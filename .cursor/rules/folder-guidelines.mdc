@@ -1,0 +1,67 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Folder Organization Guidelines
+
+This document provides guidelines for organizing code in the AI Backend project.
+
+## src/config/
+
+- Store environment variables, app settings, and configuration values
+- Export constants for API keys, server settings, etc.
+- Configuration should be loaded from environment variables when possible
+
+## src/controllers/
+
+- Controllers should handle HTTP request/response cycle
+- Extract request data and validate it
+- Call appropriate services to process business logic
+- Format and return responses
+- Keep controllers thin, move business logic to services
+
+## src/middlewares/
+
+- Create reusable middleware functions
+- Handle cross-cutting concerns like authentication, logging, error handling
+- Keep middleware focused on a single responsibility
+
+## src/models/
+
+- Define data structures and types
+- Create interfaces for database entities if applicable
+- Define schemas for data validation
+
+## src/routes/
+
+- Define API routes and endpoints
+- Connect routes to controllers
+- Group related routes in separate files
+- Use descriptive names that reflect the resource being accessed
+
+## src/services/
+
+- Implement core business logic
+- Handle external API calls
+- Maintain separation of concerns
+- Services should be testable in isolation
+
+## src/utils/
+
+- Create reusable utility functions
+- Keep functions pure when possible
+- Group related utilities in separate files
+
+## src/schemas/
+
+- Define validation schemas using Zod
+- Create reusable schema components
+- Keep schemas aligned with OpenAPI documentation
+
+## tests/
+
+- Create comprehensive test coverage
+- Unit tests should focus on individual functions
+- Integration tests should test API endpoints
+- Use fixtures for test data

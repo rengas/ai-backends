@@ -1,0 +1,61 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# AI Backend Project Structure
+
+This document outlines the recommended folder structure for the AI Backend project.
+
+## Main Structure
+
+The main entry point is [src/index.ts](mdc:src/index.ts), which initializes the application.
+
+```
+ai-backend/
+├── src/                    # Source code
+│   ├── config/             # App configuration, env vars
+│   ├── controllers/        # Route controllers (handle request/response)
+│   ├── middlewares/        # Express middlewares
+│   ├── models/             # Data models
+│   ├── routes/             # Route definitions
+│   ├── services/           # Business logic
+│   ├── utils/              # Utility functions
+│   ├── schemas/            # Validation schemas
+│   └── index.ts            # App entry point
+├── tests/                  # Test files
+│   ├── unit/
+│   ├── integration/
+│   └── fixtures/           # Test data
+├── dist/                   # Compiled output
+├── docs/                   # Documentation
+└── scripts/                # Utility scripts
+```
+
+## Key Directories
+
+### src/routes/
+
+Contains route definitions for the application's API endpoints. Examples include:
+- [routes/keywords.ts](mdc:src/routes/keywords.ts) - Keyword extraction endpoint
+- [routes/summarize.ts](mdc:src/routes/summarize.ts) - Text summarization endpoint
+- [routes/describeImage.ts](mdc:src/routes/describeImage.ts) - Image description endpoint
+- [routes/emailReply.ts](mdc:src/routes/emailReply.ts) - Email reply generation
+- [routes/tweetCreator.ts](mdc:src/routes/tweetCreator.ts) - Tweet generation endpoint
+- [routes/root.ts](mdc:src/routes/root.ts) - Root endpoint definitions
+
+### src/schemas/
+
+Contains validation schemas for request and response data.
+
+### src/services/
+
+Contains business logic and external API interactions.
+
+### src/utils/
+
+Contains utility functions used throughout the application.
+
+## Build Process
+
+The build configuration is defined in [tsconfig.json](mdc:tsconfig.json) and build scripts are in [package.json](mdc:package.json).
