@@ -1,6 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { bearerAuth } from 'hono/bearer-auth'
 import { secureHeaders } from 'hono/secure-headers'
+import { cors } from 'hono/cors'
 
 function initialise(): OpenAPIHono {
 
@@ -13,6 +14,22 @@ function initialise(): OpenAPIHono {
         console.error('DEFAULT_ACCESS_TOKEN is not set')
         process.exit(1);
     }
+
+    // Add CORS middleware
+    openaApiHono.use('/*', cors({
+        origin: (origin) => {
+            // Allow requests from webcontainer-api.io domains
+            if (origin && origin.match(/.*\.local-credentialless\.webcontainer-api\.io$/)) {
+                return origin;
+            }
+            return null;
+        },
+        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+        exposeHeaders: ['Content-Length', 'X-Request-Id'],
+        maxAge: 3600,
+        credentials: true,
+    }))
 
     configureApiSecurity(openaApiHono, token);
 
