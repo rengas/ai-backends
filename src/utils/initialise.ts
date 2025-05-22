@@ -38,7 +38,7 @@ function configureApiSecurity(app: OpenAPIHono, token: string) {
         app.use('/*', async (c, next) => {
             const path = c.req.path;
             // Allow public access to /doc and /ui
-            if (path === '/doc' || path === '/ui') {
+            if (path === '/api/docs' || path === '/api/playground') {
                 await next();
                 return;
             }

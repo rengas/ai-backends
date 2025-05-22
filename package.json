@@ -2,7 +2,7 @@
   "name": "ai-backend",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "start": "bun run src/index.ts",
+    "start": "bun dist/index.ts",
     "build": "bun build src/index.ts --outfile=dist/index.js"
   },
   "dependencies": {
