@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 750">
+  <!-- Background -->
+  <rect width="800" height="700" fill="#f8f9fa" rx="10" ry="10" />
+  
+  <!-- Title -->
+  <text x="400" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#333">Open Source AI Backend Stack</text>
+  <text x="400" y="65" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#666">Making common AI use cases easily accessible. Focus on building AI features and integrating your workflows.</text>
+  
+  <!-- Company Application layer -->
+  <rect x="50" y="110" width="700" height="80" rx="5" ry="5" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" />
+  <text x="400" y="155" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#333">Your App</text>
+  
+  <!-- AI Backend API Layer -->
+  <rect x="50" y="230" width="700" height="230" rx="5" ry="5" fill="#e8f5e9" stroke="#4caf50" stroke-width="2" />
+  <text x="400" y="260" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">AI Backend API (OAS 3.1)</text>
+  
+  <!-- Sample Use Cases Layer -->
+  <rect x="70" y="280" width="660" height="50" rx="5" ry="5" fill="#f1f8e9" stroke="#689f38" stroke-width="1" />
+  <text x="400" y="300" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">Sample Use Cases</text>
+  <text x="420" y="320" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">Text Summarization •  Text Analysis • Deep Research • Translation • Image Analysis • Speech to Text </text>
+  
+  <!-- Value-add features -->
+  <rect x="70" y="350" width="200" height="90" rx="5" ry="5" fill="#dcedc8" stroke="#8bc34a" stroke-width="1" />
+  <text x="170" y="370" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">Custom Prompts</text>
+  <text x="170" y="390" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">• Templated prompts</text>
+  <text x="170" y="410" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">• Enterprise safeguards</text>
+  <text x="170" y="430" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">• Prompt versioning</text>
+  
+  <rect x="300" y="350" width="200" height="90" rx="5" ry="5" fill="#dcedc8" stroke="#8bc34a" stroke-width="1" />
+  <text x="400" y="370" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">Intelligent Agents</text>
+  <text x="400" y="390" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">• Autonomous workflows</text>
+  <text x="400" y="410" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">• Tool integrations</text>
+  <text x="400" y="430" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">• Agentic frameworks</text>
+  
+  <rect x="530" y="350" width="200" height="90" rx="5" ry="5" fill="#dcedc8" stroke="#8bc34a" stroke-width="1" />
+  <text x="630" y="370" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">Model Context Protocol</text>
+  <text x="630" y="390" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">• Structured contexts</text>
+  <text x="630" y="410" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">• Contextual memory</text>
+  <text x="630" y="430" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">• Cross-model standards</text>
+  
+  <!-- Provider Options -->
+  <rect x="50" y="510" width="200" height="160" rx="5" ry="5" fill="#fff3e0" stroke="#ff9800" stroke-width="2" />
+  <text x="150" y="540" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#333">OpenAI</text>
+  <text x="150" y="565" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">GPT Models</text>
+  <text x="150" y="585" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">Vision</text>
+  <text x="150" y="605" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">Image Gen</text>
+  <text x="150" y="625" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">Responses API</text>
+  
+  <rect x="300" y="510" width="200" height="160" rx="5" ry="5" fill="#e1f5fe" stroke="#03a9f4" stroke-width="2" />
+  <text x="400" y="540" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#333">Self-Hosted LLMs</text>
+  <text x="400" y="565" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">Ollama</text>
+  <text x="400" y="585" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">LM Studio</text>
+  <text x="400" y="605" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">Others</text>
+  
+  <rect x="550" y="510" width="200" height="160" rx="5" ry="5" fill="#f3e5f5" stroke="#9c27b0" stroke-width="2" />
+  <text x="650" y="540" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#333">Other AI Providers</text>
+  <text x="650" y="565" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">Anthropic (Claude)</text>
+  <text x="650" y="585" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">Google (Gemini)</text>
+  <text x="650" y="605" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">Microsoft (Azure)</text>
+  <text x="650" y="625" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">AWS Bedrock</text>
+  <text x="650" y="645" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#333">OpenRouter</text>
+  
+  <!-- Connection arrows -->
+  <line x1="150" y1="190" x2="150" y2="230" stroke="#333" stroke-width="2" />
+  <line x1="400" y1="190" x2="400" y2="230" stroke="#333" stroke-width="2" />
+  <line x1="650" y1="190" x2="650" y2="230" stroke="#333" stroke-width="2" />
+  
+  <line x1="150" y1="460" x2="150" y2="510" stroke="#333" stroke-width="2" stroke-dasharray="5,5" />
+  <line x1="400" y1="460" x2="400" y2="510" stroke="#333" stroke-width="2" />
+  <line x1="650" y1="460" x2="650" y2="510" stroke="#333" stroke-width="2" stroke-dasharray="5,5" />
+  
+  <!-- Key Benefits -->
+  <rect x="50" y="690" width="700" height="60" rx="5" ry="5" fill="#E5E4E2" stroke="#80808080" stroke-width="2" />
+  <text x="400" y="715" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">Open-Source • Self-hosting</text>
+  <text x="400" y="735" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">Easy to Deploy with Docker • Integrate with your Workflows</text>
+</svg>

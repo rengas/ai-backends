@@ -2,6 +2,9 @@
 
 Making common AI use cases easily accessible and customizable. Skip the heavy lifting of understanding OpenAI or other providers.
 
+![AI Backend Architecture Diagram](images/ai-backend-diagram.png)
+
+
 ## Architecture
 
 Hono is used to create the API.
