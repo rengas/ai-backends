@@ -33,7 +33,7 @@ function configureApiSecurity(app: OpenAPIHono, token: string) {
     console.log('process.env.NODE_ENV', process.env.NODE_ENV)
     console.log('devMode', devMode)
 
-    if (!devMode) {
+    //if (!devMode) {
         app.use(secureHeaders())
 
         app.use('/*', async (c, next) => {
@@ -57,7 +57,7 @@ function configureApiSecurity(app: OpenAPIHono, token: string) {
                 in: 'header',
             }
         );
-    }
+    //}
 
 }        
 
