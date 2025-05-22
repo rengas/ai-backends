@@ -50,13 +50,13 @@ function configureApiSecurity(app: OpenAPIHono, token: string) {
     console.log('process.env.NODE_ENV', process.env.NODE_ENV)
     console.log('devMode', devMode)
 
-    //if (!devMode) {
+    if (!devMode) {
         app.use(secureHeaders())
 
         app.use('/*', async (c, next) => {
             const path = c.req.path;
             // Allow public access to /doc and /ui
-            if (path === '/' || path === '/api/doc' || path === '/api/ui') {
+            if (path === '/' || path === '/api/doc' || path === '/api/ui' || path === '/api/hello') {
                 await next();
                 return;
             }
@@ -74,8 +74,7 @@ function configureApiSecurity(app: OpenAPIHono, token: string) {
                 in: 'header',
             }
         );
-    //}
-
+    }
 }        
 
 export default initialise

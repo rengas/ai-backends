@@ -5,7 +5,7 @@ import { summarizePrompt } from '../utils/prompts'
 import { handleError, handleValidationError } from '../utils/errorHandler'
 import { summarizeRequestSchema } from '../schemas/summarize'
 
-const app = new OpenAPIHono()
+const router = new OpenAPIHono()
 
 const responseSchema = z.object({
   summary: z.string().describe('The summary of the text')  
@@ -41,9 +41,9 @@ async function handleSummarizeRequest(c: Context) {
   }
 } 
 
-app.openapi(
+router.openapi(
   createRoute({
-    path: '/summarize',
+    path: '/',  // Changed from /summarize since we'll mount at /api/summarize
     method: 'post',
     request: {
       body: {
@@ -68,4 +68,7 @@ app.openapi(
   handleSummarizeRequest as any
 )  
 
-export default app
+export default {
+  handler: router,
+  mountPath: 'summarize'  // This will be mounted at /api/summarize
+}

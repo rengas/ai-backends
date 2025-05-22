@@ -4,10 +4,12 @@ import configureApiDocs from './utils/apiDocs'
 
 const app = initialise()
 
-// Configure the routes
-configureRoutes(app)
+// Configure the routes and API docs
+async function setup() {
+    await configureRoutes(app)
+    configureApiDocs(app)
+}
 
-// Configure the API docs
-configureApiDocs(app)
+setup().catch(console.error)
 
 export default app

@@ -5,7 +5,7 @@ import { keywordsPrompt } from '../utils/prompts'
 import { handleError, handleValidationError } from '../utils/errorHandler'
 import { keywordsRequestSchema } from '../schemas/keywords'
 
-const app = new OpenAPIHono()
+const router = new OpenAPIHono()
 
 const responseSchema = z.object({
   keywords: z.array(z.string()).describe('List of keywords extracted from the text')  
@@ -40,9 +40,9 @@ async function handleKeywordsRequest(c: Context) {
   }
 } 
 
-app.openapi(
+router.openapi(
   createRoute({
-    path: '/keywords',
+    path: '/',  // Changed from /keywords since we'll mount at /api/keywords
     method: 'post',
     request: {
       body: {
@@ -67,4 +67,7 @@ app.openapi(
   handleKeywordsRequest as any
 )  
 
-export default app 
+export default {
+  handler: router,
+  mountPath: 'keywords'  // This will be mounted at /api/keywords
+} 
