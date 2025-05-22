@@ -38,4 +38,4 @@ bun run build
 
 ## API Documentation
 
-API documentation is available at `/api/playground` when the server is running.
+API documentation is available at `/api/ui` when the server is running.
