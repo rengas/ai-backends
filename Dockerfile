@@ -26,6 +26,9 @@ COPY --from=builder /app/bun.lock ./
 # Install only production dependencies
 RUN bun install --frozen-lockfile --production
 
+# Set environment variable
+ENV NODE_ENV=production
+
 # Expose the port your app runs on
 EXPOSE 3000
 
