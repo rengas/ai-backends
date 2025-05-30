@@ -18,11 +18,12 @@ async function handleTweetRequest(c: Context) {
     }
 
     // Generate the tweet using our service
-    const { tweet, characterCount, usage } = await generateTweet(topic)
+    const { tweet, characterCount, author, usage } = await generateTweet(topic)
 
     return c.json({ 
       tweet,
       characterCount,
+      author,
       usage
     }, 200)
   } catch (error) {
