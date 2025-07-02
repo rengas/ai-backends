@@ -33,6 +33,13 @@ Topic: ${topic}`;
 }
 
 /**
+ * System prompt for translation
+ */
+export function translatePrompt(text: string, targetLanguage: string): string {
+  return `Translate the following text to ${targetLanguage}. \n\nText: ${text}`;
+}
+
+/**
  * System prompt for image description
  */
 export function imageDescriptionPrompt(imageUrl: string): string {
