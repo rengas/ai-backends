@@ -7,7 +7,6 @@ services:
       - OLLAMA_URL=http://ollama:11434/v1/
       - NODE_ENV=production
       - OLLAMA_ENABLED=true
-      - DEFAULT_ACCESS_TOKEN=testing
     depends_on:
       - ollama
     networks:
