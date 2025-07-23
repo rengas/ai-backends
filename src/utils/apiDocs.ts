@@ -13,7 +13,7 @@ function getRedocHtml() {
     return readFileSync(templatePath, 'utf-8')
 }
 
-function configureApiDocs(app: OpenAPIHono) {
+async function configureApiDocs(app: OpenAPIHono) {
     // The OpenAPI documentation will be available at /doc
     app.doc('/api/doc', {
         openapi: '3.1.0',

@@ -2,14 +2,14 @@
  * System prompt template for summarization
  */
 export function summarizePrompt(text: string, maxLength?: number): string {
-  return `Summarize the following text${maxLength ? ` in ${maxLength} words or less` : ''}: ${text}`;
+  return `Summarize the following text${maxLength ? ` in ${maxLength} words or less. Just return the summary, no other text or explanation.` : ''}: ${text}`;
 }
 
 /**
  * System prompt template for keyword extraction
  */
 export function keywordsPrompt(text: string, maxKeywords?: number): string {
-  return `Extract the most important${maxKeywords ? ` ${maxKeywords}` : ''} keywords from the following text. Return them as a list of strings, with no explanations or extra text.
+  return `Extract the most important${maxKeywords ? ` ${maxKeywords}` : ''} keywords from the following text.
 
 Text: ${text}`;
 }
@@ -18,7 +18,7 @@ Text: ${text}`;
  * System prompt for email reply generation
  */
 export function emailReplyPrompt(emailContent: string, tone?: string): string {
-  return `Generate a professional email reply to the following email${tone ? ` with a ${tone} tone` : ''}.
+  return `Generate a professional email reply to the following email${tone ? ` with a ${tone} tone. Just return the reply, no other text or explanation.` : ''}.
   
 Email: ${emailContent}`;
 }
@@ -27,16 +27,14 @@ Email: ${emailContent}`;
  * System prompt for tweet creation
  */
 export function tweetPrompt(topic: string, style?: string): string {
-  return `Create a tweet about the following topic${style ? ` in a ${style} style` : ''}.
-  
-Topic: ${topic}`;
+  return `Create ONE tweet about the following topic ${topic}. Use 3-5 phrases with new lines. Keep it under 450 characters. Just return the tweet, no other text or explanation.`;
 }
 
 /**
  * System prompt for translation
  */
 export function translatePrompt(text: string, targetLanguage: string): string {
-  return `Translate the following text to ${targetLanguage}. \n\nText: ${text}`;
+  return `Translate the following text to ${targetLanguage}. Text: ${text} Just return the translated text, no other text or explanation.`;
 }
 
 /**

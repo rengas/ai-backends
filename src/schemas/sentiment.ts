@@ -6,6 +6,8 @@ import { z } from 'zod';
 export const SentimentRequestSchema = z.object({
   text: z.string().min(1, 'Text must not be empty').max(10000, 'Text must not exceed 10,000 characters'),
   categories: z.array(z.string()).optional(),
+  service: z.enum(['openai', 'ollama', 'auto']).optional().describe('AI service to use (defaults to auto)'),
+  model: z.string().optional().describe('Specific model to use (optional)'),
 });
 
 /**
@@ -20,10 +22,11 @@ export const SentimentResponseSchema = z.object({
       score: z.number(),
     })
   ),
+  service: z.string().optional().describe('The AI service that was actually used'),
   usage: z.object({
-    promptTokens: z.number(),
-    completionTokens: z.number(),
-    totalTokens: z.number(),
+    input_tokens: z.number(),
+    output_tokens: z.number(),
+    total_tokens: z.number(),
   }),
 });
 

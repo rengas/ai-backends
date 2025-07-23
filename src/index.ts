@@ -7,7 +7,7 @@ const app = initialise()
 // Configure the routes and API docs
 async function setup() {
     await configureRoutes(app)
-    configureApiDocs(app)
+    await configureApiDocs(app)
 }
 
 setup().catch(console.error)
