@@ -63,15 +63,14 @@ function configureApiSecurity(app: OpenAPIHono, token: string) {
             return bearerAuth({ token })(c, next);
         })
 
-        // API Key Middleware
-        // We should also document this security scheme
+        // Bearer Auth Middleware - Register the correct security scheme
         app.openAPIRegistry.registerComponent(
             'securitySchemes',
-            'ApiKeyAuth',
+            'BearerAuth',
             {
-                type: 'apiKey',
-                name: 'x-api-key',
-                in: 'header',
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT'
             }
         );
     }
