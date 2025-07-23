@@ -51,6 +51,11 @@ router.openapi(
   createRoute({
     path: '/',
     method: 'post',
+    security: [
+      {
+        BearerAuth: []
+      }
+    ],
     request: {
       body: {
         content: {
@@ -66,6 +71,16 @@ router.openapi(
         content: {
           'application/json': {
             schema: tweetResponseSchema
+          }
+        }
+      },
+      401: {
+        description: 'Unauthorized - Bearer token required',
+        content: {
+          'application/json': {
+            schema: z.object({
+              error: z.string()
+            })
           }
         }
       }

@@ -52,6 +52,11 @@ router.openapi(
   createRoute({
     path: '/',  // Changed from /summarize since we'll mount at /api/summarize
     method: 'post',
+    security: [
+      {
+        BearerAuth: []
+      }
+    ],
     request: {
       body: {
         content: {
@@ -67,6 +72,16 @@ router.openapi(
         content: {
           'application/json': {
             schema: responseSchema
+          }
+        }
+      },
+      401: {
+        description: 'Unauthorized - Bearer token required',
+        content: {
+          'application/json': {
+            schema: z.object({
+              error: z.string()
+            })
           }
         }
       }
