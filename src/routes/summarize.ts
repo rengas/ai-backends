@@ -1,6 +1,6 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
-import { generateResponse } from '../services/openai'
+import { generateResponse } from '../services/ai'
 import { summarizePrompt } from '../utils/prompts'
 import { handleError, handleValidationError } from '../utils/errorHandler'
 import { summarizeRequestSchema } from '../schemas/summarize'
@@ -8,7 +8,7 @@ import { summarizeRequestSchema } from '../schemas/summarize'
 const router = new OpenAPIHono()
 
 const responseSchema = z.object({
-  summary: z.string().describe('The summary of the text')  
+  summary: z.string().describe('The summary of the text').min(1, 'Summary is required')
 })
 
 // Define the schema and handler for the summarize route
@@ -17,7 +17,7 @@ const responseSchema = z.object({
  */
 async function handleSummarizeRequest(c: Context) {
   try {
-    const { text, maxLength } = await c.req.json()
+    const { text, maxLength, service = 'auto', model } = await c.req.json()
 
     if (!text) {
       return handleValidationError(c, 'Text')
@@ -27,14 +27,21 @@ async function handleSummarizeRequest(c: Context) {
     const prompt = summarizePrompt(text, maxLength)
 
     // Get response using our service
-    const { data, usage } = await generateResponse(
+    const { data, usage, service: usedService } = await generateResponse(
       prompt,
-      responseSchema
+      responseSchema,
+      service,
+      model
     )
 
     return c.json({ 
-      summary: data.summary,
-      usage
+      summary: data,
+      service: usedService,
+      usage: {
+        input_tokens: usage.input_tokens,
+        output_tokens: usage.output_tokens,
+        total_tokens: usage.total_tokens,
+      }
     }, 200)
   } catch (error) {
     return handleError(c, error, 'Failed to summarize text')

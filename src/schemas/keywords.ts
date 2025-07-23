@@ -6,6 +6,8 @@ import { z } from 'zod'
 export const keywordsRequestSchema = z.object({
   text: z.string().min(1, 'Text must not be empty'),
   maxKeywords: z.number().int().positive().optional(),
+  service: z.enum(['openai', 'ollama', 'auto']).optional().describe('AI service to use (defaults to auto)'),
+  model: z.string().optional().describe('Specific model to use (optional)'),
 })
 
 /**
@@ -13,10 +15,11 @@ export const keywordsRequestSchema = z.object({
  */
 export const keywordsResponseSchema = z.object({
   keywords: z.array(z.string()),
+  service: z.string().optional().describe('The AI service that was actually used'),
   usage: z.object({
-    promptTokens: z.number(),
-    completionTokens: z.number(),
-    totalTokens: z.number(),
+    input_tokens: z.number(),
+    output_tokens: z.number(),
+    total_tokens: z.number(),
   }),
 })
 

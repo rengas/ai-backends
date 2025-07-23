@@ -1,6 +1,6 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
-import { generateResponse } from '../services/openai'
+import { generateResponse } from '../services/ai'
 import { translatePrompt } from '../utils/prompts'
 import { handleError, handleValidationError } from '../utils/errorHandler'
 import { translateRequestSchema } from '../schemas/translate'
@@ -8,7 +8,13 @@ import { translateRequestSchema } from '../schemas/translate'
 const router = new OpenAPIHono()
 
 const responseSchema = z.object({
-  translatedText: z.string().describe('Translated text in the target language')
+  translatedText: z.string().describe('Translated text in the target language'),
+  service: z.string().optional().describe('The AI service that was actually used'),
+  usage: z.object({
+    input_tokens: z.number(),
+    output_tokens: z.number(),
+    total_tokens: z.number(),
+  }).optional()
 })
 
 /**
@@ -16,7 +22,7 @@ const responseSchema = z.object({
  */
 async function handleTranslateRequest(c: Context) {
   try {
-    const { text, targetLanguage } = await c.req.json()
+    const { text, targetLanguage, service = 'auto', model } = await c.req.json()
 
     if (!text) {
       return handleValidationError(c, 'Text')
@@ -27,14 +33,26 @@ async function handleTranslateRequest(c: Context) {
 
     const prompt = translatePrompt(text, targetLanguage)
 
-    const { data, usage } = await generateResponse(
+    // Use a simpler response schema for structured output
+    const simpleResponseSchema = z.object({
+      translatedText: z.string().describe('Translated text in the target language')
+    })
+
+    const { data, usage, service: usedService } = await generateResponse(
       prompt,
-      responseSchema
+      simpleResponseSchema,
+      service,
+      model
     )
 
     return c.json({
-      translatedText: data.translatedText,
-      usage
+      translatedText: data,
+      service: usedService,
+      usage: {
+        input_tokens: usage.input_tokens,
+        output_tokens: usage.output_tokens,
+        total_tokens: usage.total_tokens,
+      }
     }, 200)
   } catch (error) {
     return handleError(c, error, 'Failed to translate text')

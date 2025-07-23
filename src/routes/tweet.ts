@@ -1,30 +1,46 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
-import { generateTweet } from '../services/openai'
+import { generateResponse } from '../services/ai'
+import { tweetPrompt } from '../utils/prompts'
 import { handleError, handleValidationError } from '../utils/errorHandler'
 import { tweetRequestSchema, tweetResponseSchema } from '../schemas/tweet'
 
 const router = new OpenAPIHono()
+
+const tweetSchema = z.object({
+  content: z.string().describe('The tweet content')
+})
 
 /**
  * Handler for tweet creation endpoint
  */
 async function handleTweetRequest(c: Context) {
   try {
-    const { topic } = await c.req.json()
+    const { topic, service = 'auto', model } = await c.req.json()
 
     if (!topic) {
       return handleValidationError(c, 'Topic')
     }
 
-    // Generate the tweet using our service
-    const { tweet, characterCount, author, usage } = await generateTweet(topic)
+    // Generate the prompt
+    const prompt = tweetPrompt(topic)
+
+    // Get response using our service
+    const { data, usage, service: usedService } = await generateResponse(
+      prompt,
+      tweetSchema,
+      service,
+      model
+    )
 
     return c.json({ 
-      tweet,
-      characterCount,
-      author,
-      usage
+      tweet: data,
+      service: usedService,
+      usage: {
+        input_tokens: usage.input_tokens,
+        output_tokens: usage.output_tokens,
+        total_tokens: usage.total_tokens,
+      }
     }, 200)
   } catch (error) {
     return handleError(c, error, 'Failed to generate tweet')
