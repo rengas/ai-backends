@@ -19,6 +19,11 @@ export interface OllamaConfig extends ServiceConfig {
   timeout?: number;
 }
 
+export interface AnthropicConfig extends ServiceConfig {
+  apiKey: string;
+  model: string;
+}
+
 // OpenAI Configuration
 export const openaiConfig: OpenAIConfig = {
   name: 'OpenAI',
@@ -33,15 +38,24 @@ export const openaiConfig: OpenAIConfig = {
 export const ollamaConfig: OllamaConfig = {
   name: 'Ollama',
   enabled: process.env.OLLAMA_ENABLED === 'true' || process.env.OLLAMA_BASE_URL !== undefined,
-  priority: 2,
+  priority: 3,
   baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
   model: process.env.OLLAMA_MODEL || 'llama3.2',
   chatModel: process.env.OLLAMA_CHAT_MODEL || 'llama3.2',
   timeout: parseInt(process.env.OLLAMA_TIMEOUT || '30000'),
 };
 
+// Anthropic Configuration
+export const anthropicConfig: AnthropicConfig = {
+  name: 'Anthropic',
+  enabled: !!process.env.ANTHROPIC_API_KEY,
+  priority: 2,
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
+  model: process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022',
+};
+
 // Available services
-export const availableServices = [openaiConfig, ollamaConfig];
+export const availableServices = [openaiConfig, anthropicConfig, ollamaConfig];
 
 // Get the primary service (highest priority enabled service)
 export function getPrimaryService(): ServiceConfig | null {
