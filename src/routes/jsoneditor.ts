@@ -33,32 +33,66 @@ const jsonEditorHTML = `
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 5px;
             background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
         }
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            max-width: none;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
+            padding: 15px 10px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-content {
+            flex: 1;
         }
         .header h1 {
             margin: 0;
-            font-size: 2em;
+            font-size: 1.8em;
         }
         .header p {
-            margin: 10px 0 0 0;
+            margin: 8px 0 0 0;
             opacity: 0.9;
+            font-size: 0.9em;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .swagger-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .swagger-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
         }
         .editor-container {
             display: flex;
-            gap: 20px;
-            height: 600px;
+            gap: 8px;
+            flex: 1;
+            min-height: 0;
         }
         .editor-panel {
             flex: 1;
@@ -66,34 +100,38 @@ const jsonEditorHTML = `
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
         }
         .panel-header {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 12px 8px;
             border-bottom: 1px solid #e9ecef;
             font-weight: 600;
             color: #495057;
+            flex-shrink: 0;
         }
         .editor-wrapper {
-            height: calc(100% - 60px);
-            padding: 0;
+            flex: 1;
+            min-height: 0;
         }
         #jsoneditor, #jsoneditor2 {
             height: 100%;
         }
         .controls {
-            margin: 20px 0;
+            margin: 10px 0;
             text-align: center;
+            flex-shrink: 0;
         }
         .btn {
             background: #667eea;
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
-            margin: 0 10px;
+            font-size: 13px;
+            margin: 0 5px;
             transition: all 0.3s ease;
         }
         .btn:hover {
@@ -107,25 +145,69 @@ const jsonEditorHTML = `
             background: #5a6268;
         }
         .links {
-            margin-top: 20px;
+            margin-top: 10px;
             text-align: center;
+            flex-shrink: 0;
         }
         .links a {
             color: #667eea;
             text-decoration: none;
-            margin: 0 15px;
+            margin: 0 10px;
             font-weight: 500;
+            font-size: 0.9em;
         }
         .links a:hover {
             text-decoration: underline;
         }
+        .footer {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 10px;
+            padding: 15px 10px;
+            flex-shrink: 0;
+            font-size: 0.85em;
+            color: #6c757d;
+            text-align: center;
+        }
+        .footer strong {
+            color: #495057;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
         @media (max-width: 768px) {
-            .editor-container {
-                flex-direction: column;
+            body {
+                overflow: auto;
+                height: auto;
+                padding: 3px;
+            }
+            .container {
                 height: auto;
             }
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            .header-content {
+                order: 1;
+            }
+            .header-actions {
+                order: 2;
+            }
+            .editor-container {
+                flex-direction: column;
+                height: 70vh;
+                gap: 5px;
+            }
             .editor-panel {
-                height: 400px;
+                height: 50%;
+                min-height: 300px;
             }
         }
     </style>
@@ -133,8 +215,13 @@ const jsonEditorHTML = `
 <body>
     <div class="container">
         <div class="header">
-            <h1>AI Backends JSON Editor</h1>
-            <p>Edit, validate, and format JSON payloads for testing your AI Backend API endpoints</p>
+            <div class="header-content">
+                <h1>AI Backends JSON Editor</h1>
+                <p>Edit, validate, and format JSON payloads for testing your AI Backend API endpoints</p>
+            </div>
+            <div class="header-actions">
+                <a href="http://localhost:3000/api/ui" target="_blank" class="swagger-link">📊 Swagger UI</a>
+            </div>
         </div>
 
         <div class="editor-container">
@@ -166,29 +253,10 @@ const jsonEditorHTML = `
             <a href="https://github.com/josdejong/jsoneditor" target="_blank">ℹ️ About JSONEditor</a>
         </div>
 
-        <div class="license-info" style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <details style="padding: 20px;">
-                <summary style="cursor: pointer; font-weight: 600; color: #495057; font-size: 1.1em; outline: none; user-select: none;">
-                    📄 License Information
-                    <span style="font-weight: normal; font-size: 0.9em; color: #6c757d; margin-left: 10px;">(click to expand)</span>
-                </summary>
-                <div style="margin-top: 15px; background: #f8f9fa; padding: 15px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.6; color: #495057;">
-                    <strong>JSONEditor</strong> by Jos de Jong<br>
-                    Copyright © 2011-2024 Jos de Jong<br><br>
-                    
-                    Licensed under the <strong>Apache License, Version 2.0</strong><br>
-                    You may obtain a copy of the License at:<br>
-                    <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank" style="color: #667eea; text-decoration: none;">http://www.apache.org/licenses/LICENSE-2.0</a><br><br>
-                    
-                    Unless required by applicable law or agreed to in writing, software<br>
-                    distributed under the License is distributed on an "AS IS" BASIS,<br>
-                    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br>
-                    See the License for the specific language governing permissions and<br>
-                    limitations under the License.<br><br>
-                    
-                    🔗 <a href="https://github.com/josdejong/jsoneditor/blob/master/LICENSE" target="_blank" style="color: #667eea; text-decoration: none;">View Full License on GitHub</a>
-                </div>
-            </details>
+        <div class="footer">
+            <strong>JSONEditor</strong> by Jos de Jong © 2011-2024 | 
+            Licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License 2.0</a> | 
+            <a href="https://github.com/josdejong/jsoneditor" target="_blank">View on GitHub</a>
         </div>
     </div>
 
