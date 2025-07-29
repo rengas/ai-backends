@@ -1,9 +1,11 @@
 import { z } from "zod";
 import * as openaiService from "./openai";
 import * as ollamaService from "./ollama";
+import * as anthropicService from "./anthropic";
 import { 
   openaiConfig, 
   ollamaConfig, 
+  anthropicConfig,
   isServiceEnabled 
 } from "../config/services";
 
@@ -11,7 +13,7 @@ import {
 export type { TokenUsage } from "./openai";
 
 // Service types
-export type AIService = 'openai' | 'ollama' | 'auto';
+export type AIService = 'openai' | 'anthropic' | 'ollama' | 'auto';
 
 // Service interface for consistency
 export interface AIServiceResponse<T> {
@@ -39,11 +41,15 @@ export async function checkServiceAvailability(service: AIService): Promise<bool
   switch (service) {
     case 'openai':
       return isServiceEnabled('OpenAI');
+    case 'anthropic':
+      return isServiceEnabled('Anthropic');
     case 'ollama':
       if (!isServiceEnabled('Ollama')) return false;
       return await ollamaService.checkOllamaHealth();
     case 'auto':
-      return await checkServiceAvailability('openai') || await checkServiceAvailability('ollama');
+      return await checkServiceAvailability('openai') || 
+             await checkServiceAvailability('anthropic') || 
+             await checkServiceAvailability('ollama');
     default:
       return false;
   }
@@ -53,13 +59,17 @@ export async function checkServiceAvailability(service: AIService): Promise<bool
  * Get the best available service
  */
 export async function getBestAvailableService(): Promise<AIService | null> {
-  // Ollama inference by default
-  if (await checkServiceAvailability('ollama')) {
-    return 'ollama';
-  }
-
+  // Check services in priority order (OpenAI -> Anthropic -> Ollama)
   if (await checkServiceAvailability('openai')) {
     return 'openai';
+  }
+
+  if (await checkServiceAvailability('anthropic')) {
+    return 'anthropic';
+  }
+
+  if (await checkServiceAvailability('ollama')) {
+    return 'ollama';
   }
 
   return null;
@@ -106,7 +116,14 @@ export async function generateResponse<T extends z.ZodType>(
         return {
           ...result,
           service: 'openai'
-        };     
+        };
+
+      case 'anthropic':
+        result = await anthropicService.generateResponse(prompt, schema);
+        return {
+          ...result,
+          service: 'anthropic'
+        };
         
       default:
         throw new Error(`Unsupported service: ${serviceToUse}`);
@@ -138,6 +155,10 @@ export async function getAvailableModels(service: AIService): Promise<string[]> 
     case 'openai':
       // OpenAI models are configured, not dynamically fetched
       return [openaiConfig.model];
+
+    case 'anthropic':
+      // Anthropic models are configured, not dynamically fetched
+      return [anthropicConfig.model];
       
     case 'ollama':
       return await ollamaService.getAvailableModels();
@@ -158,6 +179,14 @@ export async function getServiceStatus() {
       config: {
         model: openaiConfig.model,
         hasApiKey: !!openaiConfig.apiKey,
+      }
+    },
+    anthropic: {
+      enabled: isServiceEnabled('Anthropic'),
+      available: await checkServiceAvailability('anthropic'),
+      config: {
+        model: anthropicConfig.model,
+        hasApiKey: !!anthropicConfig.apiKey,
       }
     },
     ollama: {
