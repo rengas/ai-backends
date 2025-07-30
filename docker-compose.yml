@@ -22,7 +22,7 @@ services:
     networks:
       - ollama-net
     entrypoint: /bin/sh
-    command: -c "ollama serve & sleep 5 && ollama pull qwen3:1.7b && ollama pull llama3.2:latest && wait"
+    command: -c "ollama serve & sleep 5 && ollama pull qwen3:1.7b && ollama pull llama3.2:latest && ollama pull llama3.2-vision:11b && wait"
 
 volumes:
   ollama-data:
