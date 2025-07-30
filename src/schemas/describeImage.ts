@@ -3,7 +3,7 @@ import { z } from 'zod'
 const supportedServices = ['ollama'] as const
 
 export const describeImageRequestSchema = z.object({
-  service: z.enum(supportedServices).optional().default('ollama').describe('The AI service to use for image description (currently only ollama is supported)'),
+  service: z.enum(supportedServices).describe('The AI service to use for image description (currently only ollama is supported, auto will select ollama)'),
   model: z.string().describe('The model to use for image description'),
   temperature: z.number().optional().default(0).describe('The temperature of the response'),
   stream: z.boolean().optional().default(false).describe('Whether to stream the response'),
@@ -24,7 +24,13 @@ export const describeImageResponseSchema = z.object({
   prompt_eval_count: z.number().optional().describe('Number of tokens in the prompt'),
   prompt_eval_duration: z.number().optional().describe('Prompt evaluation duration in nanoseconds'),
   eval_count: z.number().optional().describe('Number of tokens in the response'),
-  eval_duration: z.number().optional().describe('Response generation duration in nanoseconds')
+  eval_duration: z.number().optional().describe('Response generation duration in nanoseconds'),
+  usage: z.object({
+    input_tokens: z.number(),
+    output_tokens: z.number(),
+    total_tokens: z.number(),
+  }).optional().describe('Token usage information'),
+  service: z.string().optional().describe('The AI service that was actually used')
 })
 
 export const supportedVisionModelsSchema = z.object({

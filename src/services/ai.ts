@@ -34,6 +34,29 @@ export interface TweetResponse {
   service?: string; // Which service was actually used
 }
 
+export interface ImageDescriptionResponse {
+  model: string;
+  created_at: string;
+  message: {
+    role: string;
+    content: string;
+  };
+  done_reason: string;
+  done: boolean;
+  total_duration?: number;
+  load_duration?: number;
+  prompt_eval_count?: number;
+  prompt_eval_duration?: number;
+  eval_count?: number;
+  eval_duration?: number;
+  usage?: {
+    input_tokens: number;
+    output_tokens: number;
+    total_tokens: number;
+  };
+  service?: string; // Which service was actually used
+}
+
 /**
  * Check if a service is available
  */
@@ -139,6 +162,41 @@ export async function generateResponse<T extends z.ZodType>(
       }
     }
     
+    throw error;
+  }
+}
+
+/**
+ * Generate an image description using AI services with vision capabilities
+ */
+export async function generateImageResponse(
+  images: string[],
+  service: AIService = 'ollama',
+  model?: string,    
+  stream: boolean = false,
+  temperature: number = 0.3
+): Promise<ImageDescriptionResponse> {
+  
+  try {
+    let result;
+    
+    switch (service) {
+      case 'ollama':
+        result = await ollamaService.describeImage(images, model, stream, temperature);
+        return {
+          ...result,
+          usage: {
+            input_tokens: result.prompt_eval_count || 0,
+            output_tokens: result.eval_count || 0,
+            total_tokens: (result.prompt_eval_count || 0) + (result.eval_count || 0),
+          },
+          service: service
+        };
+        
+      default:
+        throw new Error(`Vision capabilities not supported for service: ${service}`);
+    }
+  } catch (error) {
     throw error;
   }
 }
