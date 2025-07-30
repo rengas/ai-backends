@@ -20,7 +20,7 @@ Multiple AI services (OpenAI, Ollama) are currently supported.
 - **/api/translate**: Translate text
 - **/api/sentiment**: Analyze sentiment
 - **/api/keywords**: Extract keywords
-- **/api/describeImage**: Describe an image
+- **/api/describe-image**: Describe an image
 - More to come...
 
 ## Summarize example
