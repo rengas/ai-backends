@@ -12,7 +12,7 @@ graph TB
     Client[Client Applications]
     
     %% API Gateway Layer
-    subgraph apiLayer ["🌐 Hono.js API Server"]
+    subgraph apiLayer ["HonoJS API Server"]
         Gateway[API Gateway<br/>OpenAPI/Swagger]
         Auth[Bearer Auth<br/>Middleware]
         CORS[CORS<br/>Middleware]
@@ -20,11 +20,11 @@ graph TB
     end
     
     %% Route Layer
-    subgraph routeLayer ["🛣️ API Routes (/api/...)"]
+    subgraph routeLayer [" API Routes (/api/...)"]
         Health["/hello<br/>Health Check"]
         Services["/services<br/>Service Management"]
         
-        subgraph textProcessing ["📝 Text Processing"]
+        subgraph textProcessing ["Text Processing"]
             Summarize["/summarize<br/>Text Summarization"]
             Sentiment["/sentiment<br/>Sentiment Analysis"]
             Keywords["/keywords<br/>Keyword Extraction"]
@@ -32,23 +32,23 @@ graph TB
             Tweet["/tweet<br/>Tweet Generation"]
         end
         
-        subgraph imageProcessing ["🖼️ Image Processing"]
+        subgraph imageProcessing ["Image Processing"]
             DescribeImg["/describeImage<br/>Image Description"]
         end
         
-        subgraph devTools ["🛠️ Developer Tools"]
+        subgraph devTools ["Developer Tools"]
             JsonEditor["/jsoneditor<br/>JSON Editor"]
         end
     end
     
     %% Service Orchestration Layer
-    subgraph orchestratorLayer ["🤖 AI Service Orchestrator"]
+    subgraph orchestratorLayer ["AI Service Orchestrator"]
         ServiceManager[AI Service Manager<br/>• Auto-selection<br/>• Failover<br/>• Health checks]
         ResponseGen[Response Generator<br/>• Schema validation<br/>• Token usage tracking]
     end
     
     %% AI Provider Layer
-    subgraph aiLayer ["🧠 AI Providers"]
+    subgraph aiLayer ["AI Providers"]
         subgraph priority1 ["Priority 1"]
             OpenAI[OpenAI<br/>GPT-4.1<br/>• Text processing<br/>• API key auth]
         end
@@ -63,13 +63,13 @@ graph TB
     end
     
     %% Configuration Layer
-    subgraph configLayer ["⚙️ Configuration"]
+    subgraph configLayer ["Configuration"]
         EnvConfig[Environment Variables<br/>• API keys<br/>• Model settings<br/>• Service URLs]
         ServiceConfig[Service Configuration<br/>• Priority settings<br/>• Availability checks]
     end
     
     %% Utilities Layer
-    subgraph utilLayer ["🔧 Utilities"]
+    subgraph utilLayer ["Utilities"]
         ErrorHandler[Error Handler<br/>• Validation<br/>• HTTP responses]
         Prompts[Prompt Templates<br/>• Task-specific prompts]
         ApiDocs[API Documentation<br/>• OpenAPI schema<br/>• Swagger UI<br/>• ReDoc]
@@ -173,5 +173,5 @@ graph TB
 ```
 
 
-*Generated on: $(date)*
-*Last Updated: $(date)*
+*Generated on: 30-07-2025*
+*Last Updated: 30-07-2025*
