@@ -47,6 +47,14 @@ Image URL: ${imageUrl}`;
 }
 
 /**
+ * System prompt for image description
+ */
+export function describeImagePrompt(): string {
+  return `Describe the following image`
+}
+
+
+/**
  * System prompt for sentiment analysis
  */
 export function sentimentPrompt(text: string, categories?: string[]): string {
