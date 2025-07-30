@@ -26,7 +26,7 @@ const jsonEditorHTML = `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Backends JSON Editor - API Testing Tool</title>
+    <title>JSON Editor</title>
     <script src="https://unpkg.com/jsoneditor@10.1.0/dist/jsoneditor.min.js"></script>
     <link href="https://unpkg.com/jsoneditor@10.1.0/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
     <style>

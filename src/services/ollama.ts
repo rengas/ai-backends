@@ -1,10 +1,12 @@
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { describeImagePrompt } from "../utils/prompts";
 
 // Configuration
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:latest';
 const OLLAMA_CHAT_MODEL = process.env.OLLAMA_CHAT_MODEL || 'llama3.2:latest';
+const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL || 'llama3.2-vision:11b';
 
 // Define our usage type to match OpenAI interface
 export interface TokenUsage {
@@ -181,90 +183,6 @@ function extractFirstTweet(response: string): string {
 }
 
 /**
- * Create a smart fallback response based on the expected schema
- */
-function createSmartFallbackResponse<T extends z.ZodType>(response: string, schema: T): any {
-  const cleanResponse = response.trim();
-  
-  // Try to inspect the schema to understand what fields are expected
-  try {
-    const schemaShape = (schema as any)._def?.shape;
-    if (schemaShape && typeof schemaShape === 'object') {
-      const result: any = {};
-      
-      // Iterate through schema fields and try to populate them intelligently
-      for (const [fieldName, fieldDef] of Object.entries(schemaShape)) {
-        const fieldDefAny = fieldDef as any;
-        
-        // Handle different field types based on name and type
-        if (fieldName === 'summary') {
-          result.summary = cleanResponse;
-                 } else if (fieldName === 'content') {
-           // For content fields (like tweets), extract the first meaningful content
-           result.content = extractFirstTweet(cleanResponse);
-        } else if (fieldName === 'translation' || fieldName === 'translatedText') {
-          result[fieldName] = cleanResponse;
-        } else if (fieldName === 'sentiment') {
-          result.sentiment = cleanResponse.toLowerCase().includes('positive') ? 'positive' : 
-                            cleanResponse.toLowerCase().includes('negative') ? 'negative' : 'neutral';
-        } else if (fieldName === 'confidence') {
-          result.confidence = 0.8; // Default confidence
-        } else if (fieldName === 'keywords') {
-          // Try to extract keywords from the response
-          const words = cleanResponse.split(/[,\s]+/).filter(word => word.length > 2);
-          result.keywords = words.slice(0, 10);
-        } else if (fieldName === 'emotions') {
-          // Default emotions array
-          result.emotions = [
-            { emotion: "neutral", score: 0.7 }
-          ];
-        } else if (fieldDefAny?._def?.typeName === 'ZodString') {
-          // For any string field, use the response
-          result[fieldName] = cleanResponse;
-        } else if (fieldDefAny?._def?.typeName === 'ZodNumber') {
-          // For number fields, try to extract or default
-          result[fieldName] = 0.8;
-        } else if (fieldDefAny?._def?.typeName === 'ZodArray') {
-          // For array fields, try to split the response
-          if (cleanResponse.includes(',')) {
-            result[fieldName] = cleanResponse.split(',').map(s => s.trim());
-          } else {
-            result[fieldName] = [cleanResponse];
-          }
-        } else {
-          // Default: assign the response to unknown fields
-          result[fieldName] = cleanResponse;
-        }
-      }
-      
-      return result;
-    }
-  } catch (error) {
-    console.warn('Could not inspect schema for smart fallback:', error);
-  }
-  
-  // Fallback to simple heuristics if schema inspection fails
-  if (cleanResponse.toLowerCase().includes('summary') || cleanResponse.length > 50) {
-    return { summary: cleanResponse };
-  }
-  
-  if (cleanResponse.toLowerCase().includes('positive') || cleanResponse.toLowerCase().includes('negative')) {
-    const sentiment = cleanResponse.toLowerCase().includes('positive') ? 'positive' : 
-                     cleanResponse.toLowerCase().includes('negative') ? 'negative' : 'neutral';
-    return { sentiment, confidence: 0.8 };
-  }
-  
-  // For keywords, try to extract meaningful words
-  if (cleanResponse.includes(',') || cleanResponse.split(' ').length <= 10) {
-    const words = cleanResponse.split(/[,\s]+/).filter(word => word.length > 2);
-    return { keywords: words.slice(0, 10) };
-  }
-
-     // Default fallback - use smart content extraction
-   return { content: extractFirstTweet(cleanResponse) };
-}
-
-/**
  * Generate a response using Ollama with structured output
  */
 export async function generateResponse<T extends z.ZodType>(
@@ -323,6 +241,32 @@ export async function getAvailableModels(): Promise<string[]> {
 }
 
 /**
+ * Get available vision models from Ollama
+ */
+export async function getAvailableVisionModels(): Promise<string[]> {
+  try {
+   const supportedModels = await getAvailableModels()
+   return supportedModels.filter(model => model.includes('vision'))
+  } catch (error) {
+    console.warn('Failed to get supported models:', error)
+    return []
+  }
+}
+
+/**
+ * Validate if a model is supported for vision tasks
+ */
+export async function isVisionModelSupported(service: string, model: string): Promise<boolean> {
+  
+  const ollamaVisionModels = ['llama3.2-vision:11b']
+  if (service === 'ollama') {
+    return ollamaVisionModels.includes(model)
+  }
+
+  return false
+}
+
+/**
  * Check if Ollama is running and accessible
  */
 export async function checkOllamaHealth(): Promise<boolean> {
@@ -334,4 +278,64 @@ export async function checkOllamaHealth(): Promise<boolean> {
   }
 }
 
-export { OLLAMA_BASE_URL, OLLAMA_MODEL, OLLAMA_CHAT_MODEL }; 
+/**
+ * Describe an image using Ollama vision model
+ */
+export async function describeImage(
+  images: string[],
+  model?: string,
+  stream: boolean = false,
+  temperature: number = 0.3
+): Promise<{
+  model: string;
+  created_at: string;
+  message: {
+    role: string;
+    content: string;
+  };
+  done_reason: string;
+  done: boolean;
+  total_duration?: number;
+  load_duration?: number;
+  prompt_eval_count?: number;
+  prompt_eval_duration?: number;
+  eval_count?: number;
+  eval_duration?: number;
+}> {
+  const modelToUse = model || OLLAMA_VISION_MODEL;
+
+  const messages = [
+    {
+      role: 'user',
+      content: describeImagePrompt(),
+      images: images
+    }
+  ]
+  
+  const payload = {
+    model: modelToUse,
+    messages: messages,
+    stream: stream,
+    options: {
+      temperature: temperature,
+    }
+  };
+
+  const response: OllamaChatResponse = await ollamaRequest('/api/chat', payload);
+  
+  return {
+    model: response.model,
+    created_at: response.created_at,
+    message: response.message,
+    done_reason: response.done ? 'stop' : 'length',
+    done: response.done,
+    total_duration: response.total_duration,
+    load_duration: response.load_duration,
+    prompt_eval_count: response.prompt_eval_count,
+    prompt_eval_duration: response.prompt_eval_duration,
+    eval_count: response.eval_count,
+    eval_duration: response.eval_duration
+  };
+}
+
+export { OLLAMA_BASE_URL, OLLAMA_MODEL, OLLAMA_CHAT_MODEL, OLLAMA_VISION_MODEL }; 
