@@ -1,7 +1,7 @@
 import { OpenAPIHono, createRoute } from '@hono/zod-openapi'
 import { Context } from 'hono'
-import { describeImage } from '../services/ollama'
-import { handleError } from '../utils/errorHandler'
+import { generateImageResponse } from '../services/ai'
+import { handleError, handleValidationError } from '../utils/errorHandler'
 import { describeImageRequestSchema, describeImageResponseSchema, describeImageErrorSchema } from '../schemas/describeImage'
 
 const router = new OpenAPIHono()
@@ -11,10 +11,14 @@ const router = new OpenAPIHono()
  */
 async function handleDescribeImageRequest(c: Context) {
   try {
-    const { model, stream = false, images, temperature } = await c.req.json()
+    const { images, service, model, stream = false, temperature = 0.3 } = await c.req.json()
     
-    // Get response using Ollama vision service
-    const response = await describeImage(images, model, stream, temperature)
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return handleValidationError(c, 'Images are required and must be a non-empty array')
+    }
+
+    // Get response using AI service layer with vision capabilities
+    const response = await generateImageResponse(images, service, model, stream, temperature)
 
     return c.json(response, 200)
   } catch (error) {
