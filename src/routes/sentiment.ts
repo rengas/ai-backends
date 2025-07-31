@@ -1,18 +1,18 @@
 import { OpenAPIHono, createRoute } from '@hono/zod-openapi'
 import { Context } from 'hono'
 import { z } from 'zod'
-import { generateResponse } from '../services/ai'
 import { sentimentPrompt } from '../utils/prompts'
 import { handleError, handleValidationError } from '../utils/errorHandler'
-import { SentimentRequestSchema, SentimentResponseSchema } from '../schemas/sentiment'
+import { createSentimentResponse, sentimentRequestSchema, sentimentResponseSchema } from '../schemas/sentiment'
+import { processStructuredOutputRequest } from '../services/ai'
 
-const openAIResponseSchema = z.object({ 
-  sentiment: z.string(), 
-  confidence: z.number().min(0).max(1), 
-  emotions: z.array(z.object({ 
-    emotion: z.string(), 
-    score: z.number().min(0).max(1) 
-  })) 
+const responseSchema = z.object({
+  sentiment: z.string(),
+  confidence: z.number().min(0).max(1),
+  emotions: z.array(z.object({
+    emotion: z.string(),
+    score: z.number().min(0).max(1)
+  }))
 })
 
 const router = new OpenAPIHono()
@@ -22,34 +22,31 @@ const router = new OpenAPIHono()
  */
 async function handleSentimentRequest(c: Context) {
   try {
-    const { text, categories, service = 'auto', model } = await c.req.json()
-    
-    if (!text) {
-      return handleValidationError(c, 'Text')
-    }
+    const { payload, config } = await c.req.json()
 
     // Generate the prompt
-    const prompt = sentimentPrompt(text, categories)
+    const prompt = sentimentPrompt(payload.text)
 
     // Get response using our service
-    const { data, usage, service: usedService } = await generateResponse(
+    const result = await processStructuredOutputRequest(
       prompt,
-      openAIResponseSchema,
-      service,
-      model
+      responseSchema,
+      config
     )
 
-    return c.json({ 
-      sentiment: data,
-      confidence: data.confidence,
-      emotions: data.emotions,
-      service: usedService,
-      usage: {
-        input_tokens: usage.input_tokens,
-        output_tokens: usage.output_tokens,
-        total_tokens: usage.total_tokens
-      }
-    }, 200)
+    const { sentiment, confidence, emotions } = result.object;
+    const { usage } = result;
+
+    const finalResponse = createSentimentResponse(
+      sentiment,
+      confidence,
+      emotions,
+      config.provider,
+      config.model,  
+      usage
+    )
+
+    return c.json(finalResponse, 200)
   } catch (error) {
     return handleError(c, error, 'Failed to analyze sentiment')
   }
@@ -68,7 +65,7 @@ router.openapi(
       body: {
         content: {
           'application/json': {
-            schema: SentimentRequestSchema
+            schema: sentimentRequestSchema
           }
         }
       }
@@ -78,7 +75,7 @@ router.openapi(
         description: 'Returns sentiment analysis results.',
         content: {
           'application/json': {
-            schema: SentimentResponseSchema
+            schema: sentimentResponseSchema
           }
         }
       },
@@ -93,7 +90,7 @@ router.openapi(
         }
       }
     }
-  }), 
+  }),
   handleSentimentRequest as any
 )
 

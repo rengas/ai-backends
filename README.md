@@ -2,17 +2,29 @@
 
 AIBackends is an API server that you can use to integrate AI into your applications. It is a turnkey and cost effective solution for your AI integration needs. 
 
-The project supports open source models using Ollama. 
+The project supports open source models using Ollama. It also supports cloud models from OpenAI and Anthropic.
 
-Goal is to make common AI use cases easily accessible so you can skip the heavy lifting of understanding prompt engineering and model selection and focus on integrating AI into your application or workflow.
+## Purpose of the project
+
+The purpose of this project is to make common AI use cases easily accessible to developers. To implement common AI use cases, you need to understand prompt engineering and API integration with different AI providers. This project aims to skip that learning curve so developers can focus on integrating AI into applications and automation workflows.
 
 ![High level architecture](images/ai-backend-diagram.png)
 
-## Architecture
+## Architecture and Tech Stack
 
-Hono is used to create the API.
-Zod is used to validate the request and response schemas.
-Multiple AI services (OpenAI, Ollama) are currently supported.
+- Hono for the API server
+- Typescript
+- Zod for request and response validation
+- Vercel AI SDK for AI integration
+- Docker for containerization
+
+## Supported LLM Providers
+
+- Ollama for local models (self-hosted)
+- OpenAI for GPT models (cloud-based)
+- Anthropic for Claude models (cloud-based)
+- OpenRouter for multiple open source and private models (coming soon)
+- Google for Gemini models (coming soon)
 
 ## Available Endpoints
 
@@ -21,55 +33,12 @@ Multiple AI services (OpenAI, Ollama) are currently supported.
 - **/api/sentiment**: Analyze sentiment
 - **/api/keywords**: Extract keywords
 - **/api/describe-image**: Describe an image
-- More to come...
+- More to come...check swagger docs for updated endpoints.
 
-## Summarize example
-![Sample API Call](images/sample-summarize-api.png)
-
-## Supported AI Providers
-
-### Ollama
-- Connects to local or remote Ollama instances
-- Supports structured output (JSON mode)
-- Model selection is done in the request body
-
-### OpenAI
-- Uses the official OpenAI TypeScript SDK
-- Supports structured output with Zod schemas
-- Requires API key configuration
-
-### Service Selection
-'ollama' is the default service. 'openai' is also supported. You need to send the service and model name in the request body. See examples below.
 
 ## Environment Setup
 
 Create a `.env` file in the root directory of this project and configure your preferred AI services:
-
-### OpenAI Configuration (Cloud-based)
-
-```env
-# OpenAI API Key (required for OpenAI service)
-OPENAI_API_KEY=your-openai-api-key
-OPENAI_MODEL=gpt-4.1
-```
-
-### Ollama Configuration (Self-hosted)
-
-```env
-# Ollama Configuration (for local/self-hosted models)
-OLLAMA_ENABLED=true
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_TIMEOUT=30000
-```
-
-### General Configuration
-
-```env
-# API Access Token
-DEFAULT_ACCESS_TOKEN=your-secret-api-key
-```
-
-### Complete .env Example
 
 ```env
 # General Configuration
@@ -77,7 +46,9 @@ DEFAULT_ACCESS_TOKEN=your-secret-api-key
 
 # OpenAI Configuration
 OPENAI_API_KEY=your-openai-api-key
-OPENAI_MODEL=gpt-4.1
+
+# Anthropic Configuration
+ANTHROPIC_API_KEY=your-anthropic-api-key
 
 # Ollama Configuration
 OLLAMA_ENABLED=true
@@ -89,23 +60,43 @@ OLLAMA_TIMEOUT=30000
 
 **Important:** Make sure to add `.env` to your `.gitignore` file to avoid committing sensitive information to version control.
 
-### Service Selection Details
-
-You can specify which service to use in your API requests with the `service` parameter:
-- `"service": "ollama"` - Ollama  
-- `"service": "openai"` - OpenAI
-
 ## Development
 
 ```bash
 # Install dependencies
 bun install
 
-# Run in development mode and bypasses access token check in the API, do not use in production
+# Run in development mode and bypasses access token check in the API, do run using this command in production. Always use production when deploying so access token is required.
 NODE_ENV=development bun run dev
 
 # Build for production
 bun run build
+```
+
+## Swagger Documentation available 
+ `http://localhost:3000/api/ui`
+![Swagger Documentation](images/swagger.png)
+
+## Provider and Model Selection
+You need to send the service and model name in the request body. See examples in the swagger docs.
+
+For example, to summarize text using qwen2.5-coder model with Ollama as provider, you can use the following curl command:
+
+```curl
+curl --location 'http://localhost:3000/api/summarize' \
+--header 'Content-Type: application/json' \
+--header 'Accept: application/json' \
+--data '{
+    "payload": {
+        "text": "Text to summarize",
+        "maxLength": 100
+    },
+    "config": {
+        "provider": "ollama",
+        "model": "qwen2.5-coder",
+        "temperature": 0
+    }
+}'
 ```
 
 ## Available Tools
@@ -113,21 +104,10 @@ bun run build
 - Swagger Docs: `http://localhost:3000/api/ui`. You can test the API endpoints here.
 - JSON Editor: `http://localhost:3000/api/jsoneditor`
 
-
 ## Testing Examples
 
-### Test the Summarize Endpoint
+Check swagger docs for examples.
 
-```bash
-curl -X POST http://localhost:3000/api/summarize \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "Your long text to be summarized goes here.",
-    "maxLength": 100,
-    "service": "auto"
-  }'
-```
+The project is in active development. More endpoints and providers will be added in the future. If you want to support me with API credits from your provider, please contact me.
 
-## Swagger Documentation available 
- `http://localhost:3000/api/ui`
-![Swagger Documentation](images/swagger.png)
+I am also open to sponsorship to support the development of the project.

@@ -1,8 +1,43 @@
 import { z } from 'zod'
+import { llmRequestSchema } from './llm'
 
-export const translateRequestSchema = z.object({
+/**
+ * Body sent by the client.
+ */
+export const payloadSchema = z.object({
   text: z.string().describe('Text to translate'),
   targetLanguage: z.string().describe('Target language code, e.g. "fr", "es", "zh"'),
-  service: z.enum(['openai', 'ollama', 'auto']).optional().describe('AI service to use (defaults to auto)'),
-  model: z.string().optional().describe('Specific model to use (optional)'),
 })
+
+export const translateRequestSchema = z.object({
+  payload: payloadSchema,
+  config: llmRequestSchema
+})
+
+/**
+ * Successful response returned to the client.
+ */
+export const translateResponseSchema = z.object({
+  translation: z.string(),
+  provider: z.string().optional().describe('The AI service that was actually used'),
+  model: z.string().optional().describe('The model that was actually used'),
+  usage: z.object({
+    input_tokens: z.number(),
+    output_tokens: z.number(),
+    total_tokens: z.number(),
+  }),
+})
+
+export function createTranslateResponse(
+  translation: string, 
+  provider?: string,
+  model?: string,
+  usage = { input_tokens: 0, output_tokens: 0, total_tokens: 0 }
+): z.infer<typeof translateResponseSchema> {
+  return {
+    translation,
+    provider,
+    model,
+    usage
+  };
+}

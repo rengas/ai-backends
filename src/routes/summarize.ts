@@ -1,48 +1,44 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
-import { generateResponse } from '../services/ai'
 import { summarizePrompt } from '../utils/prompts'
 import { handleError, handleValidationError } from '../utils/errorHandler'
-import { summarizeRequestSchema } from '../schemas/summarize'
+import { summarizeRequestSchema, summarizeResponseSchema } from '../schemas/summarize'
+import { createSummarizeResponse } from '../schemas/summarize'
+import { processTextOutputRequest } from '../services/ai'
 
 const router = new OpenAPIHono()
 
-const responseSchema = z.object({
-  summary: z.string().describe('The summary of the text').min(1, 'Summary is required')
-})
-
-// Define the schema and handler for the summarize route
 /**
  * Handler for text summarization endpoint
  */
 async function handleSummarizeRequest(c: Context) {
   try {
-    const { text, maxLength, service = 'auto', model } = await c.req.json()
+    const { payload, config } = await c.req.json()
 
-    if (!text) {
-      return handleValidationError(c, 'Text')
-    }
+    console.log('CONFIG', config);
+
+    const provider = config.provider;
+    const model = config.model;
+    // const temperature = config.temperature;
 
     // Generate the prompt
-    const prompt = summarizePrompt(text, maxLength)
+    const prompt = summarizePrompt(payload.text, payload.maxLength)
 
     // Get response using our service
-    const { data, usage, service: usedService } = await generateResponse(
+    const result = await processTextOutputRequest(
       prompt,
-      responseSchema,
-      service,
-      model
+      config,
     )
 
-    return c.json({ 
-      summary: data,
-      service: usedService,
-      usage: {
-        input_tokens: usage.input_tokens,
-        output_tokens: usage.output_tokens,
-        total_tokens: usage.total_tokens,
-      }
-    }, 200)
+    const finalResponse = createSummarizeResponse(result.text, provider, model, {
+      input_tokens: result.usage.promptTokens,
+      output_tokens: result.usage.completionTokens,
+      total_tokens: result.usage.totalTokens,
+    })
+  
+
+    return c.json(finalResponse, 200)
+
   } catch (error) {
     return handleError(c, error, 'Failed to summarize text')
   }
@@ -71,7 +67,7 @@ router.openapi(
         description: 'Returns the summarized text.',
         content: {
           'application/json': {
-            schema: responseSchema
+            schema: summarizeResponseSchema
           }
         }
       },

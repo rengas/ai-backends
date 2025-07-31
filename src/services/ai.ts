@@ -8,29 +8,26 @@ import {
   anthropicConfig,
   isServiceEnabled 
 } from "../config/services";
+import { llmRequestSchema } from "../schemas/llm";
+import { keywordsResponseSchema } from "../schemas/keywords";
+
+enum Provider {
+  openai = 'openai',
+  anthropic = 'anthropic',
+  ollama = 'ollama',
+  auto = 'auto'
+}
 
 // Re-export the TokenUsage interface for consistency
 export type { TokenUsage } from "./openai";
 
 // Service types
-export type AIService = 'openai' | 'anthropic' | 'ollama' | 'auto';
+export type AIService = 'openai' | 'anthropic' | 'ollama';
 
 // Service interface for consistency
 export interface AIServiceResponse<T> {
   data: T;
   usage: openaiService.TokenUsage;
-  service?: string; // Which service was actually used
-}
-
-export interface TweetResponse {
-  tweet: string;
-  characterCount: number;
-  author: string;
-  usage?: {
-    input_tokens: number;
-    output_tokens: number;
-    total_tokens: number;
-  };
   service?: string; // Which service was actually used
 }
 
@@ -62,40 +59,16 @@ export interface ImageDescriptionResponse {
  */
 export async function checkServiceAvailability(service: AIService): Promise<boolean> {
   switch (service) {
-    case 'openai':
+    case Provider.openai:
       return isServiceEnabled('OpenAI');
-    case 'anthropic':
+    case Provider.anthropic:
       return isServiceEnabled('Anthropic');
-    case 'ollama':
+    case Provider.ollama:
       if (!isServiceEnabled('Ollama')) return false;
-      return await ollamaService.checkOllamaHealth();
-    case 'auto':
-      return await checkServiceAvailability('openai') || 
-             await checkServiceAvailability('anthropic') || 
-             await checkServiceAvailability('ollama');
+      return await ollamaService.checkOllamaHealth();   
     default:
       return false;
   }
-}
-
-/**
- * Get the best available service
- */
-export async function getBestAvailableService(): Promise<AIService | null> {
-  // Check services in priority order (OpenAI -> Anthropic -> Ollama)
-  if (await checkServiceAvailability('openai')) {
-    return 'openai';
-  }
-
-  if (await checkServiceAvailability('anthropic')) {
-    return 'anthropic';
-  }
-
-  if (await checkServiceAvailability('ollama')) {
-    return 'ollama';
-  }
-
-  return null;
 }
 
 /**
@@ -104,65 +77,49 @@ export async function getBestAvailableService(): Promise<AIService | null> {
 export async function generateResponse<T extends z.ZodType>(
   prompt: string,
   schema: T,
-  preferredService: AIService = 'auto',
-  model?: string
+  config: z.infer<typeof llmRequestSchema>,
+  temperature: number = 0
 ): Promise<AIServiceResponse<z.infer<T>>> {
   let serviceToUse: AIService | null = null;
+
+  const provider = config.provider;
+  const model = config.model;
   
-  if (preferredService === 'auto') {
-    serviceToUse = await getBestAvailableService();
-  } else if (await checkServiceAvailability(preferredService)) {
-    serviceToUse = preferredService;
-  } else {
-    // Fallback to best available
-    serviceToUse = await getBestAvailableService();
-  }
+  const isServiceAvailable = await checkServiceAvailability(provider);
   
-  if (!serviceToUse) {
-    throw new Error('No AI services are available');
+  if (!isServiceAvailable) {
+    throw new Error(`Service ${provider} is not available`);
   }
   
   try {
     let result;
     
-    switch (serviceToUse) {
-         
-      case 'ollama':
-          result = await ollamaService.generateResponse(prompt, schema, model);
+    switch (provider) {         
+      case Provider.ollama:
+          result = await ollamaService.generateResponse(prompt, schema, model, temperature);
         return {
           ...result,
-          service: 'ollama'
+          service: Provider.ollama
         };
 
-      case 'openai':
+      case Provider.openai:
         result = await openaiService.generateResponse(prompt, schema);
         return {
           ...result,
-          service: 'openai'
+          service: Provider.openai
         };
 
-      case 'anthropic':
+      case Provider.anthropic:
         result = await anthropicService.generateResponse(prompt, schema);
         return {
           ...result,
-          service: 'anthropic'
-        };
-        
+          service: Provider.anthropic
+        };        
       default:
         throw new Error(`Unsupported service: ${serviceToUse}`);
     }
-  } catch (error) {
-    // If preferred service fails and we're not in auto mode, try fallback
-    if (preferredService !== 'auto') {
-      console.warn(`Service ${serviceToUse} failed, trying fallback...`);
-      const fallbackService = await getBestAvailableService();
-      
-      if (fallbackService && fallbackService !== serviceToUse) {
-        return generateResponse(prompt, schema, fallbackService, model);
-      }
-    }
-    
-    throw error;
+  } catch (error) {    
+    throw new Error(`Cannot connect to service ${provider}: ${error}`);
   }
 }
 
@@ -171,7 +128,7 @@ export async function generateResponse<T extends z.ZodType>(
  */
 export async function generateImageResponse(
   images: string[],
-  service: AIService = 'ollama',
+  service: AIService = Provider.ollama,
   model?: string,    
   stream: boolean = false,
   temperature: number = 0.3
@@ -210,15 +167,15 @@ export async function getAvailableModels(service: AIService): Promise<string[]> 
   }
   
   switch (service) {
-    case 'openai':
+    case Provider.openai:
       // OpenAI models are configured, not dynamically fetched
       return [openaiConfig.model];
 
-    case 'anthropic':
+    case Provider.anthropic:
       // Anthropic models are configured, not dynamically fetched
       return [anthropicConfig.model];
       
-    case 'ollama':
+    case Provider.ollama:
       return await ollamaService.getAvailableModels();
       
     default:
@@ -233,7 +190,7 @@ export async function getServiceStatus() {
   const status = {
     openai: {
       enabled: isServiceEnabled('OpenAI'),
-      available: await checkServiceAvailability('openai'),
+      available: await checkServiceAvailability(Provider.openai),
       config: {
         model: openaiConfig.model,
         hasApiKey: !!openaiConfig.apiKey,
@@ -241,7 +198,7 @@ export async function getServiceStatus() {
     },
     anthropic: {
       enabled: isServiceEnabled('Anthropic'),
-      available: await checkServiceAvailability('anthropic'),
+      available: await checkServiceAvailability(Provider.anthropic),
       config: {
         model: anthropicConfig.model,
         hasApiKey: !!anthropicConfig.apiKey,
@@ -249,7 +206,7 @@ export async function getServiceStatus() {
     },
     ollama: {
       enabled: isServiceEnabled('Ollama'),
-      available: await checkServiceAvailability('ollama'),
+      available: await checkServiceAvailability(Provider.ollama),
       config: {
         baseURL: ollamaConfig.baseURL,
         model: ollamaConfig.model,
@@ -258,11 +215,51 @@ export async function getServiceStatus() {
     }
   };
   
-  const primaryService = await getBestAvailableService();
   
   return {
-    services: status,
-    primary: primaryService,
-    anyAvailable: !!primaryService
+    services: status,  
   };
 } 
+
+export async function processStructuredOutputRequest(
+  prompt: string,
+  schema: z.ZodType,
+  config: z.infer<typeof llmRequestSchema>,
+  temperature: number = 0
+): Promise<any> {
+  const provider = config.provider;
+  const model = config.model;
+
+  switch (provider) {
+    case Provider.ollama:
+      return await ollamaService.generateChatStructuredResponse(prompt, schema, model, temperature);
+    case Provider.openai:
+      return await openaiService.generateChatStructuredResponse(prompt, schema, model, temperature);
+    case Provider.anthropic:
+      return await anthropicService.generateChatStructuredResponse(prompt, schema, model, temperature);
+    default:
+      throw new Error(`Unsupported service: ${provider}`);
+  }
+}   
+
+export async function processTextOutputRequest(
+  prompt: string,
+  config: z.infer<typeof llmRequestSchema>,
+  temperature: number = 0
+): Promise<any> {
+  const provider = config.provider;
+  const model = config.model;
+
+  console.log('MODEL TO USE', model);
+
+  switch (provider) {
+    case Provider.ollama:
+      return await ollamaService.generateChatTextResponse(prompt, model); 
+    case Provider.openai:
+      return await openaiService.generateChatTextResponse(prompt, model);
+    case Provider.anthropic:
+      return await anthropicService.generateChatTextResponse(prompt, model);
+    default:
+      throw new Error(`Unsupported service: ${provider}`);
+  }
+}   

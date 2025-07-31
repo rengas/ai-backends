@@ -68,6 +68,11 @@ async function handleGetModels(c: Context) {
           service: 'ollama', 
           models: results[1].status === 'fulfilled' ? results[1].value : [],
           available: await checkServiceAvailability('ollama')
+        },
+        anthropic: {
+          service: 'anthropic',
+          models: [],
+          available: await checkServiceAvailability('anthropic')
         }
       }
       
@@ -92,7 +97,7 @@ async function handleServiceHealth(c: Context) {
   try {
     const service = c.req.param('service')
     
-    if (!service || !['openai', 'ollama'].includes(service)) {
+    if (!service || !['openai', 'ollama', 'anthropic'].includes(service)) {
       return c.json({ error: 'Invalid service. Must be openai or ollama' }, 400)
     }
     

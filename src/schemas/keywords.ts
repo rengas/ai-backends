@@ -1,13 +1,18 @@
 import { z } from 'zod'
+import { llmRequestSchema } from './llm'
 
 /**
  * Body sent by the client.
  */
-export const keywordsRequestSchema = z.object({
+export const payloadSchema = z.object({
   text: z.string().min(1, 'Text must not be empty'),
   maxKeywords: z.number().int().positive().optional(),
-  service: z.enum(['openai', 'ollama', 'auto']).optional().describe('AI service to use (defaults to auto)'),
-  model: z.string().optional().describe('Specific model to use (optional)'),
+  temperature: z.number().min(0).max(1).optional(),
+})
+
+export const keywordsRequestSchema = z.object({
+  payload: payloadSchema,
+  config: llmRequestSchema
 })
 
 /**
@@ -15,7 +20,7 @@ export const keywordsRequestSchema = z.object({
  */
 export const keywordsResponseSchema = z.object({
   keywords: z.array(z.string()),
-  service: z.string().optional().describe('The AI service that was actually used'),
+  provider: z.string().optional().describe('The AI service that was actually used'),
   usage: z.object({
     input_tokens: z.number(),
     output_tokens: z.number(),
@@ -25,3 +30,15 @@ export const keywordsResponseSchema = z.object({
 
 export type KeywordsReq = z.infer<typeof keywordsRequestSchema>
 export type KeywordsRes = z.infer<typeof keywordsResponseSchema> 
+
+export function createKeywordsResponse(
+  keywords: string[], 
+  provider?: string,
+  usage = { input_tokens: 0, output_tokens: 0, total_tokens: 0 }
+): z.infer<typeof keywordsResponseSchema> {
+  return {
+    keywords,
+    provider,
+    usage
+  };
+}

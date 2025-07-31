@@ -4,37 +4,16 @@ import { describeImagePrompt } from "../utils/prompts";
 
 // Configuration
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:latest';
-const OLLAMA_CHAT_MODEL = process.env.OLLAMA_CHAT_MODEL || 'llama3.2:latest';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen3:4b';
+const OLLAMA_CHAT_MODEL = process.env.OLLAMA_CHAT_MODEL || 'qwen3:4b';
 const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL || 'llama3.2-vision:11b';
 
-// Define our usage type to match OpenAI interface
-export interface TokenUsage {
-  input_tokens: number;
-  input_tokens_details: {
-    cached_tokens: number;
-  };
-  output_tokens: number;
-  output_tokens_details: {
-    reasoning_tokens: number;
-  };
-  total_tokens: number;
-}
+import { createOllama } from 'ollama-ai-provider';
+import { generateObject, generateText } from "ai";
 
-// Ollama API types
-interface OllamaResponse {
-  model: string;
-  created_at: string;
-  response: string;
-  done: boolean;
-  context?: number[];
-  total_duration?: number;
-  load_duration?: number;
-  prompt_eval_count?: number;
-  prompt_eval_duration?: number;
-  eval_count?: number;
-  eval_duration?: number;
-}
+const ollama = createOllama({
+  baseURL: OLLAMA_BASE_URL + '/api',
+});
 
 interface OllamaChatResponse {
   model: string;
@@ -98,128 +77,6 @@ async function ollamaRequest(endpoint: string, payload: any): Promise<any> {
   }
 
   return responseData;
-}
-
-/**
- * Convert Ollama usage stats to our TokenUsage format
- */
-function convertUsage(ollamaResponse: OllamaResponse | OllamaChatResponse): TokenUsage {
-  const inputTokens = ollamaResponse.prompt_eval_count || 0;
-  const outputTokens = ollamaResponse.eval_count || 0;
-  
-  return {
-    input_tokens: inputTokens,
-    input_tokens_details: {
-      cached_tokens: 0, // Ollama doesn't provide this info
-    },
-    output_tokens: outputTokens,
-    output_tokens_details: {
-      reasoning_tokens: 0, // Ollama doesn't provide this info
-    },
-    total_tokens: inputTokens + outputTokens,
-  };
-}
-
-/**
- * Parse JSON response with error handling
- */
-function parseStructuredResponse<T extends z.ZodType>(response: string): z.infer<T> {
-
-  console.log("parseStructuredResponse XXX", response)
-  const cleanResponse = response.trim();
-  
-  console.log('🔍 [PARSING RESPONSE]');
-  console.log('📝 Raw response to parse:', cleanResponse);
-
-  
-  return cleanResponse;
-}
-
-/**
- * Extract the first tweet from a response that might contain multiple tweets or examples
- */
-function extractFirstTweet(response: string): string {
-  let content = response.trim();
-  
-  console.log('🐦 [EXTRACTING TWEET]');
-  console.log('📝 Input:', content);
-  
-  // Remove surrounding quotes if present (common in Ollama responses)
-  if ((content.startsWith('"') && content.endsWith('"')) || 
-      (content.startsWith("'") && content.endsWith("'"))) {
-    content = content.slice(1, -1);
-    console.log('🧹 Removed outer quotes:', content);
-  }
-  
-  // If the response contains separators (---), take only the first part
-  if (content.includes('---')) {
-    content = content.split('---')[0].trim();
-    console.log('✂️ Split on separator, took first part:', content);
-  }
-  
-  // If the response contains multiple quoted sections, take the first one
-  const quotedSections = content.match(/"([^"]+)"/g);
-  if (quotedSections && quotedSections.length > 0) {
-    content = quotedSections[0].replace(/"/g, '');
-    console.log('📑 Extracted from quoted section:', content);
-  }
-  
-  // Remove any remaining quotes that might be embedded
-  content = content.replace(/^["']|["']$/g, '').trim();
-  
-  // If still too long or contains multiple lines that look like separate tweets, take first logical tweet
-  const lines = content.split('\n').filter(line => line.trim().length > 0);
-  if (lines.length > 5) {
-    // If too many lines, it's probably multiple tweets, take first few lines
-    content = lines.slice(0, 4).join('\n');
-    console.log('📏 Truncated to first 4 lines:', content);
-  }
-  
-  // Final cleanup - ensure no stray quotes
-  content = content.replace(/\\"/g, '"').trim(); // Unescape quotes
-  
-  console.log('✅ Final extracted tweet:', content);
-  return content || response.trim(); // Fallback to original if extraction fails
-}
-
-/**
- * Generate a response using Ollama with structured output
- */
-export async function generateResponse<T extends z.ZodType>(
-  prompt: string,  
-  schema: T,
-  model?: string
-): Promise<{ 
-  data: z.infer<T>; 
-  usage: TokenUsage;
-}> {
-  const modelToUse = model || OLLAMA_MODEL;
-  
-  // Create a prompt that encourages JSON output
-  const structuredPrompt = `${prompt}`;
-
-  // Convert Zod schema to JSON Schema format for Ollama
-  const jsonSchema = zodToJsonSchema(schema, "schema");
-
-  const payload = {
-    model: modelToUse,
-    prompt: structuredPrompt,
-    stream: false,
-    options: {
-      temperature: 0.3, // Lower temperature for more consistent JSON output
-    },
-    format: jsonSchema // Use converted JSON Schema format
-  };
-
-  const response: OllamaResponse = await ollamaRequest('/api/generate', payload);
-  // Parse the structured response
-  const data = parseStructuredResponse(response.response);
-  const usage = convertUsage(response);
-
-  return {
-    data,
-    usage
-  };
 }
 
 
@@ -337,5 +194,40 @@ export async function describeImage(
     eval_duration: response.eval_duration
   };
 }
+
+export async function generateChatStructuredResponse(
+  prompt: string,
+  schema: z.ZodType,
+  model?: string,
+  temperature: number = 0
+): Promise<any> {  
+  
+  const modelToUse = ollama(model || OLLAMA_CHAT_MODEL);
+
+  const result = await generateObject({
+    model: modelToUse,
+    prompt: prompt,
+    schema: schema,
+    temperature: temperature
+  });
+
+  return result;
+}
+
+export async function generateChatTextResponse(
+  prompt: string,
+  model?: string,
+): Promise<any> {  
+  
+  const modelToUse = ollama(model || OLLAMA_CHAT_MODEL);
+
+  const result = await generateText({
+    model: modelToUse,
+    prompt: prompt
+  });
+
+  return result;
+}
+
 
 export { OLLAMA_BASE_URL, OLLAMA_MODEL, OLLAMA_CHAT_MODEL, OLLAMA_VISION_MODEL }; 

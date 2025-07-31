@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Coding Standards
 
@@ -54,3 +54,4 @@ This document outlines coding standards and best practices for the AI Backend pr
 - Consider streaming responses for long-running AI operations
 - Validate AI output before returning to clients
 - Implement exponential backoff for all external API calls to avoid hitting rate limits
+- Use the reusable AI service layer when connecting from API routes

@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # AI Backend Project Structure
 
@@ -37,12 +37,9 @@ ai-backend/
 ### src/routes/
 
 Contains route definitions for the application's API endpoints. Examples include:
-- [routes/keywords.ts](mdc:src/routes/keywords.ts) - Keyword extraction endpoint
-- [routes/summarize.ts](mdc:src/routes/summarize.ts) - Text summarization endpoint
-- [routes/describeImage.ts](mdc:src/routes/describeImage.ts) - Image description endpoint
-- [routes/emailReply.ts](mdc:src/routes/emailReply.ts) - Email reply generation
-- [routes/tweetCreator.ts](mdc:src/routes/tweetCreator.ts) - Tweet generation endpoint
-- [routes/root.ts](mdc:src/routes/root.ts) - Root endpoint definitions
+- [routes/keywords.ts](../../src/routes/keywords.ts) - Keyword extraction endpoint
+- [routes/summarize.ts](../../src/routes/summarize.ts) - Text summarization endpoint
+- [routes/describeImage.ts](../../src/routes/describeImage.ts) - Image description endpoint
 
 ### src/schemas/
 
@@ -51,6 +48,11 @@ Contains validation schemas for request and response data.
 ### src/services/
 
 Contains business logic and external API interactions.
+- [services/ai.ts](../../src/services/ai.ts) - AI service layer
+- [services/ollama.ts](../../src/services/ollama.ts) - Ollama service layer
+- [services/openai.ts](../../src/services/openai.ts) - OpenAI service layer
+- [services/anthropic.ts](../../src/services/anthropic.ts) - Anthropic service layer
+- [services/openrouter.ts](../../src/services/openrouter.ts) - OpenRouter service layer
 
 ### src/utils/
 
