@@ -24,13 +24,6 @@ Email: ${emailContent}`;
 }
 
 /**
- * System prompt for tweet creation
- */
-export function tweetPrompt(topic: string, style?: string): string {
-  return `Create ONE tweet about the following topic ${topic}. Use 3-5 phrases with new lines. Keep it under 450 characters. Just return the tweet, no other text or explanation.`;
-}
-
-/**
  * System prompt for translation
  */
 export function translatePrompt(text: string, targetLanguage: string): string {

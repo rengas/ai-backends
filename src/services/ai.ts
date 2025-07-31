@@ -22,18 +22,6 @@ export interface AIServiceResponse<T> {
   service?: string; // Which service was actually used
 }
 
-export interface TweetResponse {
-  tweet: string;
-  characterCount: number;
-  author: string;
-  usage?: {
-    input_tokens: number;
-    output_tokens: number;
-    total_tokens: number;
-  };
-  service?: string; // Which service was actually used
-}
-
 export interface ImageDescriptionResponse {
   model: string;
   created_at: string;

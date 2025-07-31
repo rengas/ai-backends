@@ -136,53 +136,6 @@ function parseStructuredResponse<T extends z.ZodType>(response: string): z.infer
 }
 
 /**
- * Extract the first tweet from a response that might contain multiple tweets or examples
- */
-function extractFirstTweet(response: string): string {
-  let content = response.trim();
-  
-  console.log('🐦 [EXTRACTING TWEET]');
-  console.log('📝 Input:', content);
-  
-  // Remove surrounding quotes if present (common in Ollama responses)
-  if ((content.startsWith('"') && content.endsWith('"')) || 
-      (content.startsWith("'") && content.endsWith("'"))) {
-    content = content.slice(1, -1);
-    console.log('🧹 Removed outer quotes:', content);
-  }
-  
-  // If the response contains separators (---), take only the first part
-  if (content.includes('---')) {
-    content = content.split('---')[0].trim();
-    console.log('✂️ Split on separator, took first part:', content);
-  }
-  
-  // If the response contains multiple quoted sections, take the first one
-  const quotedSections = content.match(/"([^"]+)"/g);
-  if (quotedSections && quotedSections.length > 0) {
-    content = quotedSections[0].replace(/"/g, '');
-    console.log('📑 Extracted from quoted section:', content);
-  }
-  
-  // Remove any remaining quotes that might be embedded
-  content = content.replace(/^["']|["']$/g, '').trim();
-  
-  // If still too long or contains multiple lines that look like separate tweets, take first logical tweet
-  const lines = content.split('\n').filter(line => line.trim().length > 0);
-  if (lines.length > 5) {
-    // If too many lines, it's probably multiple tweets, take first few lines
-    content = lines.slice(0, 4).join('\n');
-    console.log('📏 Truncated to first 4 lines:', content);
-  }
-  
-  // Final cleanup - ensure no stray quotes
-  content = content.replace(/\\"/g, '"').trim(); // Unescape quotes
-  
-  console.log('✅ Final extracted tweet:', content);
-  return content || response.trim(); // Fallback to original if extraction fails
-}
-
-/**
  * Generate a response using Ollama with structured output
  */
 export async function generateResponse<T extends z.ZodType>(

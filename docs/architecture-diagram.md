@@ -29,7 +29,6 @@ graph TB
             Sentiment["/sentiment<br/>Sentiment Analysis"]
             Keywords["/keywords<br/>Keyword Extraction"]
             Translate["/translate<br/>Translation"]
-            Tweet["/tweet<br/>Tweet Generation"]
         end
         
         subgraph imageProcessing ["Image Processing"]
@@ -86,7 +85,6 @@ graph TB
     Security --> Sentiment
     Security --> Keywords
     Security --> Translate
-    Security --> Tweet
     Security --> DescribeImg
     Security --> JsonEditor
     
@@ -95,7 +93,6 @@ graph TB
     Sentiment --> ServiceManager
     Keywords --> ServiceManager
     Translate --> ServiceManager
-    Tweet --> ServiceManager
     DescribeImg --> ServiceManager
     Services --> ServiceManager
     
@@ -147,7 +144,7 @@ graph TB
     class Client client
     class Gateway,Auth,CORS,Security apiNodes
     class Health,Services routeCore
-    class Summarize,Sentiment,Keywords,Translate,Tweet routeText
+    class Summarize,Sentiment,Keywords,Translate routeText
     class DescribeImg routeImage
     class JsonEditor routeTools
     class ServiceManager,ResponseGen orchestrator
