@@ -1,73 +1,51 @@
 import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
+import { openai } from '@ai-sdk/openai';
+import { generateObject, generateText } from "ai";
 
-const OPENAI_MODEL = 'gpt-4.1'
+const OPENAI_MODEL = 'gpt-4.1-nano'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
-const openai = new OpenAI({
+const openai1 = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
-// Define our usage type
-export interface TokenUsage {
-  input_tokens: number;
-  input_tokens_details: {
-    cached_tokens: number;
-  };
-  output_tokens: number;
-  output_tokens_details: {
-    reasoning_tokens: number;
-  };
-  total_tokens: number;
-}
-
-/**
- * Generate a response using OpenAI with structured output
- */
-export async function generateResponse<T extends z.ZodType>(
+export async function generateChatStructuredResponse(
   prompt: string,
-  schema: T,
-): Promise<{ 
-  data: z.infer<T>; 
-  usage: TokenUsage;
-}> {
-  const response = await openai.responses.parse({
-    model: OPENAI_MODEL,
-    input: [
-      { role: "user", content: prompt }
-    ],
-    text: {
-      format: zodTextFormat(schema, "result"),
-    },
+  schema: z.ZodType,
+  model?: string,
+  temperature: number = 0
+): Promise<any> {
+  
+  const modelToUse = openai.responses(model || OPENAI_MODEL);
+
+  const result = await generateObject({
+    model: modelToUse,
+    schema: schema,
+    prompt: prompt,
+    temperature: temperature
   });
-  
-  // Convert the usage data to our expected format
-  const usage: TokenUsage = {
-    input_tokens: 0,
-    input_tokens_details: {
-      cached_tokens: 0
-    },
-    output_tokens: 0,
-    output_tokens_details: {
-      reasoning_tokens: 0
-    },
-    total_tokens: 0
-  }
-  
-  // Try to populate with real data if available
-  if (response.usage) {
-    // The new OpenAI SDK has different property names
-    usage.total_tokens = response.usage.total_tokens || 0;
-    // Estimate input/output tokens since specific breakdowns might not be available
-    usage.input_tokens = Math.floor(usage.total_tokens * 0.7); // Estimate
-    usage.output_tokens = usage.total_tokens - usage.input_tokens;
-  }
-  
-  return {
-    data: response.output_parsed,
-    usage
-  }
+
+  return result;
 }
 
-export { openai, OPENAI_MODEL } 
+export async function generateChatTextResponse(
+  prompt: string,
+  model?: string,
+): Promise<any> {  
+
+  console.log('model', model);
+  
+  const modelToUse = openai.responses(model || OPENAI_MODEL);
+
+  const result = await generateText({
+    model: modelToUse,
+    prompt: prompt
+  });
+
+  return result;
+}
+
+
+export { openai1 as openai, OPENAI_MODEL } 

@@ -30,7 +30,7 @@ export const openaiConfig: OpenAIConfig = {
   enabled: !!process.env.OPENAI_API_KEY,
   priority: 1,
   apiKey: process.env.OPENAI_API_KEY || '',
-  model: process.env.OPENAI_MODEL || 'gpt-4.1',
+  model: process.env.OPENAI_MODEL || 'gpt-4.1-nano',
   baseURL: process.env.OPENAI_BASE_URL,
 };
 
@@ -40,8 +40,8 @@ export const ollamaConfig: OllamaConfig = {
   enabled: process.env.OLLAMA_ENABLED === 'true' || process.env.OLLAMA_BASE_URL !== undefined,
   priority: 3,
   baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
-  model: process.env.OLLAMA_MODEL || 'llama3.2',
-  chatModel: process.env.OLLAMA_CHAT_MODEL || 'llama3.2',
+  model: process.env.OLLAMA_MODEL || 'llama3.2:latest',
+  chatModel: process.env.OLLAMA_CHAT_MODEL || 'llama3.2:latest',
   timeout: parseInt(process.env.OLLAMA_TIMEOUT || '30000'),
 };
 
@@ -51,7 +51,7 @@ export const anthropicConfig: AnthropicConfig = {
   enabled: !!process.env.ANTHROPIC_API_KEY,
   priority: 2,
   apiKey: process.env.ANTHROPIC_API_KEY || '',
-  model: process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022',
+  model: process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307',
 };
 
 // Available services

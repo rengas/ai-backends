@@ -1,9 +1,9 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
-import { generateResponse } from '../services/ai'
+import { processStructuredOutputRequest } from '../services/ai'   
 import { keywordsPrompt } from '../utils/prompts'
-import { handleError, handleValidationError } from '../utils/errorHandler'
-import { keywordsRequestSchema } from '../schemas/keywords'
+import { handleError } from '../utils/errorHandler'
+import { keywordsRequestSchema, keywordsResponseSchema, createKeywordsResponse } from '../schemas/keywords'
 
 const router = new OpenAPIHono()
 
@@ -16,34 +16,35 @@ const responseSchema = z.object({
  */
 async function handleKeywordsRequest(c: Context) {
   try {
-    const { text, maxKeywords, service = 'auto', model } = await c.req.json()
-
-    if (!text) {
-      return handleValidationError(c, 'Text')
-    }
+    const { payload, config } = await c.req.json()
 
     // Generate the prompt
-    const prompt = keywordsPrompt(text, maxKeywords)
+    const prompt = keywordsPrompt(payload.text, payload.maxKeywords)
+    const temperature = config.temperature || 0
 
     // Get response using our service
-    const { data, usage, service: usedService } = await generateResponse(
+    const result = await processStructuredOutputRequest(
       prompt,
       responseSchema,
-      service,
-      model
+      config,
+      temperature
     )
 
-    console.log("KEYWORDS DATA", data)
+    console.log("KEYWORDS RESULT", result)
+    const keywords = result.object.keywords;
 
-    return c.json({ 
-      keywords: data,
-      service: usedService,
-      usage: {
-        input_tokens: usage.input_tokens,
-        output_tokens: usage.output_tokens,
-        total_tokens: usage.total_tokens,
+    const finalResponse = createKeywordsResponse(
+      keywords, 
+      config.provider, 
+      { 
+        input_tokens: result.usage.promptTokens, 
+        output_tokens: result.usage.completionTokens, 
+        total_tokens: result.usage.totalTokens 
       }
-    }, 200)
+    );
+
+    return c.json(finalResponse, 200)
+    
   } catch (error) {
     return handleError(c, error, 'Failed to extract keywords from text')
   }
@@ -67,7 +68,7 @@ router.openapi(
         description: 'Returns the extracted keywords.',
         content: {
           'application/json': {
-            schema: responseSchema
+            schema: keywordsResponseSchema
           }
         }
       }

@@ -15,15 +15,6 @@ Text: ${text}`;
 }
 
 /**
- * System prompt for email reply generation
- */
-export function emailReplyPrompt(emailContent: string, tone?: string): string {
-  return `Generate a professional email reply to the following email${tone ? ` with a ${tone} tone. Just return the reply, no other text or explanation.` : ''}.
-  
-Email: ${emailContent}`;
-}
-
-/**
  * System prompt for translation
  */
 export function translatePrompt(text: string, targetLanguage: string): string {
@@ -57,22 +48,11 @@ export function sentimentPrompt(text: string, categories?: string[]): string {
   return `Analyze the sentiment of the following text and return your response in JSON format.
 
 Your response must include:
-1. "sentiment": The overall sentiment classification (one of: ${sentimentCategories.join(', ')})
+1. "sentiment": The overall sentiment classification
 2. "confidence": A confidence score between 0 and 1 (where 1 is most confident)
 3. "emotions": An array of emotion objects, each with "emotion" (string) and "score" (number 0-1)
 
-The JSON keys must match exactly: "sentiment", "confidence", and "emotions".
-
-Example response format:
-{
-  "sentiment": "positive",
-  "confidence": 0.85,
-  "emotions": [
-    {"emotion": "joy", "score": 0.8},
-    {"emotion": "excitement", "score": 0.6},
-    {"emotion": "satisfaction", "score": 0.7}
-  ]
-}
+DO NOT CALL ANY TOOLS OR FUNCTIONS
 
 Text to analyze: ${text}`;
 }
