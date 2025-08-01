@@ -18,8 +18,14 @@ function initialise(): OpenAPIHono {
     // Add CORS middleware
     openaApiHono.use('/*', cors({
         origin: (origin) => {
-            // Allow requests from webcontainer-api.io domains
-            if (origin && origin.match(/.*\.local-credentialless\.webcontainer-api\.io$/)) {
+            // Allow requests from localhost
+            // Add your domain name here when you deploy so that you can access the API from your domain
+            if (
+                (origin && origin.startsWith('http://localhost')) ||
+                (origin && origin.startsWith('http://127.0.0.1')) ||
+                (origin && origin.startsWith('https://localhost')) ||
+                (origin && origin.startsWith('https://127.0.0.1'))
+            ) {
                 return origin;
             }
             return null;
