@@ -123,18 +123,6 @@ export async function isVisionModelSupported(service: string, model: string): Pr
 }
 
 /**
- * Check if Ollama is running and accessible
- */
-export async function checkOllamaHealth(): Promise<boolean> {
-  try {
-    const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`);
-    return response.ok;
-  } catch (error) {
-    return false;
-  }
-}
-
-/**
  * Describe an image using Ollama vision model
  */
 export async function describeImage(

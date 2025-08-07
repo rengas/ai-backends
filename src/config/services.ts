@@ -24,6 +24,12 @@ export interface AnthropicConfig extends ServiceConfig {
   model: string;
 }
 
+export interface OpenRouterConfig extends ServiceConfig {
+  apiKey: string;
+  model: string;
+  baseURL?: string;
+}
+
 // OpenAI Configuration
 export const openaiConfig: OpenAIConfig = {
   name: 'OpenAI',
@@ -54,8 +60,18 @@ export const anthropicConfig: AnthropicConfig = {
   model: process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307',
 };
 
+// OpenRouter Configuration
+export const openrouterConfig: OpenRouterConfig = {
+  name: 'OpenRouter',
+  enabled: !!process.env.OPENROUTER_API_KEY,
+  priority: 4,
+  apiKey: process.env.OPENROUTER_API_KEY || '',
+  model: process.env.OPENROUTER_MODEL || 'anthropic/claude-3.5-sonnet',
+  baseURL: process.env.OPENROUTER_BASE_URL,
+};
+
 // Available services
-export const availableServices = [openaiConfig, anthropicConfig, ollamaConfig];
+export const availableServices = [openaiConfig, anthropicConfig, ollamaConfig, openrouterConfig];
 
 // Get the primary service (highest priority enabled service)
 export function getPrimaryService(): ServiceConfig | null {

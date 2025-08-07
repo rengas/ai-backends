@@ -49,3 +49,15 @@ export async function generateChatTextResponse(
 }
 
 export { anthropic1 as anthropic, ANTHROPIC_MODEL };
+
+/**
+ * Get available models from Anthropic
+ * Note: Anthropic supports hundreds of models, this returns commonly used ones
+ */
+export async function getAvailableModels(): Promise<string[]> {
+  // Anthropic supports hundreds of models
+  // Returning some popular ones as examples
+  return [
+    'claude-3-haiku-20240307',
+  ];
+}

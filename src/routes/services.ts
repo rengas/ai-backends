@@ -55,7 +55,9 @@ async function handleGetModels(c: Context) {
       // Get models from all available services
       const results = await Promise.allSettled([
         getAvailableModels('openai'),
-        getAvailableModels('ollama')
+        getAvailableModels('ollama'),
+        getAvailableModels('openrouter'),
+        getAvailableModels('anthropic')
       ])
       
       const response = {

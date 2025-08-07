@@ -49,3 +49,15 @@ export async function generateChatTextResponse(
 
 
 export { openai1 as openai, OPENAI_MODEL } 
+
+/**
+ * Get available models from OpenAI
+ * Note: OpenAI supports hundreds of models, this returns commonly used ones
+ */
+export async function getAvailableModels(): Promise<string[]> {
+  // OpenAI supports hundreds of models
+  // Returning some popular ones as examples
+  return [
+    'gpt-4.1-nano',
+  ];
+}

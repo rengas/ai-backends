@@ -2,34 +2,26 @@ import { z } from "zod";
 import * as openaiService from "./openai";
 import * as ollamaService from "./ollama";
 import * as anthropicService from "./anthropic";
+import * as openrouterService from "./openrouter";
 import { 
   openaiConfig, 
   ollamaConfig, 
   anthropicConfig,
+  openrouterConfig,
   isServiceEnabled 
 } from "../config/services";
 import { llmRequestSchema } from "../schemas/llm";
-import { keywordsResponseSchema } from "../schemas/keywords";
 
 enum Provider {
   openai = 'openai',
   anthropic = 'anthropic',
   ollama = 'ollama',
-  auto = 'auto'
+  openrouter = 'openrouter',
 }
-
-// Re-export the TokenUsage interface for consistency
-export type { TokenUsage } from "./openai";
 
 // Service types
-export type AIService = 'openai' | 'anthropic' | 'ollama';
+export type AIService = 'openai' | 'anthropic' | 'ollama' | 'openrouter';
 
-// Service interface for consistency
-export interface AIServiceResponse<T> {
-  data: T;
-  usage: openaiService.TokenUsage;
-  service?: string; // Which service was actually used
-}
 
 export interface ImageDescriptionResponse {
   model: string;
@@ -64,62 +56,11 @@ export async function checkServiceAvailability(service: AIService): Promise<bool
     case Provider.anthropic:
       return isServiceEnabled('Anthropic');
     case Provider.ollama:
-      if (!isServiceEnabled('Ollama')) return false;
-      return await ollamaService.checkOllamaHealth();   
+      return isServiceEnabled('Ollama');
+    case Provider.openrouter:
+      return isServiceEnabled('OpenRouter');
     default:
       return false;
-  }
-}
-
-/**
- * Generate a response using the specified or best available AI service
- */
-export async function generateResponse<T extends z.ZodType>(
-  prompt: string,
-  schema: T,
-  config: z.infer<typeof llmRequestSchema>,
-  temperature: number = 0
-): Promise<AIServiceResponse<z.infer<T>>> {
-  let serviceToUse: AIService | null = null;
-
-  const provider = config.provider;
-  const model = config.model;
-  
-  const isServiceAvailable = await checkServiceAvailability(provider);
-  
-  if (!isServiceAvailable) {
-    throw new Error(`Service ${provider} is not available`);
-  }
-  
-  try {
-    let result;
-    
-    switch (provider) {         
-      case Provider.ollama:
-          result = await ollamaService.generateResponse(prompt, schema, model, temperature);
-        return {
-          ...result,
-          service: Provider.ollama
-        };
-
-      case Provider.openai:
-        result = await openaiService.generateResponse(prompt, schema);
-        return {
-          ...result,
-          service: Provider.openai
-        };
-
-      case Provider.anthropic:
-        result = await anthropicService.generateResponse(prompt, schema);
-        return {
-          ...result,
-          service: Provider.anthropic
-        };        
-      default:
-        throw new Error(`Unsupported service: ${serviceToUse}`);
-    }
-  } catch (error) {    
-    throw new Error(`Cannot connect to service ${provider}: ${error}`);
   }
 }
 
@@ -168,15 +109,16 @@ export async function getAvailableModels(service: AIService): Promise<string[]> 
   
   switch (service) {
     case Provider.openai:
-      // OpenAI models are configured, not dynamically fetched
-      return [openaiConfig.model];
+      return openaiService.getAvailableModels();
 
-    case Provider.anthropic:
-      // Anthropic models are configured, not dynamically fetched
-      return [anthropicConfig.model];
+    case Provider.anthropic:      
+      return anthropicService.getAvailableModels();
       
     case Provider.ollama:
       return await ollamaService.getAvailableModels();
+
+    case Provider.openrouter:
+      return await openrouterService.getAvailableModels();
       
     default:
       return [];
@@ -212,6 +154,15 @@ export async function getServiceStatus() {
         model: ollamaConfig.model,
         chatModel: ollamaConfig.chatModel,
       }
+    },
+    openrouter: {
+      enabled: isServiceEnabled('OpenRouter'),
+      available: await checkServiceAvailability(Provider.openrouter),
+      config: {
+        model: openrouterConfig.model,
+        hasApiKey: !!openrouterConfig.apiKey,
+        baseURL: openrouterConfig.baseURL,
+      }
     }
   };
   
@@ -237,6 +188,8 @@ export async function processStructuredOutputRequest(
       return await openaiService.generateChatStructuredResponse(prompt, schema, model, temperature);
     case Provider.anthropic:
       return await anthropicService.generateChatStructuredResponse(prompt, schema, model, temperature);
+    case Provider.openrouter:
+      return await openrouterService.generateChatStructuredResponse(prompt, schema, model, temperature);
     default:
       throw new Error(`Unsupported service: ${provider}`);
   }
@@ -259,6 +212,8 @@ export async function processTextOutputRequest(
       return await openaiService.generateChatTextResponse(prompt, model);
     case Provider.anthropic:
       return await anthropicService.generateChatTextResponse(prompt, model);
+    case Provider.openrouter:
+      return await openrouterService.generateChatTextResponse(prompt, model, temperature);
     default:
       throw new Error(`Unsupported service: ${provider}`);
   }
