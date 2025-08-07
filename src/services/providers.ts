@@ -1,3 +1,3 @@
 import { z } from 'zod'
 
-export const providersSupported = z.enum(['ollama', 'openai', 'anthropic'])
+export const providersSupported = z.enum(['ollama', 'openai', 'anthropic', 'openrouter'])
