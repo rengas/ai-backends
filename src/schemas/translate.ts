@@ -6,7 +6,7 @@ import { llmRequestSchema } from './llm'
  */
 export const payloadSchema = z.object({
   text: z.string().describe('Text to translate'),
-  targetLanguage: z.string().describe('Target language code, e.g. "fr", "es", "zh"'),
+  targetLanguage: z.string().describe('Target language e.g.  "english", "tagalog", "japanese", "korean", "chinese", "french", "spanish"'),
 })
 
 export const translateRequestSchema = z.object({

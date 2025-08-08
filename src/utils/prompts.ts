@@ -56,3 +56,39 @@ DO NOT CALL ANY TOOLS OR FUNCTIONS
 
 Text to analyze: ${text}`;
 }
+
+/**
+ * System prompt for email reply generation
+ */
+export function emailReplyPrompt(
+  text: string,
+  customInstruction?: string,
+  senderName?: string,
+  recipientName?: string
+): string {
+  const instructionLine = customInstruction
+    ? `Additional guidance from requester: ${customInstruction}`
+    : 'Write the reply in a professional and concise tone.';
+
+  const addressInstruction = senderName ? `Address the reply to ${senderName} by name, but do not add a greeting line.` : '';
+  const signoffInstruction = recipientName ? `Sign the reply as ${recipientName} without adding a signature block.` : '';
+
+  return `You are an email assistant. Compose a thoughtful reply to the following email.
+
+${instructionLine}
+${addressInstruction ? `\n${addressInstruction}` : ''}
+${signoffInstruction ? `\n${signoffInstruction}` : ''}
+
+Rules:
+- Understand the email thoroughly before replying.
+- You are the recipient of the email and you reply using that perspective.
+- Do not add a subject line to the reply.
+- Always include "hi", "hello" or "dear" greetings unless explicitly asked not to.
+- Be polite, clear, and actionable.
+- If information is missing, propose reasonable next steps or clarifying questions. Otherwise, be direct and to the point.
+
+<email_to_reply_to>
+"""
+${text}
+</email_to_reply_to>`;
+}
