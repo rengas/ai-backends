@@ -2,7 +2,7 @@ import { OpenAPIHono, createRoute } from '@hono/zod-openapi'
 import { Context } from 'hono'
 import { z } from 'zod'
 import { sentimentPrompt } from '../utils/prompts'
-import { handleError, handleValidationError } from '../utils/errorHandler'
+import { handleError } from '../utils/errorHandler'
 import { createSentimentResponse, sentimentRequestSchema, sentimentResponseSchema } from '../schemas/sentiment'
 import { processStructuredOutputRequest } from '../services/ai'
 
