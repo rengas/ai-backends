@@ -17,7 +17,12 @@ async function handleEmailReplyRequest(c: Context) {
     const provider = config.provider
     const model = config.model
 
-    const prompt = emailReplyPrompt(payload.text, payload.tone, payload.hint)
+    const prompt = emailReplyPrompt(
+      payload.text,
+      payload.customInstruction,
+      payload.senderName,
+      payload.recipientName
+    )
 
     const result = await processTextOutputRequest(prompt, config)
 

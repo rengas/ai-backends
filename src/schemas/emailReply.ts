@@ -6,11 +6,12 @@ import { llmRequestSchema } from './llm'
  */
 export const payloadSchema = z.object({
   text: z.string().min(1, 'Email text must not be empty').describe('The email content to reply to'),
-  tone: z
-    .enum(['professional', 'friendly', 'concise', 'apologetic', 'persuasive'])
+  customInstruction: z
+    .string()
     .optional()
-    .describe('Optional tone/style for the reply'),
-  hint: z.string().optional().describe('Optional hint/instructions from the API caller to guide the reply'),
+    .describe('Optional combined guidance/style instruction, e.g., "positive, professional in Tagalog"'),
+  senderName: z.string().optional().describe('Optional sender name to address in the reply without greeting words'),
+  recipientName: z.string().optional().describe('Optional name of the person writing the reply (the recipient of the original email)'),
 })
 
 export const emailReplyRequestSchema = z.object({
