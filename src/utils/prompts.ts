@@ -56,3 +56,31 @@ DO NOT CALL ANY TOOLS OR FUNCTIONS
 
 Text to analyze: ${text}`;
 }
+
+/**
+ * System prompt for email reply generation
+ */
+export function emailReplyPrompt(text: string, tone?: string, hint?: string): string {
+  const toneInstruction = tone
+    ? `Write the reply in a ${tone} tone.`
+    : 'Write the reply in a professional and concise tone.';
+
+  const hintInstruction = hint ? `Additional guidance from requester: ${hint}` : '';
+
+  return `You are an email assistant. Compose a thoughtful reply to the following email.
+
+${toneInstruction}
+${hintInstruction ? `\n${hintInstruction}` : ''}
+
+Rules:
+- You are the recipient of the email and you reply using that perspective.
+- Do not add a subject line to the reply.
+- Do not include greetings like "Hi" or signatures; return only the main body of the reply.
+- Be polite, clear, and actionable.
+- If information is missing, propose reasonable next steps or clarifying questions.
+
+Email to reply to:
+"""
+${text}
+"""`;
+}
