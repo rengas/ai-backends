@@ -61,6 +61,46 @@ async function loadRoutesForVersion(version: string): Promise<LoadedRoute[]> {
     return routes
 }
 
+async function loadTopLevelRoutes(): Promise<LoadedRoute[]> {
+    const baseDir = path.join(__dirname, '../routes')
+    if (!fs.existsSync(baseDir) || !fs.statSync(baseDir).isDirectory()) return []
+
+    const routeFiles = fs
+        .readdirSync(baseDir)
+        .filter((file) => file.endsWith('.ts') && !file.endsWith('.test.ts'))
+
+    const routes: LoadedRoute[] = []
+    for (const file of routeFiles) {
+        const routePath = path.join(baseDir, file)
+        const routeModule = await import(routePath)
+        const moduleExport = routeModule.default
+
+        const handler = moduleExport?.handler || moduleExport
+        const mountPath: string = moduleExport?.mountPath || file.replace('.ts', '')
+
+        if (
+            handler &&
+            typeof handler === 'object' &&
+            'routes' in handler &&
+            Array.isArray((handler as any).routes) &&
+            typeof (handler as any).fetch === 'function' &&
+            typeof (handler as any).route === 'function'
+        ) {
+            routes.push({ handler, mountPath })
+        } else {
+            console.warn(
+                `[WARN] Top-level route file '${file}' (resolved handler type: ${typeof handler}) does not export a valid Hono router instance. Expected an object with an array 'routes' property and fetch/route methods. Skipping.`
+            )
+            if (handler && typeof handler === 'object') {
+                console.warn(
+                    `[DEBUG] Problematic handler for ${file} has keys: ${Object.keys(handler).join(', ')}. Is routes an array? ${Array.isArray((handler as any).routes)}`
+                )
+            }
+        }
+    }
+    return routes
+}
+
 function discoverAvailableVersions(): string[] {
     const baseDir = path.join(__dirname, '../routes')
     const versions = new Set<string>()
@@ -83,6 +123,13 @@ function discoverAvailableVersions(): string[] {
 async function configureRoutes(app: OpenAPIHono) {
     const versions = discoverAvailableVersions()
 
+    // Load and mount unversioned routes directly under /api/<mountPath>
+    const unversionedRoutes = await loadTopLevelRoutes()
+    const unversionedMounts = new Set(unversionedRoutes.map((r) => r.mountPath))
+    for (const { handler, mountPath } of unversionedRoutes) {
+        app.route(`/api/${mountPath}`, handler)
+    }
+
     // Build and mount routers for each version
     for (const version of versions) {
         const versionRoutes = await loadRoutesForVersion(version)
@@ -101,6 +148,9 @@ async function configureRoutes(app: OpenAPIHono) {
         // using lightweight forwarders so docs don't duplicate unversioned paths
         if (version === 'v1') {
             for (const { mountPath } of versionRoutes) {
+                // Do not create a forwarder if an unversioned route already exists for this mountPath
+                if (unversionedMounts.has(mountPath)) continue
+
                 const forwarder = new Hono()
                 forwarder.all('/*', (c) => {
                     const incomingUrl = new URL(c.req.url)
