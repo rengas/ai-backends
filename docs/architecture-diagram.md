@@ -1,8 +1,8 @@
-# AI Backend Architecture Diagram
+# AI Backends Architecture Diagram
 
 ## Overview
 
-This document contains the comprehensive architecture diagram for the AI Backend system, showing all implemented features, services, and their relationships.
+This document contains the comprehensive architecture diagram for the AI Backends system, showing all implemented features, services, and their relationships.
 
 ## Architecture Diagram
 

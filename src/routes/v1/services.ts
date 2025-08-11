@@ -1,6 +1,7 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
 import { getServiceStatus, getAvailableModels, checkServiceAvailability } from '../../services/ai'
+import { getModelsByCapability, getModelsCatalogByProvider } from '../../config/models'
 import { handleError } from '../../utils/errorHandler'
 
 const router = new OpenAPIHono()
@@ -35,6 +36,24 @@ const modelsSchema = z.object({
   available: z.boolean()
 })
 
+const capabilityEnum = z.enum(['summarize', 'keywords', 'sentiment', 'emailReply', 'vision'])
+const byProviderSchema = z.record(z.array(z.string()))
+const providerViewSchema = z.record(z.array(z.object({
+  name: z.string(),
+  capabilities: z.array(capabilityEnum),
+  notes: z.string().optional()
+})))
+const modelsGuidanceSchema = z.object({
+  source: z.literal('config'),
+  byCapability: z.object({
+    summarize: byProviderSchema,
+    keywords: byProviderSchema,
+    sentiment: byProviderSchema,
+    emailReply: byProviderSchema,
+    vision: byProviderSchema,
+  })
+})
+
 async function handleServiceStatus(c: Context) {
   try {
     const status = await getServiceStatus()
@@ -47,6 +66,22 @@ async function handleServiceStatus(c: Context) {
 async function handleGetModels(c: Context) {
   try {
     const service = c.req.query('service') || 'auto'
+    const source = (c.req.query('source') || 'live') as 'live' | 'config'
+    const view = (c.req.query('view') || 'capability') as 'capability' | 'provider' | 'both'
+
+    if (source === 'config') {
+      const byCapability = {
+        summarize: getModelsByCapability('summarize'),
+        keywords: getModelsByCapability('keywords'),
+        sentiment: getModelsByCapability('sentiment'),
+        emailReply: getModelsByCapability('emailReply'),
+        vision: getModelsByCapability('vision'),
+      }
+      const byProvider = getModelsCatalogByProvider()
+      if (view === 'provider') return c.json({ source: 'config', byProvider }, 200)
+      if (view === 'both') return c.json({ source: 'config', byCapability, byProvider }, 200)
+      return c.json({ source: 'config', byCapability }, 200)
+    }
     if (service === 'auto') {
       const results = await Promise.allSettled([
         getAvailableModels('openai'),
@@ -65,9 +100,14 @@ async function handleGetModels(c: Context) {
           models: results[1].status === 'fulfilled' ? results[1].value : [],
           available: await checkServiceAvailability('ollama')
         },
+        openrouter: {
+          service: 'openrouter',
+          models: results[2].status === 'fulfilled' ? results[2].value : [],
+          available: await checkServiceAvailability('openrouter')
+        },
         anthropic: {
           service: 'anthropic',
-          models: [],
+          models: results[3].status === 'fulfilled' ? results[3].value : [],
           available: await checkServiceAvailability('anthropic')
         }
       }
@@ -89,8 +129,8 @@ async function handleGetModels(c: Context) {
 async function handleServiceHealth(c: Context) {
   try {
     const service = c.req.param('service')
-    if (!service || !['openai', 'ollama', 'anthropic'].includes(service)) {
-      return c.json({ error: 'Invalid service. Must be openai or ollama' }, 400)
+    if (!service || !['openai', 'ollama', 'openrouter', 'anthropic'].includes(service)) {
+      return c.json({ error: 'Invalid service. Must be one of: openai, ollama, openrouter, anthropic' }, 400)
     }
     const available = await checkServiceAvailability(service as any)
     return c.json({
@@ -124,8 +164,16 @@ router.openapi(
     request: {
       query: z.object({
         service: z.string().optional().openapi({
-          description: 'Service to get models for (openai, ollama, or auto for all)',
+          description: 'Service to get models for (openai, ollama, openrouter, anthropic, or auto for all)',
           example: 'auto'
+        }),
+        source: z.enum(['live', 'config']).optional().openapi({
+          description: 'Data source: live fetch from providers, or config-guidance from models.json',
+          example: 'config'
+        }),
+        view: z.enum(['capability', 'provider', 'both']).optional().openapi({
+          description: 'When source=config, return models grouped by capability (default), by provider, or both',
+          example: 'both'
         })
       })
     },
@@ -138,8 +186,11 @@ router.openapi(
               modelsSchema,
               z.object({
                 openai: modelsSchema,
-                ollama: modelsSchema
-              })
+                ollama: modelsSchema,
+                openrouter: modelsSchema,
+                anthropic: modelsSchema
+              }),
+              modelsGuidanceSchema.extend({ byProvider: providerViewSchema }).partial({ byCapability: true, byProvider: true })
             ])
           }
         }

@@ -18,11 +18,11 @@ async function configureApiDocs(app: OpenAPIHono) {
     app.doc('/api/doc', {
         openapi: '3.1.0',
         info: {
-            title: 'AI Backend',
+            title: 'AI Backends',
             version: 'v1.0.0',
             description: 'Making common AI use cases easily accessible and customizable. Skip the heavy lifting of understanding OpenAI or other providers with our open source stack.',
             contact: {
-                name: 'AI Backend Support',
+                name: 'AI Backends Support',
                 url: 'https://github.com/donvito/ai-backend'
             }
         },
