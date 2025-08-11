@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { llmRequestSchema } from './v1/llm';
+import { llmRequestSchema } from './llm';
 
 export const payloadSchema = z.object({
   text: z.string().min(1, 'Text must not be empty').max(10000, 'Text must not exceed 10,000 characters'),

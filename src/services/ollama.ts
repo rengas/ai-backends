@@ -37,9 +37,9 @@ async function ollamaRequest(endpoint: string, payload: any): Promise<any> {
   const url = `${OLLAMA_BASE_URL}${endpoint}`;
   const startTime = Date.now();
   
-  console.log('🤖 [OLLAMA REQUEST]');
-  console.log('📍 URL:', url);
-  console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+  console.log('[OLLAMA REQUEST]');
+  console.log('URL:', url);
+  console.log('Payload:', JSON.stringify(payload, null, 2));
   
   const response = await fetch(url, {
     method: 'POST',
@@ -53,23 +53,23 @@ async function ollamaRequest(endpoint: string, payload: any): Promise<any> {
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.log('❌ [OLLAMA ERROR]');
-    console.log('🕐 Duration:', `${duration}ms`);
-    console.log('📊 Status:', `${response.status} ${response.statusText}`);
-    console.log('📄 Error Response:', errorText);
+    console.log('[OLLAMA ERROR]');
+    console.log('Duration:', `${duration}ms`);
+    console.log('Status:', `${response.status} ${response.statusText}`);
+    console.log('Error Response:', errorText);
     throw new Error(`Ollama API error: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
   const responseData = await response.json();
   
-  console.log('✅ [OLLAMA RESPONSE]');
-  console.log('🕐 Duration:', `${duration}ms`);
-  console.log('📊 Status:', response.status);
-  console.log('📄 Raw Response:', JSON.stringify(responseData, null, 2));
+  console.log('[OLLAMA RESPONSE]');
+  console.log('Duration:', `${duration}ms`);
+  console.log('Status:', response.status);
+  console.log('Raw Response:', JSON.stringify(responseData, null, 2));
   
   // Log key metrics if available
   if (responseData.prompt_eval_count || responseData.eval_count) {
-    console.log('📈 Token Usage:');
+    console.log('Token Usage:');
     console.log('  • Input tokens:', responseData.prompt_eval_count || 0);
     console.log('  • Output tokens:', responseData.eval_count || 0);
     console.log('  • Total tokens:', (responseData.prompt_eval_count || 0) + (responseData.eval_count || 0));
@@ -207,6 +207,8 @@ export async function generateChatTextResponse(
 ): Promise<any> {  
   
   const modelToUse = ollama(model || OLLAMA_CHAT_MODEL);
+  
+  console.log('OLLAMA_BASE_URL', OLLAMA_BASE_URL);
 
   const result = await generateText({
     model: modelToUse,

@@ -1,11 +1,10 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
-import { getServiceStatus, getAvailableModels, checkServiceAvailability } from '../services/ai'
-import { handleError } from '../utils/errorHandler'
+import { getServiceStatus, getAvailableModels, checkServiceAvailability } from '../../services/ai'
+import { handleError } from '../../utils/errorHandler'
 
 const router = new OpenAPIHono()
 
-// Response schemas
 const serviceStatusSchema = z.object({
   services: z.object({
     openai: z.object({
@@ -36,7 +35,6 @@ const modelsSchema = z.object({
   available: z.boolean()
 })
 
-// Service status endpoint
 async function handleServiceStatus(c: Context) {
   try {
     const status = await getServiceStatus()
@@ -46,20 +44,16 @@ async function handleServiceStatus(c: Context) {
   }
 }
 
-// Models endpoint
 async function handleGetModels(c: Context) {
   try {
     const service = c.req.query('service') || 'auto'
-    
     if (service === 'auto') {
-      // Get models from all available services
       const results = await Promise.allSettled([
         getAvailableModels('openai'),
         getAvailableModels('ollama'),
         getAvailableModels('openrouter'),
         getAvailableModels('anthropic')
       ])
-      
       const response = {
         openai: {
           service: 'openai',
@@ -67,7 +61,7 @@ async function handleGetModels(c: Context) {
           available: await checkServiceAvailability('openai')
         },
         ollama: {
-          service: 'ollama', 
+          service: 'ollama',
           models: results[1].status === 'fulfilled' ? results[1].value : [],
           available: await checkServiceAvailability('ollama')
         },
@@ -77,12 +71,10 @@ async function handleGetModels(c: Context) {
           available: await checkServiceAvailability('anthropic')
         }
       }
-      
       return c.json(response, 200)
     } else {
       const models = await getAvailableModels(service as any)
       const available = await checkServiceAvailability(service as any)
-      
       return c.json({
         service,
         models,
@@ -94,17 +86,13 @@ async function handleGetModels(c: Context) {
   }
 }
 
-// Health check endpoint for specific service
 async function handleServiceHealth(c: Context) {
   try {
     const service = c.req.param('service')
-    
     if (!service || !['openai', 'ollama', 'anthropic'].includes(service)) {
       return c.json({ error: 'Invalid service. Must be openai or ollama' }, 400)
     }
-    
     const available = await checkServiceAvailability(service as any)
-    
     return c.json({
       service,
       available,
@@ -115,7 +103,6 @@ async function handleServiceHealth(c: Context) {
   }
 }
 
-// Register routes
 router.openapi(
   createRoute({
     path: '/status',
@@ -123,11 +110,7 @@ router.openapi(
     responses: {
       200: {
         description: 'Returns status of all AI services',
-        content: {
-          'application/json': {
-            schema: serviceStatusSchema
-          }
-        }
+        content: { 'application/json': { schema: serviceStatusSchema } }
       }
     }
   }),
@@ -199,4 +182,6 @@ router.openapi(
 export default {
   handler: router,
   mountPath: 'services'
-} 
+}
+
+

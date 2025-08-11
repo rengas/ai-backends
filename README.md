@@ -69,8 +69,8 @@ OLLAMA_TIMEOUT=30000
 # Install dependencies
 bun install
 
-# Run in development mode and bypasses access token check in the API, do run using this command in production. Always use production when deploying so access token is required.
-NODE_ENV=development bun run dev
+# Run in development mode and bypasses access token check in the API, do run using this command in production. Always use production when deploying so access token is required. NODE_ENV=development is set in package.json when you run in development mode.
+bun run dev
 
 # Build for production
 bun run build
@@ -86,7 +86,7 @@ You need to send the service and model name in the request body. See examples in
 For example, to summarize text using qwen2.5-coder model with Ollama as provider, you can use the following curl command:
 
 ```curl
-curl --location 'http://localhost:3000/api/summarize' \
+curl --location 'http://localhost:3000/api/v1/summarize' \
 --header 'Content-Type: application/json' \
 --header 'Accept: application/json' \
 --data '{
