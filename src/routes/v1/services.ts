@@ -3,7 +3,6 @@ import { Context } from 'hono'
 import { getServiceStatus, getAvailableModels, checkServiceAvailability } from '../../services/ai'
 import { getModelsByCapability, getModelsCatalogByProvider } from '../../config/models'
 import { handleError } from '../../utils/errorHandler'
-import emailReply from './emailReply'
 
 const router = new OpenAPIHono()
 
