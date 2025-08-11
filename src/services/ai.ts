@@ -10,7 +10,7 @@ import {
   openrouterConfig,
   isServiceEnabled 
 } from "../config/services";
-import { llmRequestSchema } from "../schemas/llm";
+import { llmRequestSchema } from "../schemas/v1/llm";
 
 enum Provider {
   openai = 'openai',

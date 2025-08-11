@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { providersSupported } from '../services/providers'
+import { providersSupported } from '../../services/providers'
 
 /**
  * Body sent by the client.

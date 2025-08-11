@@ -20,17 +20,19 @@ const healthCheckRoute = createRoute({
       },
     },
   },
-  tags: ["Health"], // Optional: to group it in Swagger UI
+  tags: ["Health"],
 });
 
 router.openapi(healthCheckRoute, (c) => {
   return c.json({
     status: "ok",
-    message: "Service is healthy"
+    message: "Service is healthy v2"
   }, 200);
 });
 
 export default {
   handler: router,
-  mountPath: 'hello' // This will be mounted at /api/hello
-}; 
+  mountPath: 'hello'
+};
+
+

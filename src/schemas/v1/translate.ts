@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { llmRequestSchema } from './v1/llm'
+import { llmRequestSchema } from './llm'
 
 /**
  * Body sent by the client.

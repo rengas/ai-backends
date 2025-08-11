@@ -1,58 +1,41 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
-import { summarizePrompt } from '../utils/prompts'
-import { handleError, handleValidationError } from '../utils/errorHandler'
-import { summarizeRequestSchema, summarizeResponseSchema } from '../schemas/summarize'
-import { createSummarizeResponse } from '../schemas/summarize'
-import { processTextOutputRequest } from '../services/ai'
+import { summarizePrompt } from '../../utils/prompts'
+import { handleError, handleValidationError } from '../../utils/errorHandler'
+import { summarizeRequestSchema, summarizeResponseSchema } from '../../schemas/v1/summarize'
+import { createSummarizeResponse } from '../../schemas/v1/summarize'
+import { processTextOutputRequest } from '../../services/ai'
+import { apiVersion } from './versionConfig'
+import { createFinalResponse } from './finalResponse'
 
 const router = new OpenAPIHono()
 
-/**
- * Handler for text summarization endpoint
- */
 async function handleSummarizeRequest(c: Context) {
   try {
     const { payload, config } = await c.req.json()
-
-    console.log('CONFIG', config);
-
-    const provider = config.provider;
-    const model = config.model;
-    // const temperature = config.temperature;
-
-    // Generate the prompt
+    const provider = config.provider
+    const model = config.model
     const prompt = summarizePrompt(payload.text, payload.maxLength)
-
-    // Get response using our service
-    const result = await processTextOutputRequest(
-      prompt,
-      config,
-    )
-
+    const result = await processTextOutputRequest(prompt, config)
     const finalResponse = createSummarizeResponse(result.text, provider, model, {
       input_tokens: result.usage.promptTokens,
       output_tokens: result.usage.completionTokens,
       total_tokens: result.usage.totalTokens,
     })
-  
 
-    return c.json(finalResponse, 200)
+    const finalResponseWithVersion = createFinalResponse(finalResponse, apiVersion)
 
+    return c.json(finalResponseWithVersion, 200)
   } catch (error) {
     return handleError(c, error, 'Failed to summarize text')
   }
-} 
+}
 
 router.openapi(
   createRoute({
-    path: '/',  // Changed from /summarize since we'll mount at /api/summarize
+    path: '/',
     method: 'post',
-    security: [
-      {
-        BearerAuth: []
-      }
-    ],
+    security: [ { BearerAuth: [] } ],
     request: {
       body: {
         content: {
@@ -82,11 +65,13 @@ router.openapi(
         }
       }
     }
-  }), 
+  }),
   handleSummarizeRequest as any
-)  
+)
 
 export default {
   handler: router,
-  mountPath: 'summarize'  // This will be mounted at /api/summarize
+  mountPath: 'summarize'
 }
+
+
