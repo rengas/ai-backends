@@ -158,25 +158,119 @@
 
         <!-- Available Endpoints -->
         <section class="mb-16">
-            <div class="max-w-4xl mx-auto">
-                <h2 class="text-3xl font-bold text-center mb-8">Available Endpoints</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-gray-50 rounded-lg">
-                        <h3 class="font-semibold text-gray-900 mb-2">Core AI Services</h3>
-                        <ul class="space-y-1 text-gray-700">
-                            <li><code class="text-purple-600">/api/summarize</code> - Text summarization</li>
-                            <li><code class="text-purple-600">/api/translate</code> - Language translation</li>
-                            <li><code class="text-purple-600">/api/sentiment</code> - Sentiment analysis</li>
-                            <li><code class="text-purple-600">/api/keywords</code> - Keyword extraction</li>
-                        </ul>
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold mb-4">Available Endpoints</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Powerful AI capabilities accessible through simple REST API endpoints
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Text Summarization -->
+                    <div class="group relative overflow-hidden bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Text Summarization</h3>
+                                <code class="text-sm text-blue-600 font-mono">/api/summarize</code>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm">Extract key insights and create concise summaries from long text content</p>
                     </div>
-                    <div class="p-4 bg-gray-50 rounded-lg">
-                        <h3 class="font-semibold text-gray-900 mb-2">Management & Tools</h3>
-                        <ul class="space-y-1 text-gray-700">
-                            <li><code class="text-purple-600">/api/services</code> - Service management</li>
-                            <li><code class="text-purple-600">/api/ui</code> - Swagger documentation</li>
-                            <li><code class="text-purple-600">/api/jsoneditor</code> - JSON payload editor</li>
-                        </ul>
+
+                    <!-- Language Translation -->
+                    <div class="group relative overflow-hidden bg-white rounded-xl p-6 border border-gray-200 hover:border-green-300 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Language Translation</h3>
+                                <code class="text-sm text-green-600 font-mono">/api/translate</code>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm">Translate text between multiple languages with high accuracy and context awareness</p>
+                    </div>
+
+                    <!-- Sentiment Analysis -->
+                    <div class="group relative overflow-hidden bg-white rounded-xl p-6 border border-gray-200 hover:border-rose-300 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Sentiment Analysis</h3>
+                                <code class="text-sm text-rose-600 font-mono">/api/sentiment</code>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm">Analyze emotional tone and sentiment in text content with detailed confidence scores</p>
+                    </div>
+
+                    <!-- Keyword Extraction -->
+                    <div class="group relative overflow-hidden bg-white rounded-xl p-6 border border-gray-200 hover:border-amber-300 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5a4 4 0 010 8H7V3zm0 8h6a4 4 0 110 8H7v-8z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Keyword Extraction</h3>
+                                <code class="text-sm text-amber-600 font-mono">/api/keywords</code>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm">Extract important keywords and phrases from text with relevance scoring</p>
+                    </div>
+
+                    <!-- Email Reply Generation -->
+                    <div class="group relative overflow-hidden bg-white rounded-xl p-6 border border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Email Reply Generation</h3>
+                                <code class="text-sm text-emerald-600 font-mono">/api/emailReply</code>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm">Generate contextual and professional email responses based on conversation history</p>
+                    </div>
+
+                    <!-- Image Analysis -->
+                    <div class="group relative overflow-hidden bg-white rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Image Analysis</h3>
+                                <code class="text-sm text-purple-600 font-mono">/api/describeImage</code>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm">Analyze and describe images with detailed visual understanding and context</p>
+                    </div>
+                </div>
+
+                <!-- Call to Action -->
+                <div class="text-center mt-12">
+                    <div class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        <a href="/api/ui" class="text-white no-underline">Explore API Documentation</a>
                     </div>
                 </div>
             </div>
