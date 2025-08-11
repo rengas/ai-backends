@@ -3,9 +3,9 @@ description:
 globs: 
 alwaysApply: true
 ---
-# AI Backend Project Structure
+# AI Backends Project Structure
 
-This document outlines the recommended folder structure for the AI Backend project.
+This document outlines the recommended folder structure for the AI Backends project.
 
 ## Main Structure
 

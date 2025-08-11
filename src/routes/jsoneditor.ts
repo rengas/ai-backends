@@ -1,24 +1,6 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono } from "@hono/zod-openapi";
 
 const router = new OpenAPIHono();
-
-const jsonEditorRoute = createRoute({
-  method: "get",
-  path: "/",
-  responses: {
-    200: {
-      description: "Returns the AI Backend JSON editor interface for testing API payloads.",
-      content: {
-        "text/html": {
-          schema: {
-            type: "string"
-          }
-        },
-      },
-    },
-  },
-  tags: ["Tools"],
-});
 
 const jsonEditorHTML = `
 <!DOCTYPE html>
@@ -217,7 +199,7 @@ const jsonEditorHTML = `
         <div class="header">
             <div class="header-content">
                 <h1>AI Backends JSON Editor</h1>
-                <p>Edit, validate, and format JSON payloads for testing your AI Backend API endpoints</p>
+                <p>Edit, validate, and format JSON payloads for testing your AI Backends API endpoints</p>
             </div>
             <div class="header-actions">
                 <a href="http://localhost:3000/api/ui" target="_blank" class="swagger-link">📊 Swagger UI</a>
@@ -285,7 +267,7 @@ const jsonEditorHTML = `
         // Set initial example data
         const exampleData = {
             "message": "Analyze this text for sentiment",
-            "text": "I love using this AI backend for my applications!",
+            "text": "I love using this AI backends for my applications!",
             "model": "claude-3-sonnet",
             "options": {
                 "temperature": 0.7,
@@ -410,7 +392,8 @@ const jsonEditorHTML = `
 </html>
 `;
 
-router.openapi(jsonEditorRoute, (c) => {
+// Use a plain route so it does not appear in the OpenAPI/Swagger docs
+router.get('/', (c) => {
   return c.html(jsonEditorHTML);
 });
 
