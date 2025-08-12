@@ -36,7 +36,7 @@ const modelsSchema = z.object({
   available: z.boolean()
 })
 
-const capabilityEnum = z.enum(['summarize', 'keywords', 'sentiment', 'emailReply', 'vision'])
+const capabilityEnum = z.enum(['summarize', 'keywords', 'sentiment', 'emailReply', 'vision', 'askText'])
 const byProviderSchema = z.record(z.array(z.string()))
 const providerViewSchema = z.record(z.array(z.object({
   name: z.string(),
@@ -51,6 +51,7 @@ const modelsGuidanceSchema = z.object({
     sentiment: byProviderSchema,
     emailReply: byProviderSchema,
     vision: byProviderSchema,
+    askText: byProviderSchema,
   })
 })
 
@@ -76,6 +77,7 @@ async function handleGetModels(c: Context) {
         sentiment: getModelsByCapability('sentiment'),
         emailReply: getModelsByCapability('emailReply'),
         vision: getModelsByCapability('vision'),
+        askText: getModelsByCapability('askText'),
       }
       const byProvider = getModelsCatalogByProvider()
       if (view === 'provider') return c.json({ source: 'config', byProvider }, 200)
