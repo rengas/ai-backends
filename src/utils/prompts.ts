@@ -92,3 +92,25 @@ Rules:
 ${text}
 </email_to_reply_to>`;
 }
+
+/**
+ * System prompt for answering questions based on provided text
+ */
+export function askTextPrompt(text: string, question: string): string {
+  return `Based on the following text, answer the question comprehensively and accurately.
+
+Text:
+"""
+${text}
+"""
+
+Question: ${question}
+
+Instructions:
+- Answer the question based solely on the information provided in the text.
+- If the text does not contain enough information to answer the question, say so clearly.
+- Be concise but thorough in your response.
+- Do not add information from outside the provided text.
+
+Answer:`;
+}
