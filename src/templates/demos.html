@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Backends - Demos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-purple': '#B341F9',
+                        'brand-pink': '#E453C0',
+                        'terminal-bg': '#1C2128',
+                        'terminal-text': '#A7B5C4'
+                    },
+                    backgroundImage: {
+                        'gradient-brand': 'linear-gradient(135deg, #B341F9, #E453C0)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="/" class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-xl bg-[#B341F9] flex items-center justify-center">
+                        <span class="text-white font-bold text-xl">AI</span>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">Backends</span>
+                </a>
+                <div class="flex items-center space-x-6">
+                    <a href="/api/ui" target="_blank" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">API Docs</a>
+                    <a href="/api/demos" class="text-brand-purple font-medium">Demos</a>
+                    <a href="/api/models" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">Models Guide</a>
+                    <a href="https://github.com/donvito/ai-backend" 
+                       class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors duration-300">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"/>
+                        </svg>
+                        GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-12">
+        <!-- Page Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Interactive Demos</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Explore the capabilities of AI Backends through interactive demonstrations. 
+                Try out different features and see the API in action.
+            </p>
+        </div>
+
+        <!-- Demos Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <!-- Highlighter Demo Card -->
+            <div class="group relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-brand opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+                
+                <div class="p-8">
+                    <div class="w-12 h-12 bg-gradient-brand rounded-xl flex items-center justify-center text-white mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a6 6 0 00-2-4l-2-2V5a2 2 0 00-2-2h-4v14" />
+                        </svg>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Highlighter Demo</h3>
+                    <p class="text-gray-600 mb-6 leading-relaxed">
+                        Extract key highlights from conversations using AI. Automatically identify important moments, 
+                        topics, and insights from any text with intelligent categorization.
+                    </p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Multiple AI providers supported
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Real-time highlighting
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Token usage tracking
+                        </div>
+                    </div>
+                    
+                    <a href="/api/highlighter-demo" 
+                       class="inline-flex items-center px-6 py-3 bg-gradient-brand text-white rounded-lg font-medium hover:opacity-90 transition-opacity duration-200 group">
+                        Try Demo
+                        <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- More demos coming soon card -->
+            <div class="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl shadow-lg border border-gray-200">
+                <div class="p-8 flex flex-col items-center justify-center h-full min-h-[400px]">
+                    <div class="w-16 h-16 bg-gray-200 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">More Demos Coming Soon</h3>
+                    <p class="text-gray-500 text-center">
+                        We're working on more interactive demos to showcase AI Backends capabilities.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Endpoints Section -->
+        <section class="mt-20 max-w-6xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Available API Endpoints</h2>
+                <p class="text-gray-600 mb-8">
+                    These demos showcase just a few of the powerful endpoints available in AI Backends. 
+                    Explore our full API documentation to see all capabilities.
+                </p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-brand-purple mb-1">Text</div>
+                        <div class="text-sm text-gray-600">Summarization</div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-brand-purple mb-1">Language</div>
+                        <div class="text-sm text-gray-600">Translation</div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-brand-purple mb-1">Sentiment</div>
+                        <div class="text-sm text-gray-600">Analysis</div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-brand-purple mb-1">Image</div>
+                        <div class="text-sm text-gray-600">Description</div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <a href="/api/ui" 
+                       class="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors duration-300">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                        </svg>
+                        View Full API Documentation
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8 mt-20">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-400">
+                &copy; 2025 AI Backends. Open source under MIT License.
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
