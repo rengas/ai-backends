@@ -24,8 +24,8 @@ const samplePayload = `{
         "maxHighlights": 5
     },
     "config": {
-        "provider": "openai",
-        "model": "gpt-5",
+        "provider": "openrouter",
+        "model": "anthropic/claude-sonnet-4",
         "temperature": 0
     }
 }`
@@ -43,6 +43,25 @@ const html = `<!DOCTYPE html>
     .shadow-soft { box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
     .sticky-header { position: sticky; top: 0; z-index: 40; backdrop-filter: blur(10px); }
     .label-pill { border-radius: 9999px; padding: 2px 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    
+    /* Loading animation */
+    .loading-dots {
+      display: inline-flex;
+      gap: 4px;
+    }
+    .loading-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #B341F9;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -90,15 +109,17 @@ const html = `<!DOCTYPE html>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Provider</label>
             <select id="provider" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="openrouter">openrouter</option>
               <option value="openai">openai</option>
               <option value="anthropic">anthropic</option>
-              <option value="ollama">ollama</option>
-              <option value="openrouter">openrouter</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
-            <input id="model" type="text" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" value="gpt-4.1" />
+            <select id="model" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="anthropic/claude-sonnet-4">anthropic/claude-sonnet-4</option>
+              <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+            </select>
           </div>
         </div>
 
@@ -155,14 +176,36 @@ const html = `<!DOCTYPE html>
     const jsonPreview = document.getElementById('jsonPreview');
     
     let abortController = null;
+    
+    // Model options for each provider
+    const modelOptions = {
+      openrouter: [
+        { value: 'anthropic/claude-sonnet-4', label: 'anthropic/claude-sonnet-4' },
+        { value: 'openai/gpt-oss-120b', label: 'openai/gpt-oss-120b' }
+      ],
+      openai: [
+        { value: 'gpt-5', label: 'gpt-5' }
+      ],
+      anthropic: [
+        { value: 'claude-sonnet-4-0', label: 'claude-sonnet-4-0' }
+      ]
+    };
+    
+    function updateModelOptions() {
+      const provider = providerEl.value;
+      const models = modelOptions[provider] || [];
+      modelEl.innerHTML = models.map(m => '<option value="' + m.value + '">' + m.label + '</option>').join('');
+      updatePreview();
+    }
 
     function setFromSample() {
       try {
         const data = JSON.parse(sample);
         inputText.value = data.payload.text;
         maxHighlightsEl.value = data.payload.maxHighlights || 5;
-        providerEl.value = data.config.provider;
-        modelEl.value = data.config.model;
+        providerEl.value = 'openrouter';
+        updateModelOptions();
+        modelEl.value = 'anthropic/claude-sonnet-4';
         temperatureEl.value = data.config.temperature || 0;
         updatePreview();
       } catch (_) {}
@@ -181,7 +224,7 @@ const html = `<!DOCTYPE html>
         },
         config: {
           provider: providerEl.value,
-          model: modelEl.value.trim() || 'gpt-4.1',
+          model: modelEl.value,
           temperature: Number(temperatureEl.value) || 0
         }
       };
@@ -250,6 +293,13 @@ const html = `<!DOCTYPE html>
       
       runBtn.classList.add('hidden');
       cancelBtn.classList.remove('hidden');
+      
+      // Show loading animation
+      renderedText.innerHTML = '<div class="flex items-center justify-center py-8"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></div>';
+      highlightsList.innerHTML = '';
+      labelLegend.innerHTML = '';
+      usageInfo.classList.add('hidden');
+      summaryLine.textContent = '';
       
       try {
         const res = await fetch('/api/v1/highlighter', { 
@@ -321,8 +371,10 @@ const html = `<!DOCTYPE html>
     inputText.addEventListener('input', updatePreview);
     maxHighlightsEl.addEventListener('input', updatePreview);
     temperatureEl.addEventListener('input', updatePreview);
-    providerEl.addEventListener('change', updatePreview);
-    modelEl.addEventListener('input', updatePreview);
+    providerEl.addEventListener('change', () => {
+      updateModelOptions();
+    });
+    modelEl.addEventListener('change', updatePreview);
 
     runBtn.addEventListener('click', run);
     cancelBtn.addEventListener('click', () => {
