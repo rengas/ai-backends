@@ -25,7 +25,7 @@ const samplePayload = `{
     },
     "config": {
         "provider": "openai",
-        "model": "gpt-4.1",
+        "model": "gpt-5",
         "temperature": 0
     }
 }`
@@ -35,7 +35,7 @@ const html = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Highlighter Demo</title>
+  <title>AI Backends - Highlighter Demo</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .highlight-span { padding: 2px 4px; border-radius: 6px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
@@ -49,8 +49,12 @@ const html = `<!DOCTYPE html>
   <header class="sticky-header bg-white/80 border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold">HL</div>
-        <h1 class="text-xl font-semibold text-gray-900">Highlighter Demo</h1>
+        <div class="w-10 h-10 rounded-xl bg-[#B341F9] flex items-center justify-center">
+          <span class="text-white font-bold text-xl">AI</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xl font-bold text-gray-900">AI Backends</span>         
+        </div>
       </div>
       <nav class="text-sm">
         <a href="/api/ui" target="_blank" class="text-indigo-600 hover:text-indigo-800">Swagger UI</a>
@@ -59,6 +63,14 @@ const html = `<!DOCTYPE html>
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Demo Title and Description -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-3">Highlighter Demo</h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Highlight important parts of text using AI
+      </p>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Controls -->
       <section class="bg-white p-4 rounded-xl border border-gray-200 shadow-soft">
@@ -97,6 +109,7 @@ const html = `<!DOCTYPE html>
 
         <div class="mt-4 flex items-center gap-2">
           <button id="runBtn" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">Highlight</button>
+          <button id="cancelBtn" class="hidden px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Cancel</button>
           <button id="loadSample" class="px-4 py-2 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200">Load Sample</button>
         </div>
 
@@ -132,6 +145,7 @@ const html = `<!DOCTYPE html>
     const modelEl = document.getElementById('model');
     const tokenEl = document.getElementById('token');
     const runBtn = document.getElementById('runBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
     const loadSampleBtn = document.getElementById('loadSample');
     const renderedText = document.getElementById('renderedText');
     const highlightsList = document.getElementById('highlightsList');
@@ -139,6 +153,8 @@ const html = `<!DOCTYPE html>
     const usageInfo = document.getElementById('usageInfo');
     const summaryLine = document.getElementById('summaryLine');
     const jsonPreview = document.getElementById('jsonPreview');
+    
+    let abortController = null;
 
     function setFromSample() {
       try {
@@ -229,9 +245,19 @@ const html = `<!DOCTYPE html>
       const token = tokenEl.value.trim();
       if (token) headers['Authorization'] = 'Bearer ' + token;
 
-      runBtn.disabled = true; runBtn.textContent = 'Running...';
+      // Create new AbortController for this request
+      abortController = new AbortController();
+      
+      runBtn.classList.add('hidden');
+      cancelBtn.classList.remove('hidden');
+      
       try {
-        const res = await fetch('/api/v1/highlighter', { method: 'POST', headers, body: JSON.stringify(req) });
+        const res = await fetch('/api/v1/highlighter', { 
+          method: 'POST', 
+          headers, 
+          body: JSON.stringify(req),
+          signal: abortController.signal
+        });
         if (!res.ok) {
           const txt = await res.text();
           throw new Error('Request failed: ' + res.status + ' ' + txt);
@@ -255,21 +281,40 @@ const html = `<!DOCTYPE html>
         const counts = {};
         for (const h of highlights) counts[h.label || 'Highlight'] = (counts[h.label || 'Highlight'] || 0) + 1;
         labelLegend.innerHTML = Object.entries(counts).map(([label, count]) => { const c = colorFor(label); return '<span class="label-pill ' + c.pill + '">' + escapeHtml(label) + '<span class="text-gray-500">(' + count + ')</span></span>'; }).join('');
-        // Usage
-        if (data?.usage) {
+        // Usage - handle different response formats
+        const usage = data?.usage || data?.data?.usage;
+        if (usage) {
           usageInfo.classList.remove('hidden');
-          usageInfo.textContent = 'Tokens: in ' + data.usage.input_tokens + ', out ' + data.usage.output_tokens + ', total ' + data.usage.total_tokens;
+          const inputTokens = usage.input_tokens || usage.prompt_tokens || 0;
+          const outputTokens = usage.output_tokens || usage.completion_tokens || 0;
+          const totalTokens = usage.total_tokens || (inputTokens + outputTokens);
+          
+          usageInfo.innerHTML = '<div class="flex items-center gap-4 text-sm">' +
+            '<span class="text-gray-500">Tokens:</span>' +
+            '<span class="font-medium">Input: <span class="text-blue-600">' + inputTokens + '</span></span>' +
+            '<span class="font-medium">Output: <span class="text-green-600">' + outputTokens + '</span></span>' +
+            '<span class="font-medium">Total: <span class="text-purple-600">' + totalTokens + '</span></span>' +
+            '</div>';
+        } else {
+          usageInfo.classList.add('hidden');
         }
         // Summary
         summaryLine.textContent = 'Conversation Analysis: ' + highlights.length + ' key highlights identified';
       } catch (err) {
-        renderedText.innerHTML = '<div class="text-red-600">' + escapeHtml(err.message) + '</div>';
+        if (err.name === 'AbortError') {
+          renderedText.innerHTML = '<div class="text-amber-600">Request cancelled by user</div>';
+        } else {
+          renderedText.innerHTML = '<div class="text-red-600">' + escapeHtml(err.message) + '</div>';
+        }
         highlightsList.innerHTML = '';
         labelLegend.innerHTML = '';
         usageInfo.classList.add('hidden');
+        usageInfo.innerHTML = '';
         summaryLine.textContent = '';
       } finally {
-        runBtn.disabled = false; runBtn.textContent = 'Highlight';
+        runBtn.classList.remove('hidden');
+        cancelBtn.classList.add('hidden');
+        abortController = null;
       }
     }
 
@@ -280,12 +325,15 @@ const html = `<!DOCTYPE html>
     modelEl.addEventListener('input', updatePreview);
 
     runBtn.addEventListener('click', run);
+    cancelBtn.addEventListener('click', () => {
+      if (abortController) {
+        abortController.abort();
+      }
+    });
     loadSampleBtn.addEventListener('click', () => setFromSample());
 
     // Load sample on first load
     setFromSample();
-    // Auto-run once to show example output (user can re-run)
-    setTimeout(run, 300);
   </script>
 </body>
 </html>`
