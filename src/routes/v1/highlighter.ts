@@ -61,11 +61,12 @@ function normaliseHighlights(text: string, highlights: Array<{ char_start_positi
 		.filter((h) => h.char_end_position > h.char_start_position)
 		.sort((a, b) => a.char_start_position - b.char_start_position)
 
-	// Optionally merge overlaps to avoid visual glitches
+	// Merge only truly overlapping highlights to avoid visual glitches
 	const merged: typeof normalised = []
 	for (const h of normalised) {
 		const last = merged[merged.length - 1]
-		if (last && h.char_start_position <= last.char_end_position) {
+		if (last && h.char_start_position < last.char_end_position) {
+			// Only merge if there's actual overlap (not just adjacent)
 			last.char_end_position = Math.max(last.char_end_position, h.char_end_position)
 			if (!last.description && h.description) last.description = h.description
 			continue
