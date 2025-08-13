@@ -136,6 +136,7 @@ Rules:
 - Provide a short "label" (2–5 words) that identifies the type of information for each highlight. Example labels include "Problem Identification", "Order Information", "Root Cause Analysis", "Solution Implementation", and "Additional Support". Choose the best label based on context; create a concise label if none of the examples apply.
 - Provide a concise human-readable description for why each span is important.
 - Do not include any explanation outside the JSON.
+ - IMPORTANT: When selecting spans, snap to whole words. Do not cut a word in the middle. If a span would split a word, expand to include the entire word. Also trim leading/trailing whitespace from spans.
 
 Text:
 """

@@ -18,6 +18,64 @@ const responseSchema = z.object({
 	highlights: z.array(highlightSpanSchema)
 })
 
+function isAlphaNumeric(char: string): boolean {
+	return /[A-Za-z0-9]/.test(char)
+}
+
+function snapToWordBoundaries(text: string, start: number, end: number) {
+	const length = text.length
+	let s = Math.max(0, Math.min(start, length))
+	let e = Math.max(0, Math.min(end, length))
+	if (e <= s) {
+		// minimal 1-char span
+		e = Math.min(length, s + 1)
+	}
+
+	// Trim leading/trailing whitespace first
+	while (s < e && /\s/.test(text[s])) s++
+	while (e > s && /\s/.test(text[e - 1])) e--
+
+	// Expand to word boundaries when the selection cuts through a word
+	if (s > 0 && isAlphaNumeric(text[s]) && isAlphaNumeric(text[s - 1])) {
+		while (s > 0 && isAlphaNumeric(text[s - 1])) s--
+	}
+	if (e < length && isAlphaNumeric(text[e - 1]) && isAlphaNumeric(text[e])) {
+		while (e < length && isAlphaNumeric(text[e])) e++
+	}
+
+	return { start: s, end: e }
+}
+
+function normaliseHighlights(text: string, highlights: Array<{ char_start_position: number; char_end_position: number; label?: string; description?: string }>) {
+	const length = text.length
+	const normalised = highlights
+		.map((h) => {
+			const { start, end } = snapToWordBoundaries(text, h.char_start_position ?? 0, h.char_end_position ?? 0)
+			return {
+				char_start_position: Math.max(0, Math.min(start, length)),
+				char_end_position: Math.max(0, Math.min(end, length)),
+				label: h.label ?? 'Highlight',
+				description: h.description ?? ''
+			}
+		})
+		.filter((h) => h.char_end_position > h.char_start_position)
+		.sort((a, b) => a.char_start_position - b.char_start_position)
+
+	// Optionally merge overlaps to avoid visual glitches
+	const merged: typeof normalised = []
+	for (const h of normalised) {
+		const last = merged[merged.length - 1]
+		if (last && h.char_start_position <= last.char_end_position) {
+			last.char_end_position = Math.max(last.char_end_position, h.char_end_position)
+			if (!last.description && h.description) last.description = h.description
+			continue
+		}
+		merged.push({ ...h })
+	}
+
+	return merged
+}
+
 async function handleHighlighterRequest(c: Context) {
 	try {
 		const { payload, config } = await c.req.json()
@@ -29,7 +87,8 @@ async function handleHighlighterRequest(c: Context) {
 			{ ...config, temperature },
 			temperature
 		)
-		const highlights = result.object.highlights
+		const rawHighlights = result.object.highlights
+		const highlights = normaliseHighlights(payload.text, rawHighlights)
 		const finalResponse = createHighlighterResponse(
 			highlights,
 			config.provider,

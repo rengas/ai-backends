@@ -204,34 +204,21 @@ const html = `<!DOCTYPE html>
 
     function applyHighlights(text, highlights) {
       if (!highlights || highlights.length === 0) return '<div class="text-gray-500 text-sm">No highlights to display</div>';
-      // Sort and clamp
-      const length = text.length;
-      const spans = highlights
-        .filter(h => Number.isFinite(h.char_start_position) && Number.isFinite(h.char_end_position))
-        .map(h => ({
-          start: Math.max(0, Math.min(length, h.char_start_position)),
-          end: Math.max(0, Math.min(length, h.char_end_position)),
-          label: String(h.label || 'Highlight'),
-          description: String(h.description || '')
-        }))
-        .filter(h => h.end > h.start)
-        .sort((a,b) => a.start - b.start);
-
-      // Assume non-overlapping for readability
+      // Render strictly as returned by API (assume valid, non-overlapping, ordered spans)
       let html = '';
       let cursor = 0;
-      for (const s of spans) {
-        const color = colorFor(s.label);
-        if (cursor < s.start) {
-          html += escapeHtml(text.slice(cursor, s.start));
-        }
-        const segment = escapeHtml(text.slice(s.start, s.end));
-        html += '<span class="highlight-span ' + color.bg + ' ' + color.text + '" title="' + escapeHtml(s.label) + ': ' + escapeHtml(s.description) + '">' + segment + '</span>';
-        cursor = s.end;
+      for (const h of highlights) {
+        const s = h.char_start_position;
+        const e = h.char_end_position;
+        const label = String(h.label || 'Highlight');
+        const desc = String(h.description || '');
+        const color = colorFor(label);
+        if (cursor < s) html += escapeHtml(text.slice(cursor, s));
+        const segment = escapeHtml(text.slice(s, e));
+        html += '<span class="highlight-span ' + color.bg + ' ' + color.text + '" title="' + escapeHtml(label) + ': ' + escapeHtml(desc) + '">' + segment + '</span>';
+        cursor = e;
       }
-      if (cursor < text.length) {
-        html += escapeHtml(text.slice(cursor));
-      }
+      if (cursor < text.length) html += escapeHtml(text.slice(cursor));
       return html;
     }
 
