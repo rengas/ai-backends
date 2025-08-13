@@ -18,8 +18,13 @@ const responseSchema = z.object({
 	highlights: z.array(highlightSpanSchema)
 })
 
-function isAlphaNumeric(char: string): boolean {
-	return /[A-Za-z0-9]/.test(char)
+function isAlphaNumeric(char: string | undefined): boolean {
+	// Guard against undefined
+	if (char === undefined) return false
+	// Use a more comprehensive regex that includes common Unicode ranges for letters and numbers
+	// This includes Latin, common European extensions, and digit characters
+	// For full Unicode support, consider using a library like XRegExp
+	return /[A-Za-z0-9\u00C0-\u024F\u1E00-\u1EFF]/.test(char)
 }
 
 function snapToWordBoundaries(text: string, start: number, end: number) {
@@ -36,10 +41,11 @@ function snapToWordBoundaries(text: string, start: number, end: number) {
 	while (e > s && /\s/.test(text[e - 1])) e--
 
 	// Expand to word boundaries when the selection cuts through a word
-	if (s > 0 && isAlphaNumeric(text[s]) && isAlphaNumeric(text[s - 1])) {
+	// Check bounds before accessing characters
+	if (s > 0 && s < length && isAlphaNumeric(text[s]) && isAlphaNumeric(text[s - 1])) {
 		while (s > 0 && isAlphaNumeric(text[s - 1])) s--
 	}
-	if (e < length && isAlphaNumeric(text[e - 1]) && isAlphaNumeric(text[e])) {
+	if (e > 0 && e < length && isAlphaNumeric(text[e - 1]) && isAlphaNumeric(text[e])) {
 		while (e < length && isAlphaNumeric(text[e])) e++
 	}
 
