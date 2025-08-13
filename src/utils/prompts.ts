@@ -114,3 +114,32 @@ Instructions:
 
 Answer:`;
 }
+
+/**
+ * System prompt for text highlighter
+ */
+export function highlighterPrompt(text: string, maxHighlights?: number): string {
+  const maxLine = maxHighlights ? `Identify up to ${maxHighlights} of the most important segments in the text.` : `Identify the most important segments in the text.`;
+  return `You are a text highlighter. ${maxLine}
+
+Return your answer strictly as JSON with this exact structure:
+{
+  "highlights": [
+    { "char_start_position": number, "char_end_position": number, "label": string, "description": string }
+  ]
+}
+
+Rules:
+- Use zero-based character indices based on the raw input string.
+- "char_end_position" must be exclusive (i.e., the highlight covers characters in [char_start_position, char_end_position)).
+- Ensure 0 <= char_start_position < char_end_position <= input length.
+- Provide a short "label" (2–3 words) that identifies the type of information for each highlight. Example labels include "Problem Identification", "Order Information", "Root Cause Analysis", "Solution Implementation", and "Additional Support". Choose the best label based on context; create a concise label if none of the examples apply.
+- Provide a concise human-readable description for why each span is important.
+- Do not include any explanation outside the JSON.
+ - IMPORTANT: When selecting spans, snap to whole words. Do not cut a word in the middle. If a span would split a word, expand to include the entire word. Also trim leading/trailing whitespace from spans.
+
+Text:
+"""
+${text}
+"""`;
+}
