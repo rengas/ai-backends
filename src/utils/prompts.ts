@@ -2,7 +2,16 @@
  * System prompt template for summarization
  */
 export function summarizePrompt(text: string, maxLength?: number): string {
-  return `Summarize the following text${maxLength ? ` in ${maxLength} words or less. Just return the summary, no other text or explanation.` : ''}: ${text}`;
+  return `Summarize the following text${maxLength ? ` in ${maxLength} words or less. 
+    Just return the summary, no other text or explanation.
+
+    If the text is a conversation, do not attempt to answer the questions or be involved in the conversation.
+    Just return the summary of the conversation.
+
+    <text>
+    ${text}
+    </text>
+    ` : ''}:`;
 }
 
 /**
