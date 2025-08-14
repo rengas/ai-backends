@@ -1,31 +1,16 @@
 import { z } from 'zod'
 import { lmstudioConfig } from '../config/services'
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { generateObject, generateText } from 'ai'
 
 // Build base URL ensuring single trailing /v1
 const normalizedBase = (lmstudioConfig.baseURL || 'http://localhost:1234').replace(/\/$/, '')
 const LMSTUDIO_BASE_URL = `${normalizedBase}`
 
-/**
- * Make a request to LMStudio API
- */
-async function lmstudioRequest(endpoint: string, payload: any): Promise<any> {
-  const url = `${LMSTUDIO_BASE_URL}/v1${endpoint}`;
-  
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),    
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`LMStudio API error: ${response.status} ${response.statusText} - ${errorText}`);
-  }
-
-  return response.json();
-}
+const lmstudio = createOpenAICompatible({
+  name: 'lmstudio',
+  baseURL: `${LMSTUDIO_BASE_URL}/v1`,
+})
 
 export async function generateChatStructuredResponse(
     prompt: string,
@@ -33,35 +18,16 @@ export async function generateChatStructuredResponse(
     model?: string,
     temperature: number = 0
   ): Promise<any> {  
-    
-    const payload = {
-      model: model || lmstudioConfig.chatModel,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: temperature,
-      response_format: { type: 'json_object' }
-    };
+    const modelToUse = lmstudio(model || lmstudioConfig.chatModel);
 
-    const response = await lmstudioRequest('/chat/completions', payload);
+    const result = await generateObject({
+      model: modelToUse, 
+      prompt: prompt,
+      schema: schema,
+      temperature: temperature,   
+    });
     
-    try {
-      const content = response.choices[0].message.content;
-      const parsed = JSON.parse(content);
-      
-      // Validate against schema
-      const validated = schema.parse(parsed);
-      
-      return {
-        object: validated,
-        finishReason: response.choices[0].finish_reason,
-        usage: {
-          promptTokens: response.usage?.prompt_tokens || 0,
-          completionTokens: response.usage?.completion_tokens || 0,
-          totalTokens: response.usage?.total_tokens || 0,
-        }
-      };
-    } catch (error) {
-      throw new Error(`Failed to parse or validate LMStudio response: ${error}`);
-    }
+    return result;
   }
 
 export async function generateChatTextResponse(
@@ -70,25 +36,16 @@ export async function generateChatTextResponse(
   temperature: number = 0
 ): Promise<any> {
   
-  const payload = {
-    model: model || lmstudioConfig.chatModel,
-    messages: [{ role: 'user', content: prompt }],
-    temperature: temperature,
-  };
+  const modelToUse = lmstudio(model || lmstudioConfig.chatModel);
 
-  const response = await lmstudioRequest('/chat/completions', payload);
+  const result = await generateText({
+    model: modelToUse,
+    prompt: prompt,
+    temperature: temperature,
+    toolChoice: 'none',
+  });
   
-  // Return format matching AI SDK's generateText response
-  return {
-    text: response.choices[0].message.content,
-    finishReason: response.choices[0].finish_reason,
-    usage: {
-      promptTokens: response.usage?.prompt_tokens || 0,
-      completionTokens: response.usage?.completion_tokens || 0,
-      totalTokens: response.usage?.total_tokens || 0,
-    },
-    warnings: []
-  };
+  return result;
 }
 
 export async function getAvailableModels(): Promise<string[]> {
