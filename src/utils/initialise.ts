@@ -94,7 +94,8 @@ function configureApiSecurity(app: OpenAPIHono, token: string) {
                 path === '/api/demos' ||
                 path === '/api/highlighter-demo' ||
                 path === '/api/models' ||
-                path === '/api/jsoneditor'
+                path === '/api/jsoneditor' ||
+                path === '/api/summarize-demo'
             ) {
                 await next();
                 return;

@@ -35,7 +35,9 @@
         { "name": "anthropic/claude-3.5-sonnet", "capabilities": ["summarize", "keywords", "sentiment"], "notes": "Claude 3.5 Sonnet via OpenRouter; strong reasoning." },
         { "name": "openai/gpt-4o-mini", "capabilities": ["summarize", "keywords", "sentiment"], "notes": "OpenRouter proxy to GPT-4o mini." },
         { "name": "google/gemini-2.0-flash-lite-001", "capabilities": ["summarize", "keywords", "sentiment", "askText"], "notes": "Google Gemini 2.0 Flash Lite via OpenRouter with Q&A capabilities." },
-        { "name": "google/gemini-2.5-flash-lite", "capabilities": ["summarize", "keywords", "sentiment", "askText"], "notes": "Google Gemini 2.5 Flash Lite via OpenRouter with 1M token context window for large document Q&A." }
+        { "name": "google/gemini-2.5-flash-lite", "capabilities": ["summarize", "keywords", "sentiment", "askText"], "notes": "Google Gemini 2.5 Flash Lite via OpenRouter with 1M token context window for large document Q&A." },
+        { "name": "openai/gpt-oss-20b", "capabilities": ["summarize", "keywords", "sentiment", "askText"], "notes": "OpenRouter proxy to GPT OSS 20B" },
+        { "name": "openai/gpt-oss-120b", "capabilities": ["summarize", "keywords", "sentiment", "askText"], "notes": "OpenRouter proxy to GPT OSS 120B" }
       ]
     },
     "anthropic": {

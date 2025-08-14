@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Backends - Summarization Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-purple': '#B341F9',
+            'brand-pink': '#E453C0',
+            'terminal-bg': '#1C2128',
+            'terminal-text': '#A7B5C4'
+          },
+          backgroundImage: {
+            'gradient-brand': 'linear-gradient(135deg, #B341F9, #E453C0)',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-white min-h-screen">
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 rounded-xl bg-[#B341F9] flex items-center justify-center">
+            <span class="text-white font-bold text-xl">AI</span>
+          </div>
+          <span class="text-2xl font-bold text-gray-900">Backends</span>
+          <span class="ml-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700">
+            <svg class="w-4 h-4 mr-1" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"/>
+            </svg>
+            Open Source
+          </span>
+        </a>
+        <div class="flex items-center space-x-6">
+          <a href="/api/ui" target="_blank" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">API Docs</a>
+          <a href="/api/demos" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">Demos</a>
+          <a href="/api/jsoneditor" target="_blank" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">JSON Editor</a>
+          <a href="/api/models" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">Models Guide</a>
+          <a href="https://github.com/donvito/ai-backend" class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors duration-300">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"/>
+            </svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-6 py-12">
+    <!-- Breadcrumb -->
+    <nav class="mb-6 text-sm">
+      <ol class="flex items-center space-x-2 text-gray-500">
+        <li><a href="/" class="hover:text-gray-700">Home</a></li>
+        <li><span>/</span></li>
+        <li><a href="/api/demos" class="hover:text-gray-700">Demos</a></li>
+        <li><span>/</span></li>
+        <li class="text-gray-900 font-medium">Summarization</li>
+      </ol>
+    </nav>
+
+    <!-- Demo Title and Description -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-3">Summarization Demo</h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Generate concise summaries using models from multiple providers
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+      <!-- Controls -->
+      <section class="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h2 class="text-lg font-semibold mb-3">Input</h2>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Text</label>
+        <textarea id="inputText" class="w-full h-48 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple bg-white" placeholder="Enter text to summarize..."></textarea>
+
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Max Words</label>
+            <input id="maxLength" type="number" min="0" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" value="120" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Temperature</label>
+            <input id="temperature" type="number" step="0.1" min="0" max="1" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" value="0.2" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+            <select id="provider" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple">
+              <option value="ollama">ollama</option>
+              <option value="openai">openai</option>
+              <option value="openrouter">openrouter</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+            <select id="model" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple"></select>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Bearer Token (optional)</label>
+          <input id="token" type="password" placeholder="Only needed in production deployments" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" />
+        </div>
+
+        <div class="mt-4 flex items-center gap-2">
+          <button id="runBtn" class="px-4 py-2 rounded-lg bg-brand-purple text-white hover:bg-[#9935D9]">Summarize</button>
+          <button id="cancelBtn" class="hidden px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Cancel</button>
+          <button id="loadSample" class="px-4 py-2 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200">Load Sample</button>
+        </div>
+
+        <details class="mt-4">
+          <summary class="text-sm text-gray-600 cursor-pointer">View JSON request</summary>
+          <pre id="jsonPreview" class="mt-2 bg-gray-900 text-green-400 p-3 rounded-lg text-xs mono overflow-auto"></pre>
+        </details>
+      </section>
+
+      <!-- Output -->
+      <section class="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h2 class="text-lg font-semibold mb-3">Output</h2>
+        <div id="usageInfo" class="hidden mb-3 text-sm"></div>
+        <div id="summaryText" class="p-4 rounded-lg bg-gray-50 border border-gray-200 leading-7 text-gray-900"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const samplePayload = {
+      payload: {
+        text: "In recent years, the conversation around artificial intelligence has largely been dominated by large language models (LLMs) such as GPT-4, Claude, and Gemini. These models have captured attention due to their impressive performance across a wide range of general-purpose tasks. However, this trend is starting to shift as more organizations begin to explore the power and practicality of small language models (SLMs). While LLMs continue to hold value in tasks requiring broad context and general reasoning, SLMs are emerging as a sustainable, cost-efficient, and highly specialized alternative for many enterprise use cases. SLMs, typically ranging from 1B to 13B parameters, are significantly lighter and more agile. They can be fine-tuned for specific domains such as customer support, legal document review, technical troubleshooting, and enterprise knowledge retrieval. Unlike LLMs, which often require dedicated infrastructure or third-party API access, SLMs can often be deployed on-premises or within a company’s private cloud. This allows for tighter integration with internal systems and better control over sensitive data—an increasingly important factor in regulated industries like finance, healthcare, and government. Companies like IBM, HuggingFace, and NVIDIA are already rolling out tools and models designed for on-device or edge use. One of the most compelling advantages of SLMs is their efficiency. Because they are smaller in size, inference and training costs are lower. Inference latency is shorter, which makes them ideal for real-time applications. Moreover, SLMs can be tailored to individual departments or workflows, enabling teams to deploy multiple specialized agents rather than relying on a single monolithic AI system. For example, a bank might use a fine-tuned SLM to automate fraud detection workflows, another for processing compliance reports, and another to assist customer service agents in responding to complex client queries. As open-source innovation continues to accelerate, we are seeing an explosion in the availability of high-performing models like Qwen1.5, Phi-3, Gemma, and TinyLlama. Each is designed with efficient training and deployment in mind, and most can be hosted on consumer-grade hardware or edge devices such as smartphones, routers, and IoT gateways. This democratization of language models allows smaller businesses and startups to access powerful AI capabilities without relying on costly commercial APIs. Of course, SLMs are not without limitations. They generally underperform LLMs in open-ended reasoning tasks and may struggle when context exceeds a certain limit. However, with clever retrieval techniques (such as RAG or document chunking) and tight task definitions, these challenges can often be mitigated. Looking ahead, the future of enterprise AI will likely involve a hybrid approach: LLMs for general, high-level reasoning tasks and SLMs for day-to-day operations. This model allows organizations to leverage the best of both worlds—using massive models when necessary while relying on smaller, sustainable systems for the bulk of operational tasks. In summary, SLMs represent a pivotal opportunity for enterprises seeking AI-powered transformation without the overhead of large-scale model deployment. Their combination of affordability, customizability, and data privacy compliance makes them particularly well-suited for long-term integration into business workflows. As toolchains and model architectures continue to evolve, SLMs will become an even more attractive option for companies aiming to build scalable, efficient, and privacy-conscious AI solutions.",
+        maxLength: 100
+      },
+      config: {
+        provider: "ollama",
+        model: "gemma3:4b",
+        temperature: 0
+      }
+    };
+
+    const inputText = document.getElementById('inputText');
+    const maxLengthEl = document.getElementById('maxLength');
+    const temperatureEl = document.getElementById('temperature');
+    const providerEl = document.getElementById('provider');
+    const modelEl = document.getElementById('model');
+    const tokenEl = document.getElementById('token');
+    const runBtn = document.getElementById('runBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const loadSampleBtn = document.getElementById('loadSample');
+    const summaryText = document.getElementById('summaryText');
+    const usageInfo = document.getElementById('usageInfo');
+    const jsonPreview = document.getElementById('jsonPreview');
+
+    let abortController = null;
+
+    // Dynamic model options fetched from backend (summarize capability)
+    let modelOptions = null;
+
+    // Fallback options if fetch fails or endpoint is unavailable
+    const fallbackModelOptions = {
+      ollama: [
+        { value: 'gemma3:4b', label: 'gemma3:4b (default)' }
+      ],
+      openai: [
+        { value: 'gpt-4o-mini', label: 'gpt-4o-mini' },
+        { value: 'gpt-4.1-nano', label: 'gpt-4.1-nano' },
+        { value: 'gpt-5-nano', label: 'gpt-5-nano' }
+      ],
+      openrouter: [
+        { value: 'openai/gpt-4o-mini', label: 'openai/gpt-4o-mini' }
+      ]
+    };
+
+    function updateModelOptions() {
+      const provider = providerEl.value;
+      const source = modelOptions || fallbackModelOptions;
+      const models = (source && source[provider]) ? source[provider] : [];
+      modelEl.innerHTML = models.map(m => '<option value="' + m.value + '">' + m.label + '</option>').join('');
+      updatePreview();
+    }
+
+    async function fetchSummarizeModels() {
+      const headers = {};
+      const token = tokenEl.value.trim();
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const res = await fetch('/api/v1/services/models?source=config&view=capability', { headers });
+      if (!res.ok) throw new Error('Failed to load models: ' + res.status);
+      const data = await res.json();
+      const summarize = data && data.byCapability && data.byCapability.summarize;
+      if (!summarize || typeof summarize !== 'object') throw new Error('Invalid models response');
+      const mapped = {};
+      for (const provider in summarize) {
+        const list = Array.isArray(summarize[provider]) ? summarize[provider] : [];
+        mapped[provider] = list.map(name => ({ value: name, label: name }));
+      }
+      return mapped;
+    }
+
+    async function initModels() {
+      try {
+        modelOptions = await fetchSummarizeModels();
+      } catch (e) {
+        modelOptions = null; // fall back to static options
+      }
+      const source = modelOptions || fallbackModelOptions;
+      const providers = Object.keys(source);
+      providerEl.innerHTML = providers.map(p => '<option value="' + p + '">' + p + '</option>').join('');
+      if (!providers.includes(providerEl.value)) {
+        providerEl.value = providers[0] || '';
+      }
+      updateModelOptions();
+    }
+
+    function buildRequest() {
+      return {
+        payload: {
+          text: inputText.value.trim(),
+          maxLength: Math.max(0, Number(maxLengthEl.value) || 0)
+        },
+        config: {
+          provider: providerEl.value,
+          model: modelEl.value,
+          temperature: Number(temperatureEl.value) || 0
+        }
+      };
+    }
+
+    function updatePreview() {
+      const req = buildRequest();
+      jsonPreview.textContent = JSON.stringify(req, null, 2);
+    }
+
+    function setFromSample() {
+      inputText.value = samplePayload.payload.text;
+      maxLengthEl.value = samplePayload.payload.maxLength || 100;
+      providerEl.value = 'ollama';
+      updateModelOptions();
+      modelEl.value = 'gemma3:4b';
+      temperatureEl.value = samplePayload.config.temperature || 0;
+      updatePreview();
+    }
+
+    async function run() {
+      const req = buildRequest();
+      updatePreview();
+      const headers = { 'Content-Type': 'application/json' };
+      const token = tokenEl.value.trim();
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      abortController = new AbortController();
+
+      runBtn.classList.add('hidden');
+      cancelBtn.classList.remove('hidden');
+
+      summaryText.innerHTML = '<div class="text-gray-500">Generating summary...</div>';
+      usageInfo.classList.add('hidden');
+      usageInfo.innerHTML = '';
+
+      try {
+        const res = await fetch('/api/v1/summarize', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(req),
+          signal: abortController.signal
+        });
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error('Request failed: ' + res.status + ' ' + txt);
+        }
+        const data = await res.json();
+        const summary = data?.summary || data?.data?.summary || '';
+        summaryText.textContent = summary || 'No summary returned.';
+
+        const usage = data?.usage || data?.data?.usage;
+        if (usage) {
+          usageInfo.classList.remove('hidden');
+          const inputTokens = usage.input_tokens || usage.prompt_tokens || 0;
+          const outputTokens = usage.output_tokens || usage.completion_tokens || 0;
+          const totalTokens = usage.total_tokens || (inputTokens + outputTokens);
+          usageInfo.innerHTML = '<div class="flex items-center gap-4 text-sm">' +
+            '<span class="text-gray-500">Tokens:</span>' +
+            '<span class="font-medium">Input: <span class="text-blue-600">' + inputTokens + '</span></span>' +
+            '<span class="font-medium">Output: <span class="text-green-600">' + outputTokens + '</span></span>' +
+            '<span class="font-medium">Total: <span class="text-purple-600">' + totalTokens + '</span></span>' +
+          '</div>';
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          summaryText.innerHTML = '<div class="text-amber-600">Request cancelled by user</div>';
+        } else {
+          summaryText.innerHTML = '<div class="text-red-600">' + (err.message || 'Unknown error') + '</div>';
+        }
+        usageInfo.classList.add('hidden');
+        usageInfo.innerHTML = '';
+      } finally {
+        runBtn.classList.remove('hidden');
+        cancelBtn.classList.add('hidden');
+        abortController = null;
+      }
+    }
+
+    inputText.addEventListener('input', updatePreview);
+    maxLengthEl.addEventListener('input', updatePreview);
+    temperatureEl.addEventListener('input', updatePreview);
+    providerEl.addEventListener('change', () => {
+      updateModelOptions();
+    });
+    tokenEl.addEventListener('change', () => {
+      // Re-fetch models using the provided token (needed in production)
+      initModels();
+    });
+    modelEl.addEventListener('change', updatePreview);
+
+    runBtn.addEventListener('click', run);
+    cancelBtn.addEventListener('click', () => abortController && abortController.abort());
+    loadSampleBtn.addEventListener('click', () => setFromSample());
+
+    // Initialize models from backend, then load sample
+    initModels().then(() => setFromSample());
+  </script>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-12 mt-20">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Documentation</h3>
+          <ul class="space-y-2">
+            <li><a href="/api/ui" target="_blank" class="text-gray-300 hover:text-white transition-colors">Swagger UI</a></li>
+            <li><a href="/api/doc" target="_blank" class="text-gray-300 hover:text-white transition-colors">API Reference</a></li>
+            <li><a href="/api/demos" class="text-gray-300 hover:text-white transition-colors">Live Demos</a></li>
+            <li><a href="/api/models" class="text-gray-300 hover:text-white transition-colors">Models Guide</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Resources</h3>
+          <ul class="space-y-2">
+            <li><a href="https://github.com/donvito/ai-backend" class="text-gray-300 hover:text-white transition-colors">GitHub Repository</a></li>
+            <li><a href="https://github.com/donvito/ai-backend/issues" class="text-gray-300 hover:text-white transition-colors">Issues & Support</a></li>
+            <li><a href="https://github.com/donvito/ai-backend/blob/main/README.md" class="text-gray-300 hover:text-white transition-colors">Setup Guide</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">About</h3>
+          <p class="text-gray-300 text-sm leading-relaxed">
+            Open source AI backend making common AI use cases easily accessible and customizable. 
+            100% self-hosted with complete control over your data.
+          </p>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+        <p>&copy; 2025 AI Backends. Open source under MIT License.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+
+
