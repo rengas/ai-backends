@@ -194,7 +194,7 @@
     }
 
     async function initModels() {
-      try { modelOptions = await fetchCapabilityModels('summarize'); } catch { modelOptions = null; }
+      try { modelOptions = await fetchCapabilityModels('translate'); } catch { modelOptions = null; }
       const source = modelOptions || fallbackModelOptions;
       const providers = Object.keys(source);
       providerEl.innerHTML = providers.map(p => '<option value="' + p + '">' + p + '</option>').join('');
