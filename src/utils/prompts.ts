@@ -84,6 +84,12 @@ export function emailReplyPrompt(
 
   const addressInstruction = senderName ? `Address the reply to ${senderName} by name, but do not add a greeting line.` : '';
   const signoffInstruction = recipientName ? `Sign the reply as ${recipientName} without adding a signature block.` : '';
+  const recipientPerspectiveRule = recipientName
+    ? `- ${recipientName} is the recipient of the email, reply using ${recipientName}'s perspective.`
+    : '';
+  const greetingRule = senderName
+    ? `- Always include "hi", "hello" or "dear" addressing ${senderName} unless explicitly asked not to.`
+    : `- Always include "hi", "hello" or "dear" unless explicitly asked not to.`;
 
   const promptText = `You are an email assistant. Compose a thoughtful reply to the following email.
 
@@ -92,10 +98,9 @@ ${addressInstruction ? `\n${addressInstruction}` : ''}
 ${signoffInstruction ? `\n${signoffInstruction}` : ''}
 
 Rules:
-- Understand the email intent thoroughly before replying.
-- ${recipientName} is the recipient of the email, reply using ${recipientName} perspective.
+- Understand the email intent thoroughly before replying.${recipientPerspectiveRule ? `\n${recipientPerspectiveRule}` : ''}
 - Do not add a subject line to the reply.
-- Always include "hi", "hello" or "dear" addressing ${senderName} unless explicitly asked not to.
+${greetingRule ? `\n${greetingRule}` : ''}
 - Be polite, clear, and actionable.
 - If information is missing, propose reasonable next steps or clarifying questions. Otherwise, be direct and to the point.
 
