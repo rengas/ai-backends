@@ -14,6 +14,11 @@ const lmstudio = createOpenAICompatible({
   baseURL: `${LMSTUDIO_BASE_URL}/v1`,
 })
 
+const client = new OpenAI({
+  baseURL: `${LMSTUDIO_BASE_URL}/v1`,
+  apiKey: process.env.LMSTUDIO_API_KEY || 'lm-studio',
+})
+
 export async function generateChatStructuredResponse(
     prompt: string,
     schema: z.ZodType,
@@ -24,11 +29,6 @@ export async function generateChatStructuredResponse(
 
     // Convert Zod schema to JSON Schema for LM Studio's OpenAI-compatible endpoint
     const jsonSchema = zodToJsonSchema(schema)
-
-    const client = new OpenAI({
-      baseURL: `${LMSTUDIO_BASE_URL}/v1`,
-      apiKey: process.env.LMSTUDIO_API_KEY || 'lm-studio',
-    })
 
     const completion = await client.chat.completions.create({
       model: modelId,
