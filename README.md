@@ -4,6 +4,8 @@ AIBackends is an API server that you can use to integrate AI into your applicati
 
 The project supports open source models using Ollama and LM Studio. It also supports cloud models from OpenAI and Anthropic.
 
+![AI Backends](images/run-aibackends.png)
+
 ## Purpose of the project
 
 The purpose of this project is to make common AI use cases easily accessible to developers. To implement common AI use cases, you need to understand prompt engineering and API integration with different AI providers. This project aims to skip that learning curve so developers can focus on integrating AI into applications and automation workflows.
