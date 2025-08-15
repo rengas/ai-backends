@@ -10,7 +10,6 @@ import { apiVersion } from './versionConfig'
 
 const responseSchema = z.object({
   sentiment: z.string(),
-  categories: z.array(z.string()).optional(),
   confidence: z.number().min(0).max(1),
   emotions: z.array(z.object({
     emotion: z.string(),
@@ -23,7 +22,7 @@ const router = new OpenAPIHono()
 async function handleSentimentRequest(c: Context) {
   try {
     const { payload, config } = await c.req.json()
-    const prompt = sentimentPrompt(payload.text, payload.categories)
+    const prompt = sentimentPrompt(payload.text)
     const result = await processStructuredOutputRequest(
       prompt,
       responseSchema,
