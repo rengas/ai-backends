@@ -40,6 +40,13 @@
         { "name": "openai/gpt-oss-120b", "capabilities": ["summarize", "keywords", "sentiment", "askText"], "notes": "OpenRouter proxy to GPT OSS 120B" }
       ]
     },
+    "lmstudio": {
+      "enabled": true,
+      "models": [
+        { "name": "gemma-3-270m-it", "capabilities": ["summarize", "keywords", "sentiment"], "notes": "Gemma 3 270M instruct tuned; great for ultra-fast summarization on CPU." },
+        { "name": "llama-3.2-3b-instruct", "capabilities": ["summarize", "keywords", "sentiment"], "notes": "Llama 3.2 3B instruct; strong small model for summarization." }
+      ]
+    },
     "anthropic": {
       "enabled": true,
       "models": [

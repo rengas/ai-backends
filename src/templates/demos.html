@@ -61,12 +61,12 @@
         </div>
 
         <!-- Demos Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
             <!-- Highlighter Demo Card -->
-            <div class="group relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+            <div class="group relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 h-full flex flex-col">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-brand opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
                 
-                <div class="p-8">
+                <div class="p-8 flex flex-col h-full">
                     <div class="w-12 h-12 bg-gradient-brand rounded-xl flex items-center justify-center text-white mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a6 6 0 00-2-4l-2-2V5a2 2 0 00-2-2h-4v14" />
@@ -101,9 +101,9 @@
                     </div>
                     
                     <a href="/api/highlighter-demo" 
-                       class="inline-flex items-center px-6 py-3 bg-gradient-brand text-white rounded-lg font-medium hover:opacity-90 transition-opacity duration-200 group">
+                       class="mt-auto inline-flex items-center justify-center relative px-6 pr-10 py-3 bg-gradient-brand text-white rounded-lg font-medium hover:opacity-90 transition-opacity duration-200 group">
                         Try Demo
-                        <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
                     </a>
@@ -111,10 +111,10 @@
             </div>
 
             <!-- Summarization Demo Card -->
-            <div class="group relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+            <div class="group relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 h-full flex flex-col">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-brand opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
                 
-                <div class="p-8">
+                <div class="p-8 flex flex-col h-full">
                     <div class="w-12 h-12 bg-gradient-brand rounded-xl flex items-center justify-center text-white mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8s-9-3.582-9-8 4.03-8 9-8 9 3.582 9 8z" />
@@ -123,7 +123,7 @@
                     
                     <h3 class="text-2xl font-bold text-gray-900 mb-3">Summarization Demo</h3>
                     <p class="text-gray-600 mb-6 leading-relaxed">
-                        Create concise summaries with the local Ollama provider using the default <span class="font-mono">gemma3:4b</span> model.
+                        Create concise summaries using different models and providers. Try summarizing an article, conversation or any text.
                     </p>
                     
                     <div class="space-y-3 mb-6">
@@ -131,26 +131,26 @@
                             <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                             </svg>
-                            Uses Ollama locally
+                            Summarize long texts
                         </div>
                         <div class="flex items-center text-sm text-gray-600">
                             <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                             </svg>
-                            Default model gemma3:4b
+                            Use Ollama or LM Studio for local models
                         </div>
                         <div class="flex items-center text-sm text-gray-600">
                             <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                             </svg>
-                            Token usage tracking
+                           Use OpenAI, Anthropic or OpenRouter for cloud models
                         </div>
                     </div>
                     
                     <a href="/api/summarize-demo" 
-                       class="inline-flex items-center px-6 py-3 bg-gradient-brand text-white rounded-lg font-medium hover:opacity-90 transition-opacity duration-200 group">
+                       class="mt-auto inline-flex items-center justify-center relative px-6 pr-10 py-3 bg-gradient-brand text-white rounded-lg font-medium hover:opacity-90 transition-opacity duration-200 group">
                         Try Demo
-                        <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
                     </a>

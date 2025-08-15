@@ -24,7 +24,33 @@ const serviceStatusSchema = z.object({
         model: z.string(),
         chatModel: z.string(),
       })
-    })
+      }),
+      openrouter: z.object({
+        enabled: z.boolean(),
+        available: z.boolean(),
+        config: z.object({
+          model: z.string(),
+          hasApiKey: z.boolean(),
+          baseURL: z.string().nullable().optional()
+        })
+      }),
+      anthropic: z.object({
+        enabled: z.boolean(),
+        available: z.boolean(),
+        config: z.object({
+          model: z.string(),
+          hasApiKey: z.boolean(),
+        })
+      }),
+      lmstudio: z.object({
+        enabled: z.boolean(),
+        available: z.boolean(),
+        config: z.object({
+          baseURL: z.string(),
+          model: z.string(),
+          chatModel: z.string(),
+        })
+      })
   }),
   primary: z.string().nullable(),
   anyAvailable: z.boolean()
@@ -89,7 +115,8 @@ async function handleGetModels(c: Context) {
         getAvailableModels('openai'),
         getAvailableModels('ollama'),
         getAvailableModels('openrouter'),
-        getAvailableModels('anthropic')
+        getAvailableModels('anthropic'),
+        getAvailableModels('lmstudio')
       ])
       const response = {
         openai: {
@@ -111,6 +138,11 @@ async function handleGetModels(c: Context) {
           service: 'anthropic',
           models: results[3].status === 'fulfilled' ? results[3].value : [],
           available: await checkServiceAvailability('anthropic')
+        },
+        lmstudio: {
+          service: 'lmstudio',
+          models: results[4].status === 'fulfilled' ? results[4].value : [],
+          available: await checkServiceAvailability('lmstudio')
         }
       }
       return c.json(response, 200)
@@ -131,8 +163,8 @@ async function handleGetModels(c: Context) {
 async function handleServiceHealth(c: Context) {
   try {
     const service = c.req.param('service')
-    if (!service || !['openai', 'ollama', 'openrouter', 'anthropic'].includes(service)) {
-      return c.json({ error: 'Invalid service. Must be one of: openai, ollama, openrouter, anthropic' }, 400)
+    if (!service || !['openai', 'ollama', 'openrouter', 'anthropic', 'lmstudio'].includes(service)) {
+      return c.json({ error: 'Invalid service. Must be one of: openai, ollama, openrouter, anthropic, lmstudio' }, 400)
     }
     const available = await checkServiceAvailability(service as any)
     return c.json({
@@ -166,7 +198,7 @@ router.openapi(
     request: {
       query: z.object({
         service: z.string().optional().openapi({
-          description: 'Service to get models for (openai, ollama, openrouter, anthropic, or auto for all)',
+          description: 'Service to get models for (openai, ollama, openrouter, anthropic, lmstudio, or auto for all)',
           example: 'auto'
         }),
         source: z.enum(['live', 'config']).optional().openapi({
@@ -190,7 +222,8 @@ router.openapi(
                 openai: modelsSchema,
                 ollama: modelsSchema,
                 openrouter: modelsSchema,
-                anthropic: modelsSchema
+                anthropic: modelsSchema,
+                lmstudio: modelsSchema,
               }),
               modelsGuidanceSchema.extend({ byProvider: providerViewSchema }).partial({ byCapability: true, byProvider: true })
             ])

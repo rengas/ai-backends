@@ -19,6 +19,13 @@ export interface OllamaConfig extends ServiceConfig {
   timeout?: number;
 }
 
+export interface LMStudioConfig extends ServiceConfig {
+  baseURL: string;
+  model: string;
+  chatModel: string;
+  timeout?: number;
+}
+
 export interface AnthropicConfig extends ServiceConfig {
   apiKey: string;
   model: string;
@@ -70,8 +77,19 @@ export const openrouterConfig: OpenRouterConfig = {
   baseURL: process.env.OPENROUTER_BASE_URL,
 };
 
+// LM Studio Configuration
+export const lmstudioConfig: LMStudioConfig = {
+  name: 'LMStudio',
+  enabled: process.env.LMSTUDIO_ENABLED === 'true' || process.env.LMSTUDIO_BASE_URL !== undefined,
+  priority: 5,
+  baseURL: process.env.LMSTUDIO_BASE_URL || 'http://localhost:1234',
+  model: process.env.LMSTUDIO_MODEL || 'gemma-3-270m-it',
+  chatModel: process.env.LMSTUDIO_CHAT_MODEL || process.env.LMSTUDIO_MODEL || 'gemma-3-270m-it',
+  timeout: parseInt(process.env.LMSTUDIO_TIMEOUT || '30000'),
+};
+
 // Available services
-export const availableServices = [openaiConfig, anthropicConfig, ollamaConfig, openrouterConfig];
+export const availableServices = [openaiConfig, anthropicConfig, ollamaConfig, openrouterConfig, lmstudioConfig];
 
 // Get the primary service (highest priority enabled service)
 export function getPrimaryService(): ServiceConfig | null {

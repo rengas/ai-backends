@@ -195,7 +195,7 @@ export async function generateChatStructuredResponse(
     model: modelToUse,
     prompt: prompt,
     schema: schema,
-    temperature: temperature
+    temperature: temperature,    
   });
 
   return result;
