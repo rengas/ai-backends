@@ -93,9 +93,13 @@ function configureApiSecurity(app: OpenAPIHono, token: string) {
                 // Public demo and tools pages
                 path === '/api/demos' ||
                 path === '/api/highlighter-demo' ||
+                path === '/api/summarize-demo' ||
+                path === '/api/sentiment-demo' ||
+                path === '/api/keywords-demo' ||
+                path === '/api/email-reply-demo' ||
+                path === '/api/translate-demo' ||
                 path === '/api/models' ||
-                path === '/api/jsoneditor' ||
-                path === '/api/summarize-demo'
+                path === '/api/jsoneditor'
             ) {
                 await next();
                 return;
