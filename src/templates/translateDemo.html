@@ -281,7 +281,6 @@
       const translation = (translationText.textContent || '').trim();
       if (!translation) return;
       const selected = (targetLanguageEl.value || targetLanguageSelectEl.value || '').trim();
-      const tl = languageNameToGoogleCode(selected);
       const url = 'https://translate.google.com/?sl=auto&tl=en&text=' + encodeURIComponent(translation) + '&op=translate';
       window.open(url, '_blank', 'noopener');
     }
