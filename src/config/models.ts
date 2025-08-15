@@ -1,7 +1,14 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-export type ModelCapability = 'summarize' | 'keywords' | 'sentiment' | 'vision' | 'emailReply'
+export type ModelCapability =
+  | 'summarize'
+  | 'keywords'
+  | 'sentiment'
+  | 'vision'
+  | 'emailReply'
+  | 'translate'
+  | 'askText'
 
 export interface ProviderModelConfigItem {
   name: string
