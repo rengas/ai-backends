@@ -2,13 +2,17 @@
 
 AIBackends is an API server that you can use to integrate AI into your applications. It is a turnkey and cost effective solution for your AI integration needs. 
 
-The project supports open source models using Ollama. It also supports cloud models from OpenAI and Anthropic.
+The project supports open source models using Ollama and LM Studio. It also supports cloud models from OpenAI and Anthropic.
 
 ## Purpose of the project
 
 The purpose of this project is to make common AI use cases easily accessible to developers. To implement common AI use cases, you need to understand prompt engineering and API integration with different AI providers. This project aims to skip that learning curve so developers can focus on integrating AI into applications and automation workflows.
 
 ![High level architecture](images/ai-backend-diagram.png)
+
+## Technical Architecture
+
+![Technical Architecture](images/aibackends-architecture.png)
 
 ## Architecture and Tech Stack
 
@@ -21,6 +25,7 @@ The purpose of this project is to make common AI use cases easily accessible to 
 ## Supported LLM Providers
 
 - Ollama for local models (self-hosted)
+- LM Studio for local models via OpenAI-compatible API (self-hosted)
 - OpenAI for GPT models (cloud-based)
 - Anthropic for Claude models (cloud-based)
 - OpenRouter for multiple open source and private models (coming soon)
@@ -58,8 +63,14 @@ OLLAMA_ENABLED=true
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_TIMEOUT=30000
 
-# You can change OLLAMA_BASE_URL to use a remote Ollama instance if you want.
+# You can change OLLAMA_BASE_URL to use a remote Ollama instance
+ 
+# LM Studio Configuration 
+LMSTUDIO_ENABLED=true
+LMSTUDIO_BASE_URL=http://localhost:1234
 ```
+
+# You can change LMSTUDIO_BASE_URL to use a remote LM Studio instance
 
 **Important:** Make sure to add `.env` to your `.gitignore` file to avoid committing sensitive information to version control.
 
@@ -75,6 +86,12 @@ bun run dev
 # Build for production
 bun run build
 ```
+
+## Demos
+
+You can access demos at http://localhost:3000/api/demos
+
+![Demos](images/aibackends-demo-page.png)
 
 ## Swagger Documentation available 
  `http://localhost:3000/api/ui`
