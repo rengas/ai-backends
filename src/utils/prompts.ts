@@ -52,9 +52,11 @@ export function describeImagePrompt(): string {
  */
 export function sentimentPrompt(text: string, categories?: string[]): string {
   const defaultCategories = ['positive', 'negative', 'neutral'];
-  const sentimentCategories = categories && categories.length > 0 ? categories : defaultCategories;
+  // const sentimentCategories = categories && categories.length > 0 ? categories : defaultCategories;
   
   return `Analyze the sentiment of the following text and return your response in JSON format.
+
+  Return the sentiment of the text using the default categories ${defaultCategories.join(', ')}.
 
 Your response must include:
 1. "sentiment": The overall sentiment classification
@@ -82,24 +84,26 @@ export function emailReplyPrompt(
   const addressInstruction = senderName ? `Address the reply to ${senderName} by name, but do not add a greeting line.` : '';
   const signoffInstruction = recipientName ? `Sign the reply as ${recipientName} without adding a signature block.` : '';
 
-  return `You are an email assistant. Compose a thoughtful reply to the following email.
+  const promptText = `You are an email assistant. Compose a thoughtful reply to the following email.
 
 ${instructionLine}
 ${addressInstruction ? `\n${addressInstruction}` : ''}
 ${signoffInstruction ? `\n${signoffInstruction}` : ''}
 
 Rules:
-- Understand the email thoroughly before replying.
-- You are the recipient of the email and you reply using that perspective.
+- Understand the email intent thoroughly before replying.
+- ${recipientName} is the recipient of the email, reply using ${recipientName} perspective.
 - Do not add a subject line to the reply.
-- Always include "hi", "hello" or "dear" greetings unless explicitly asked not to.
+- Always include "hi", "hello" or "dear" addressing ${senderName} unless explicitly asked not to.
 - Be polite, clear, and actionable.
 - If information is missing, propose reasonable next steps or clarifying questions. Otherwise, be direct and to the point.
 
 <email_to_reply_to>
 """
 ${text}
-</email_to_reply_to>`;
+</email_to_reply_to>`
+
+  return promptText;
 }
 
 /**
