@@ -11,14 +11,14 @@
     "ollama": {
       "enabled": true,
       "models": [
-        { "name": "llama3.2:latest", "capabilities": ["summarize", "keywords", "sentiment", "emailReply"], "notes": "Meta Llama 3.2 general-purpose model." },
-        { "name": "qwen2.5-coder:latest", "capabilities": ["summarize", "keywords"], "notes": "Qwen 2.5 coder-optimized variant for code tasks." },
-        { "name": "gemma2:2b", "capabilities": ["summarize", "keywords", "sentiment"], "notes": "Gemma 2 small variant for lightweight tasks." },
+        { "name": "llama3.2:latest", "capabilities": ["summarize", "keywords", "sentiment", "emailReply", "translate"], "notes": "Meta Llama 3.2 general-purpose model." },
+        { "name": "qwen2.5-coder:latest", "capabilities": ["summarize", "keywords", "emailReply"], "notes": "Qwen 2.5 coder-optimized variant for code tasks." },
+        { "name": "gemma2:2b", "capabilities": ["summarize", "keywords", "sentiment", "emailReply"], "notes": "Gemma 2 small variant for lightweight tasks." },
         { "name": "gemma3:4b", "capabilities": ["summarize", "keywords", "sentiment", "emailReply", "askText", "translate"], "notes": "Gemma 3 small variant for lightweight tasks with Q&A support." },
-        { "name": "qwen2.5:0.5b", "capabilities": ["summarize", "keywords", "sentiment"], "notes": "Qwen 2.5 0.5B parameter model for ultra-light workloads." },
-        { "name": "qwen2.5:1.5b", "capabilities": ["summarize", "keywords", "sentiment"], "notes": "Qwen 2.5 1.5B parameter model; balanced speed/quality." },
+        { "name": "qwen2.5:0.5b", "capabilities": ["summarize", "keywords", "sentiment", "emailReply"], "notes": "Qwen 2.5 0.5B parameter model for ultra-light workloads." },
+        { "name": "qwen2.5:1.5b", "capabilities": ["summarize", "keywords", "sentiment", "emailReply"], "notes": "Qwen 2.5 1.5B parameter model; balanced speed/quality." },
         { "name": "qwen2.5:3b", "capabilities": ["summarize", "keywords", "sentiment", "askText", "emailReply", "translate"], "notes": "Qwen 2.5 3B parameter model for stronger quality." },
-        { "name": "qwen2.5:7b", "capabilities": ["summarize", "keywords", "sentiment"], "notes": "Qwen 2.5 7B parameter model for higher quality." },        
+        { "name": "qwen2.5:7b", "capabilities": ["summarize", "keywords", "sentiment", "emailReply"], "notes": "Qwen 2.5 7B parameter model for higher quality." },        
         { "name": "llama3.2:1b", "capabilities": ["summarize", "keywords", "sentiment", "askText", "emailReply", "translate"], "notes": "Llama 3.2 1B tiny variant for edge/light usage." },
         { "name": "llama3.2:3b", "capabilities": ["summarize", "keywords", "sentiment", "askText", "emailReply", "translate"], "notes": "Llama 3.2 3B small variant." },
         { "name": "gemma3:270m", "capabilities": ["summarize", "keywords", "sentiment", "askText", "emailReply"], "notes": "Gemma 3 270M instruct tuned; great for ultra-fast summarization on CPU." }
