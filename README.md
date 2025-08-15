@@ -146,3 +146,7 @@ Check swagger docs for examples.
 The project is in active development. More endpoints and providers will be added in the future. If you want to support me with API credits from your provider, please contact me.
 
 I am also open to sponsorship to support the development of the project.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=donvito/ai-backends&type=Date)](https://www.star-history.com/#donvito/ai-backends&Date)
