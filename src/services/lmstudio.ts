@@ -3,6 +3,7 @@ import { lmstudioConfig } from '../config/services'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { generateText } from 'ai'
 import { zodToJsonSchema } from 'zod-to-json-schema'
+import OpenAI from 'openai'
 
 // Build base URL ensuring single trailing /v1
 const normalizedBase = (lmstudioConfig.baseURL || 'http://localhost:1234').replace(/\/$/, '')
@@ -24,14 +25,17 @@ export async function generateChatStructuredResponse(
     // Convert Zod schema to JSON Schema for LM Studio's OpenAI-compatible endpoint
     const jsonSchema = zodToJsonSchema(schema)
 
-    const body = {
+    const client = new OpenAI({
+      baseURL: `${LMSTUDIO_BASE_URL}/v1`,
+      apiKey: process.env.LMSTUDIO_API_KEY || 'lm-studio',
+    })
+
+    const completion = await client.chat.completions.create({
       model: modelId,
       messages: [
         { role: 'user', content: prompt }
       ],
       temperature: typeof temperature === 'number' ? temperature : 0,
-      max_tokens: -1,
-      stream: false,
       response_format: {
         type: 'json_schema',
         json_schema: {
@@ -39,52 +43,10 @@ export async function generateChatStructuredResponse(
           strict: true,
           schema: jsonSchema,
         },
-      },
-    }
-
-    const response = await fetch(`${LMSTUDIO_BASE_URL}/v1/chat/completions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      } as any,
     })
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => '')
-      throw new Error(`LM Studio request failed (${response.status}): ${errorText}`)
-    }
-
-    const data = await response.json()
-
-    const choice = Array.isArray(data?.choices) ? data.choices[0] : undefined
-    const contentRaw = choice?.message?.content
-
-    if (typeof contentRaw !== 'string') {
-      throw new Error('LM Studio returned non-string content for structured response')
-    }
-
-    let parsedObject: unknown
-    try {
-      parsedObject = JSON.parse(contentRaw)
-    } catch (err) {
-      throw new Error(`Failed to parse assistant JSON content: ${String(err)}`)
-    }
-
-    const validation = schema.safeParse(parsedObject)
-    if (!validation.success) {
-      throw new Error(`Response failed schema validation: ${validation.error.message}`)
-    }
-
-    return {
-      object: validation.data,
-      finishReason: choice?.finish_reason ?? choice?.finishReason ?? null,
-      usage: {
-        promptTokens: data?.usage?.prompt_tokens ?? 0,
-        completionTokens: data?.usage?.completion_tokens ?? 0,
-        totalTokens: data?.usage?.total_tokens ?? 0,
-      },
-      id: data?.id,
-      model: data?.model ?? modelId,
-    }
+    return parseLmStudioStructuredResponse(completion, schema, modelId)
   }
 
 export async function generateChatTextResponse(
@@ -116,6 +78,43 @@ export async function getAvailableModels(): Promise<string[]> {
     return []
   } catch (error) {
     return []
+  }
+}
+
+function parseLmStudioStructuredResponse<T>(
+  completion: OpenAI.Chat.Completions.ChatCompletion,
+  schema: z.ZodType<T>,
+  modelFallback: string
+) {
+  const choice = Array.isArray(completion?.choices) ? completion.choices[0] : undefined
+  const contentRaw = choice?.message?.content
+
+  if (typeof contentRaw !== 'string') {
+    throw new Error('LM Studio returned non-string content for structured response')
+  }
+
+  let parsedObject: unknown
+  try {
+    parsedObject = JSON.parse(contentRaw)
+  } catch (err) {
+    throw new Error(`Failed to parse assistant JSON content: ${String(err)}`)
+  }
+
+  const validation = schema.safeParse(parsedObject)
+  if (!validation.success) {
+    throw new Error(`Response failed schema validation: ${validation.error.message}`)
+  }
+
+  return {
+    object: validation.data,
+    finishReason: (choice as any)?.finish_reason ?? (choice as any)?.finishReason ?? null,
+    usage: {
+      promptTokens: (completion as any)?.usage?.prompt_tokens ?? 0,
+      completionTokens: (completion as any)?.usage?.completion_tokens ?? 0,
+      totalTokens: (completion as any)?.usage?.total_tokens ?? 0,
+    },
+    id: completion?.id,
+    model: (completion as any)?.model ?? modelFallback,
   }
 }
 
