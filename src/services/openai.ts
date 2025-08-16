@@ -1,5 +1,4 @@
 import OpenAI from "openai";
-import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
 import { openai } from '@ai-sdk/openai';
 import { generateObject, generateText } from "ai";

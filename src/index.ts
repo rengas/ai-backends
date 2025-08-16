@@ -1,6 +1,10 @@
 import initialise from './utils/initialise' 
 import configureRoutes from './utils/apiRoutes'
 import configureApiDocs from './utils/apiDocs'
+import displayLogo from './utils/logo'
+
+// Display ASCII logo on startup
+displayLogo()
 
 const app = initialise()
 

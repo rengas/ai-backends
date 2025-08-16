@@ -5,7 +5,7 @@ alwaysApply: true
 ---
 # Folder Organization Guidelines
 
-This document provides guidelines for organizing code in the AI Backend project.
+This document provides guidelines for organizing code in the AI Backends project.
 
 ## src/config/
 

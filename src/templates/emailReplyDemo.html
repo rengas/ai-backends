@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Backends - Email Reply Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-purple': '#B341F9',
+            'brand-pink': '#E453C0',
+          },
+          backgroundImage: { 'gradient-brand': 'linear-gradient(135deg, #B341F9, #E453C0)' }
+        }
+      }
+    }
+  </script>
+  <style>
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;}
+    .loading-dots { display: inline-flex; gap: 6px; }
+    .loading-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #B341F9; animation: bounce 1.4s infinite ease-in-out both; }
+    .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+    
+    .metrics-container {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+    }
+    .metric-item {
+      background: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .metric-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    .metric-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-white min-h-screen">
+  <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 rounded-xl bg-[#B341F9] flex items-center justify-center">
+            <span class="text-white font-bold text-xl">AI</span>
+          </div>
+          <span class="text-2xl font-bold text-gray-900">Backends</span>
+        </a>
+        <div class="flex items-center space-x-6">
+          <a href="/api/ui" target="_blank" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">API Docs</a>
+          <a href="/api/demos" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">Demos</a>
+          <a href="/api/jsoneditor" target="_blank" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">JSON Editor</a>
+          <a href="/api/models" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">Models Guide</a>
+          <a href="https://github.com/donvito/ai-backend" class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors duration-300">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-6 py-12">
+    <nav class="mb-6 text-sm">
+      <ol class="flex items-center space-x-2 text-gray-500">
+        <li><a href="/" class="hover:text-gray-700">Home</a></li>
+        <li><span>/</span></li>
+        <li><a href="/api/demos" class="hover:text-gray-700">Demos</a></li>
+        <li><span>/</span></li>
+        <li class="text-gray-900 font-medium">Email Reply</li>
+      </ol>
+    </nav>
+
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-3">Email Reply Demo</h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">Generate a professional email reply with optional guidance</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+      <section class="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h2 class="text-lg font-semibold mb-3">Input</h2>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email Text</label>
+        <textarea id="inputText" class="w-full h-48 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple bg-white" placeholder="Paste email text..."></textarea>
+
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Custom Instruction</label>
+            <input id="customInstruction" type="text" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" placeholder="e.g., professional, concise" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Temperature</label>
+            <input id="temperature" type="number" step="0.1" min="0" max="1" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" value="0" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Sender Name</label>
+            <input id="senderName" type="text" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" placeholder="Optional" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Recipient Name</label>
+            <input id="recipientName" type="text" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" placeholder="Optional" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+            <select id="provider" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple"></select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+            <select id="model" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple"></select>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Bearer Token (optional)</label>
+          <input id="token" type="password" placeholder="Only needed in production deployments" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" />
+        </div>
+
+        <div class="mt-4 flex items-center gap-2">
+          <button id="runBtn" class="px-4 py-2 rounded-lg bg-brand-purple text-white hover:bg-[#9935D9]">Generate Reply</button>
+          <button id="cancelBtn" class="hidden px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Cancel</button>
+          <button id="loadSample" class="px-4 py-2 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200">Load Sample</button>
+        </div>
+
+        <details class="mt-4">
+          <summary class="text-sm text-gray-600 cursor-pointer">View JSON request</summary>
+          <pre id="jsonPreview" class="mt-2 bg-gray-900 text-green-400 p-3 rounded-lg text-xs mono overflow-auto"></pre>
+        </details>
+      </section>
+
+      <section class="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h2 class="text-lg font-semibold mb-3">Output</h2>
+        <div id="loadingIndicator" class="hidden mb-3">
+          <div class="flex items-center justify-center py-4">
+            <div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+          </div>
+        </div>
+        <div id="usageInfo" class="hidden mb-3 text-sm"></div>
+        <div id="replyText" class="p-4 rounded-lg bg-gray-50 border border-gray-200 leading-7 text-gray-900 whitespace-pre-wrap"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const samplePayload = {
+      payload: {
+        text: "Hi team, I recently purchased your product but I'm having trouble setting it up. Could you help me with installation steps?",
+        customInstruction: "professional, concise",
+        senderName: "Alex",
+        recipientName: "Jordan"
+      },
+      config: { provider: "openai", model: "gpt-4o-mini", temperature: 0 }
+    };
+
+    const inputText = document.getElementById('inputText');
+    const customInstructionEl = document.getElementById('customInstruction');
+    const senderNameEl = document.getElementById('senderName');
+    const recipientNameEl = document.getElementById('recipientName');
+    const temperatureEl = document.getElementById('temperature');
+    const providerEl = document.getElementById('provider');
+    const modelEl = document.getElementById('model');
+    const tokenEl = document.getElementById('token');
+    const runBtn = document.getElementById('runBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const loadSampleBtn = document.getElementById('loadSample');
+    const jsonPreview = document.getElementById('jsonPreview');
+    const usageInfo = document.getElementById('usageInfo');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const replyText = document.getElementById('replyText');
+
+    let abortController = null;
+    let modelOptions = null;
+    const DEFAULT_MODEL = 'gemma3:4b';
+
+    // No generic fallback: only show providers/models with emailReply capability
+    const fallbackModelOptions = {};
+
+    async function fetchCapabilityModels(capability) {
+      const headers = {};
+      const token = tokenEl.value.trim();
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const res = await fetch('/api/v1/services/models?source=config&view=capability', { headers });
+      if (!res.ok) throw new Error('Failed to load models: ' + res.status);
+      const data = await res.json();
+      const entry = data && data.byCapability && data.byCapability[capability];
+      if (!entry || typeof entry !== 'object') throw new Error('Invalid models response');
+      const mapped = {};
+      for (const provider in entry) {
+        const list = Array.isArray(entry[provider]) ? entry[provider] : [];
+        mapped[provider] = list.map(name => ({ value: name, label: name }));
+      }
+      return mapped;
+    }
+
+    function updateModelOptions() {
+      const provider = providerEl.value;
+      const source = modelOptions || {};
+      const models = (source && source[provider]) ? source[provider] : [];
+      modelEl.innerHTML = models.map(m => '<option value="' + m.value + '">' + m.label + '</option>').join('');
+      // Ensure a valid model is selected
+      if (models.length > 0) {
+        const current = modelEl.value;
+        const exists = models.some(m => m.value === current);
+        if (!exists) modelEl.value = models[0].value;
+      } else {
+        modelEl.value = '';
+      }
+      updatePreview();
+    }
+
+    async function initModels() {
+      try { modelOptions = await fetchCapabilityModels('emailReply'); } catch { modelOptions = null; }
+      // Only include providers that actually have one or more models for emailReply
+      let source = modelOptions || {};
+      const filtered = {};
+      if (source && typeof source === 'object') {
+        for (const p in source) {
+          const list = Array.isArray(source[p]) ? source[p] : [];
+          if (list.length > 0) filtered[p] = list;
+        }
+      }
+      source = filtered;
+      const providers = Object.keys(source);
+      providerEl.innerHTML = providers.map(p => '<option value="' + p + '">' + p + '</option>').join('');
+      if (!providers.includes(providerEl.value)) providerEl.value = providers[0] || '';
+      updateModelOptions();
+    }
+
+    function buildRequest() {
+      return {
+        payload: {
+          text: inputText.value.trim(),
+          customInstruction: customInstructionEl.value.trim() || undefined,
+          senderName: senderNameEl.value.trim() || undefined,
+          recipientName: recipientNameEl.value.trim() || undefined
+        },
+        config: {
+          provider: providerEl.value,
+          model: modelEl.value,
+          temperature: Number(temperatureEl.value) || 0
+        }
+      };
+    }
+
+    function updatePreview() {
+      jsonPreview.textContent = JSON.stringify(buildRequest(), null, 2);
+    }
+
+    async function run() {
+      const req = buildRequest();
+      updatePreview();
+      const headers = { 'Content-Type': 'application/json' };
+      const token = tokenEl.value.trim();
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      abortController = new AbortController();
+      runBtn.classList.add('hidden');
+      cancelBtn.classList.remove('hidden');
+      loadingIndicator.classList.remove('hidden');
+      replyText.textContent = '';
+      usageInfo.classList.add('hidden'); usageInfo.innerHTML = '';
+      
+      const startTime = performance.now();
+      
+      try {
+        const res = await fetch('/api/v1/emailReply', { method: 'POST', headers, body: JSON.stringify(req), signal: abortController.signal });
+        const endTime = performance.now();
+        const responseTime = (endTime - startTime).toFixed(2);
+        
+        if (!res.ok) { const txt = await res.text(); throw new Error('Request failed: ' + res.status + ' ' + txt); }
+        const data = await res.json();
+        const reply = data?.reply || data?.data?.reply || '';
+        replyText.textContent = reply || 'No reply returned.';
+        const usage = data?.usage || data?.data?.usage;
+        usageInfo.classList.remove('hidden');
+        
+        let metricsHtml = '<div class="metrics-container">';
+        metricsHtml += '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">';
+        
+        // Response Time metric
+        metricsHtml += '<div class="metric-item">' +
+          '<div class="metric-icon">' +
+            '<svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>' +
+            '</svg>' +
+          '</div>' +
+          '<div>' +
+            '<div class="metric-label">Response</div>' +
+            '<div class="metric-value text-orange-600">' + responseTime + ' ms</div>' +
+          '</div>' +
+        '</div>';
+        
+        if (usage) {
+          const inputTokens = usage.input_tokens || usage.prompt_tokens || 0;
+          const outputTokens = usage.output_tokens || usage.completion_tokens || 0;
+          const totalTokens = usage.total_tokens || (inputTokens + outputTokens);
+          
+          // Input Tokens
+          metricsHtml += '<div class="metric-item">' +
+            '<div class="metric-icon">' +
+              '<svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>' +
+              '</svg>' +
+            '</div>' +
+            '<div>' +
+              '<div class="metric-label">Input</div>' +
+              '<div class="metric-value text-blue-600">' + inputTokens.toLocaleString() + '</div>' +
+            '</div>' +
+          '</div>';
+          
+          // Output Tokens
+          metricsHtml += '<div class="metric-item">' +
+            '<div class="metric-icon">' +
+              '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>' +
+              '</svg>' +
+            '</div>' +
+            '<div>' +
+              '<div class="metric-label">Output</div>' +
+              '<div class="metric-value text-green-600">' + outputTokens.toLocaleString() + '</div>' +
+            '</div>' +
+          '</div>';
+          
+          // Total Tokens
+          metricsHtml += '<div class="metric-item">' +
+            '<div class="metric-icon">' +
+              '<svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>' +
+              '</svg>' +
+            '</div>' +
+            '<div>' +
+              '<div class="metric-label">Total</div>' +
+              '<div class="metric-value text-purple-600">' + totalTokens.toLocaleString() + '</div>' +
+            '</div>' +
+          '</div>';
+        }
+        
+        metricsHtml += '</div></div>';
+        usageInfo.innerHTML = metricsHtml;
+      } catch (err) {
+        replyText.textContent = err.message || 'Unknown error';
+        usageInfo.classList.add('hidden'); usageInfo.innerHTML = '';
+      } finally {
+        runBtn.classList.remove('hidden');
+        cancelBtn.classList.add('hidden');
+        loadingIndicator.classList.add('hidden');
+        abortController = null;
+      }
+    }
+
+    inputText.addEventListener('input', updatePreview);
+    customInstructionEl.addEventListener('input', updatePreview);
+    senderNameEl.addEventListener('input', updatePreview);
+    recipientNameEl.addEventListener('input', updatePreview);
+    temperatureEl.addEventListener('input', updatePreview);
+    providerEl.addEventListener('change', updateModelOptions);
+    modelEl.addEventListener('change', updatePreview);
+    tokenEl.addEventListener('change', () => initModels());
+    runBtn.addEventListener('click', run);
+    cancelBtn.addEventListener('click', () => abortController && abortController.abort());
+    loadSampleBtn.addEventListener('click', () => setFromSample());
+
+    function setFromSample() {
+      inputText.value = samplePayload.payload.text;
+      customInstructionEl.value = samplePayload.payload.customInstruction || '';
+      senderNameEl.value = samplePayload.payload.senderName || '';
+      recipientNameEl.value = samplePayload.payload.recipientName || '';
+      // Choose provider/model that exist in current source (emailReply-capable only)
+      const source = modelOptions || {};
+      const providers = Object.keys(source);
+      if (providers.length > 0) {
+        // Prefer provider that includes DEFAULT_MODEL
+        let preferredProvider = providers.find(p => (source[p] || []).some(m => m.value === DEFAULT_MODEL));
+        // Else prefer provider from sample if available
+        if (!preferredProvider && providers.includes(samplePayload.config.provider)) preferredProvider = samplePayload.config.provider;
+        // Else first provider
+        if (!preferredProvider) preferredProvider = providers[0];
+        providerEl.value = preferredProvider;
+        updateModelOptions();
+        const models = source[preferredProvider] || [];
+        // Prefer DEFAULT_MODEL if present, then sample model, else first
+        let preferredModel = (models.find(m => m.value === DEFAULT_MODEL) || null)?.value || '';
+        if (!preferredModel && models.some(m => m.value === samplePayload.config.model)) preferredModel = samplePayload.config.model;
+        if (!preferredModel) preferredModel = models[0]?.value || '';
+        if (preferredModel) modelEl.value = preferredModel;
+      } else {
+        providerEl.innerHTML = '';
+        modelEl.innerHTML = '';
+      }
+      temperatureEl.value = samplePayload.config.temperature || 0;
+      updatePreview();
+    }
+
+    initModels().then(() => setFromSample());
+  </script>
+
+  <footer class="bg-gray-900 text-white py-12 mt-20">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Documentation</h3>
+          <ul class="space-y-2">
+            <li><a href="/api/ui" target="_blank" class="text-gray-300 hover:text-white transition-colors">Swagger UI</a></li>
+            <li><a href="/api/doc" target="_blank" class="text-gray-300 hover:text-white transition-colors">API Reference</a></li>
+            <li><a href="/api/demos" class="text-gray-300 hover:text-white transition-colors">Live Demos</a></li>
+            <li><a href="/api/models" class="text-gray-300 hover:text-white transition-colors">Models Guide</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Resources</h3>
+          <ul class="space-y-2">
+            <li><a href="https://github.com/donvito/ai-backend" class="text-gray-300 hover:text-white transition-colors">GitHub Repository</a></li>
+            <li><a href="https://github.com/donvito/ai-backend/issues" class="text-gray-300 hover:text-white transition-colors">Issues & Support</a></li>
+            <li><a href="https://github.com/donvito/ai-backend/blob/main/README.md" class="text-gray-300 hover:text-white transition-colors">Setup Guide</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">About</h3>
+          <p class="text-gray-300 text-sm leading-relaxed">Open source AI backend making common AI use cases easily accessible and customizable. 100% self-hosted with complete control over your data.</p>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+        <p>&copy; 2025 AI Backends. Open source under MIT License.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+
+

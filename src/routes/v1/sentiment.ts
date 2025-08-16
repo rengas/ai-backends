@@ -1,10 +1,12 @@
 import { OpenAPIHono, createRoute } from '@hono/zod-openapi'
 import { Context } from 'hono'
 import { z } from 'zod'
-import { sentimentPrompt } from '../utils/prompts'
-import { handleError, handleValidationError } from '../utils/errorHandler'
-import { createSentimentResponse, sentimentRequestSchema, sentimentResponseSchema } from '../schemas/sentiment'
-import { processStructuredOutputRequest } from '../services/ai'
+import { sentimentPrompt } from '../../utils/prompts'
+import { handleError } from '../../utils/errorHandler'
+import { createSentimentResponse, sentimentRequestSchema, sentimentResponseSchema } from '../../schemas/v1/sentiment'
+import { processStructuredOutputRequest } from '../../services/ai'
+import { createFinalResponse } from './finalResponse'
+import { apiVersion } from './versionConfig'
 
 const responseSchema = z.object({
   sentiment: z.string(),
@@ -17,36 +19,27 @@ const responseSchema = z.object({
 
 const router = new OpenAPIHono()
 
-/**
- * Handler for sentiment analysis endpoint
- */
 async function handleSentimentRequest(c: Context) {
   try {
     const { payload, config } = await c.req.json()
-
-    // Generate the prompt
     const prompt = sentimentPrompt(payload.text)
-
-    // Get response using our service
     const result = await processStructuredOutputRequest(
       prompt,
       responseSchema,
       config
     )
-
-    const { sentiment, confidence, emotions } = result.object;
-    const { usage } = result;
-
+    const { sentiment, confidence, emotions } = result.object
+    const { usage } = result
     const finalResponse = createSentimentResponse(
       sentiment,
       confidence,
       emotions,
       config.provider,
-      config.model,  
+      config.model,
       usage
     )
-
-    return c.json(finalResponse, 200)
+    const finalResponseWithVersion = createFinalResponse(finalResponse, apiVersion)
+    return c.json(finalResponseWithVersion, 200)
   } catch (error) {
     return handleError(c, error, 'Failed to analyze sentiment')
   }
@@ -56,11 +49,7 @@ router.openapi(
   createRoute({
     path: '/',
     method: 'post',
-    security: [
-      {
-        BearerAuth: []
-      }
-    ],
+    security: [ { BearerAuth: [] } ],
     request: {
       body: {
         content: {
@@ -98,4 +87,5 @@ export default {
   handler: router,
   mountPath: 'sentiment'
 }
+
 

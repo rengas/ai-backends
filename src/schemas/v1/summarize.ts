@@ -26,7 +26,7 @@ export const summarizeResponseSchema = z.object({
     input_tokens: z.number(),
     output_tokens: z.number(),
     total_tokens: z.number(),
-  }),
+  })
 })
 
 export function createSummarizeResponse(
@@ -39,7 +39,7 @@ export function createSummarizeResponse(
     summary,
     provider,
     model,
-    usage
+    usage,
   };
 }
 

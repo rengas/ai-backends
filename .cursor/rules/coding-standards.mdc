@@ -5,7 +5,7 @@ alwaysApply: true
 ---
 # Coding Standards
 
-This document outlines coding standards and best practices for the AI Backend project.
+This document outlines coding standards and best practices for the AI Backends project.
 
 ## TypeScript Usage
 

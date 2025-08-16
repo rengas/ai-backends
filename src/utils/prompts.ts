@@ -2,7 +2,17 @@
  * System prompt template for summarization
  */
 export function summarizePrompt(text: string, maxLength?: number): string {
-  return `Summarize the following text${maxLength ? ` in ${maxLength} words or less. Just return the summary, no other text or explanation.` : ''}: ${text}`;
+  const lengthInstruction = maxLength ? ` in ${maxLength} words or less.` : '';
+  return `Summarize the following text${lengthInstruction}
+Just return the summary, no other text or explanation.
+
+If the text is a conversation, do not attempt to answer the questions or be involved in the conversation.
+Just return the summary of the conversation.
+
+<text>
+${text}
+</text>
+:`;
 }
 
 /**
@@ -43,9 +53,11 @@ export function describeImagePrompt(): string {
  */
 export function sentimentPrompt(text: string, categories?: string[]): string {
   const defaultCategories = ['positive', 'negative', 'neutral'];
-  const sentimentCategories = categories && categories.length > 0 ? categories : defaultCategories;
+  // const sentimentCategories = categories && categories.length > 0 ? categories : defaultCategories;
   
   return `Analyze the sentiment of the following text and return your response in JSON format.
+
+  Return the sentiment of the text using the default categories ${defaultCategories.join(', ')}.
 
 Your response must include:
 1. "sentiment": The overall sentiment classification
@@ -55,4 +67,98 @@ Your response must include:
 DO NOT CALL ANY TOOLS OR FUNCTIONS
 
 Text to analyze: ${text}`;
+}
+
+/**
+ * System prompt for email reply generation
+ */
+export function emailReplyPrompt(
+  text: string,
+  customInstruction?: string,
+  senderName?: string,
+  recipientName?: string
+): string {
+  const instructionLine = customInstruction
+    ? `Additional guidance from requester: ${customInstruction}`
+    : 'Write the reply in a professional and concise tone.';
+
+  const addressInstruction = senderName ? `Address the reply to ${senderName} by name, but do not add a greeting line.` : '';
+  const signoffInstruction = recipientName ? `Sign the reply as ${recipientName} without adding a signature block.` : '';
+  const recipientPerspectiveRule = recipientName
+    ? `- ${recipientName} is the recipient of the email, reply using ${recipientName}'s perspective.`
+    : '';
+  const greetingRule = senderName
+    ? `- Always include "hi", "hello" or "dear" addressing ${senderName} unless explicitly asked not to.`
+    : `- Always include "hi", "hello" or "dear" unless explicitly asked not to.`;
+
+  const promptText = `You are an email assistant. Compose a thoughtful reply to the following email.
+
+${instructionLine}
+${addressInstruction ? `\n${addressInstruction}` : ''}
+${signoffInstruction ? `\n${signoffInstruction}` : ''}
+
+Rules:
+- Understand the email intent thoroughly before replying.${recipientPerspectiveRule ? `\n${recipientPerspectiveRule}` : ''}
+- Do not add a subject line to the reply.
+${greetingRule ? `\n${greetingRule}` : ''}
+- Be polite, clear, and actionable.
+- If information is missing, propose reasonable next steps or clarifying questions. Otherwise, be direct and to the point.
+
+<email_to_reply_to>
+"""
+${text}
+</email_to_reply_to>`
+
+  return promptText;
+}
+
+/**
+ * System prompt for answering questions based on provided text
+ */
+export function askTextPrompt(text: string, question: string): string {
+  return `Based on the following text, answer the question comprehensively and accurately.
+
+Text:
+"""
+${text}
+"""
+
+Question: ${question}
+
+Instructions:
+- Answer the question based solely on the information provided in the text.
+- If the text does not contain enough information to answer the question, say so clearly.
+- Be concise but thorough in your response.
+- Do not add information from outside the provided text.
+
+Answer:`;
+}
+
+/**
+ * System prompt for text highlighter
+ */
+export function highlighterPrompt(text: string, maxHighlights?: number): string {
+  const maxLine = maxHighlights ? `Identify up to ${maxHighlights} of the most important segments in the text.` : `Identify the most important segments in the text.`;
+  return `You are a text highlighter. ${maxLine}
+
+Return your answer strictly as JSON with this exact structure:
+{
+  "highlights": [
+    { "char_start_position": number, "char_end_position": number, "label": string, "description": string }
+  ]
+}
+
+Rules:
+- Use zero-based character indices based on the raw input string.
+- "char_end_position" must be exclusive (i.e., the highlight covers characters in [char_start_position, char_end_position)).
+- Ensure 0 <= char_start_position < char_end_position <= input length.
+- Provide a short "label" (2–3 words) that identifies the type of information for each highlight. Example labels include "Problem Identification", "Order Information", "Root Cause Analysis", "Solution Implementation", and "Additional Support". Choose the best label based on context; create a concise label if none of the examples apply.
+- Provide a concise human-readable description for why each span is important.
+- Do not include any explanation outside the JSON.
+ - IMPORTANT: When selecting spans, snap to whole words. Do not cut a word in the middle. If a span would split a word, expand to include the entire word. Also trim leading/trailing whitespace from spans.
+
+Text:
+"""
+${text}
+"""`;
 }

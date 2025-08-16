@@ -1,48 +1,44 @@
-# AIBackends
+# AI Backends
 
 AIBackends is an API server that you can use to integrate AI into your applications. It is a turnkey and cost effective solution for your AI integration needs. 
 
-The project supports open source models using Ollama. It also supports cloud models from OpenAI and Anthropic.
+The project supports open source models using Ollama and LM Studio. It also supports cloud models from OpenAI and Anthropic.
+
+![AI Backends](images/run-aibackends.png)
 
 ## Purpose of the project
 
 The purpose of this project is to make common AI use cases easily accessible to developers. To implement common AI use cases, you need to understand prompt engineering and API integration with different AI providers. This project aims to skip that learning curve so developers can focus on integrating AI into applications and automation workflows.
 
+## Vision
+
 ![High level architecture](images/ai-backend-diagram.png)
 
-## Architecture and Tech Stack
+## Run the project
 
-- Hono for the API server
-- Typescript
-- Zod for request and response validation
-- Vercel AI SDK for AI integration
-- Docker for containerization
+You can configure API keys for different AI providers in the `.env` file.
 
-## Supported LLM Providers
+```bash
+# Install dependencies
+bun install
 
-- Ollama for local models (self-hosted)
-- OpenAI for GPT models (cloud-based)
-- Anthropic for Claude models (cloud-based)
-- OpenRouter for multiple open source and private models (coming soon)
-- Google for Gemini models (coming soon)
+# Run in development mode and bypasses access token check in the API, do run using this command in production. Always use production when deploying so access token is required. NODE_ENV=development is set in package.json when you run in development mode.
+bun run dev
 
-## Available Endpoints
+# Build for production
+bun run build
+```
 
-- **/api/summarize**: Summarize text
-- **/api/translate**: Translate text
-- **/api/sentiment**: Analyze sentiment
-- **/api/keywords**: Extract keywords
-- **/api/describe-image**: Describe an image
-- More to come...check swagger docs for updated endpoints.
-
-
-## Environment Setup
+## Set up environment variables
 
 Create a `.env` file in the root directory of this project and configure your preferred AI services:
 
 ```env
 # General Configuration
 DEFAULT_ACCESS_TOKEN=your-secret-api-key
+
+# CORS Configuration
+CORS_ALLOWED_ORIGINS=http://localhost:3000,https://example.com,https://*.example.com
 
 # OpenAI Configuration
 OPENAI_API_KEY=your-openai-api-key
@@ -55,27 +51,68 @@ OLLAMA_ENABLED=true
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_TIMEOUT=30000
 
-# You can change OLLAMA_BASE_URL to use a remote Ollama instance if you want.
+# You can change OLLAMA_BASE_URL to use a remote Ollama instance
+ 
+# LM Studio Configuration 
+LMSTUDIO_ENABLED=true
+LMSTUDIO_BASE_URL=http://localhost:1234
+
+# You can change LMSTUDIO_BASE_URL to use a remote LM Studio instance
 ```
 
 **Important:** Make sure to add `.env` to your `.gitignore` file to avoid committing sensitive information to version control.
 
-## Development
+## Technical Architecture
 
-```bash
-# Install dependencies
-bun install
+![Technical Architecture](images/aibackends-architecture.png)
 
-# Run in development mode and bypasses access token check in the API, do run using this command in production. Always use production when deploying so access token is required.
-NODE_ENV=development bun run dev
 
-# Build for production
-bun run build
-```
+## Tech Stack
 
-## Swagger Documentation available 
- `http://localhost:3000/api/ui`
+- Hono for the API server
+- Typescript
+- Zod for request and response validation
+- Vercel AI SDK for AI integration
+- Docker for containerization
+
+## Supported LLM Providers
+
+- Ollama for local models (self-hosted)
+- LM Studio for local models via OpenAI-compatible API (self-hosted)
+- OpenAI for GPT models (cloud-based)
+- Anthropic for Claude models (cloud-based)
+- OpenRouter for multiple open source and private models (coming soon)
+- Google for Gemini models (coming soon)
+
+## Available Endpoints
+
+- **/api/summarize**: Summarize text
+- **/api/translate**: Translate text
+- **/api/sentiment**: Analyze sentiment
+- **/api/keywords**: Extract keywords
+- **/api/describe-image**: Describe an image
+- **/api/emailReply**: Reply to an email
+- **/api/askText**: Ask a question
+- **/api/highlighter**: Describe an image
+- More to come...check swagger docs for updated endpoints.
+
+## Swagger Docs
+
+After running the project, you can access the swagger docs at:
+
+`http://localhost:3000/api/ui`
+
 ![Swagger Documentation](images/swagger.png)
+
+
+## Demos
+
+See examples how to use the APIs
+
+You can access demos at http://localhost:3000/api/demos
+
+![Demos](images/aibackends-demo-page.png)
+
 
 ## Provider and Model Selection
 You need to send the service and model name in the request body. See examples in the swagger docs.
@@ -83,7 +120,7 @@ You need to send the service and model name in the request body. See examples in
 For example, to summarize text using qwen2.5-coder model with Ollama as provider, you can use the following curl command:
 
 ```curl
-curl --location 'http://localhost:3000/api/summarize' \
+curl --location 'http://localhost:3000/api/v1/summarize' \
 --header 'Content-Type: application/json' \
 --header 'Accept: application/json' \
 --data '{
@@ -111,3 +148,7 @@ Check swagger docs for examples.
 The project is in active development. More endpoints and providers will be added in the future. If you want to support me with API credits from your provider, please contact me.
 
 I am also open to sponsorship to support the development of the project.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=donvito/ai-backends&type=Date)](https://www.star-history.com/#donvito/ai-backends&Date)
