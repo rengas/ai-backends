@@ -25,6 +25,38 @@
     .loading-dot:nth-child(1) { animation-delay: -0.32s; }
     .loading-dot:nth-child(2) { animation-delay: -0.16s; }
     @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+    
+    .metrics-container {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+    }
+    .metric-item {
+      background: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .metric-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    .metric-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body class="bg-white min-h-screen">
@@ -75,8 +107,8 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Target Language</label>
             <select id="targetLanguageSelect" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple mb-2">
               <option value="">Select a language...</option>
+              <option value="Chinese" selected>Chinese</option>
               <option value="Tagalog">Tagalog</option>
-              <option value="Chinese">Chinese</option>
               <option value="Japanese">Japanese</option>
               <option value="Korean">Korean</option>
               <option value="French">French</option>
@@ -89,7 +121,7 @@
               <option value="Hindi">Hindi</option>
               <option value="__custom">Other (type)</option>
             </select>
-            <input id="targetLanguage" type="text" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" placeholder="Type a language (e.g. Italian)" />
+            <input id="targetLanguage" type="text" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple disabled:bg-gray-50 disabled:cursor-not-allowed" placeholder="Select 'Other' above to type a custom language" disabled />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Temperature</label>
@@ -138,7 +170,7 @@
 
   <script>
     const samplePayload = {
-      payload: { text: "Good morning, how are you?", targetLanguage: "Spanish" },
+      payload: { text: "Good morning, how are you?", targetLanguage: "Chinese" },
       config: { provider: "openai", model: "gpt-4o-mini", temperature: 0 }
     };
 
@@ -224,26 +256,85 @@
       translationText.textContent = '';
       openInGoogleBtn.disabled = true;
       usageInfo.classList.add('hidden'); usageInfo.innerHTML = '';
+      
+      const startTime = performance.now();
+      
       try {
         const res = await fetch('/api/v1/translate', { method: 'POST', headers, body: JSON.stringify(req), signal: abortController.signal });
+        const endTime = performance.now();
+        const responseTime = (endTime - startTime).toFixed(2);
+        
         if (!res.ok) { const txt = await res.text(); throw new Error('Request failed: ' + res.status + ' ' + txt); }
         const data = await res.json();
         const translation = data?.translation || data?.data?.translation || '';
         translationText.textContent = translation || 'No translation returned.';
         openInGoogleBtn.disabled = !translation;
-        const usage = data?.usage || data?.data?.usage; 
+        const usage = data?.usage || data?.data?.usage;
+        usageInfo.classList.remove('hidden');
+        
+        let metricsHtml = '<div class="metrics-container">';
+        metricsHtml += '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">';
+        
+        // Response Time metric
+        metricsHtml += '<div class="metric-item">' +
+          '<div class="metric-icon">' +
+            '<svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>' +
+            '</svg>' +
+          '</div>' +
+          '<div>' +
+            '<div class="metric-label">Response</div>' +
+            '<div class="metric-value text-orange-600">' + responseTime + ' ms</div>' +
+          '</div>' +
+        '</div>';
+        
         if (usage) {
           const inputTokens = usage.input_tokens || usage.prompt_tokens || 0;
           const outputTokens = usage.output_tokens || usage.completion_tokens || 0;
           const totalTokens = usage.total_tokens || (inputTokens + outputTokens);
-          usageInfo.classList.remove('hidden');
-          usageInfo.innerHTML = '<div class="flex items-center gap-4 text-sm">' +
-            '<span class="text-gray-500">Tokens:</span>' +
-            '<span class="font-medium">Input: <span class="text-blue-600">' + inputTokens + '</span></span>' +
-            '<span class="font-medium">Output: <span class="text-green-600">' + outputTokens + '</span></span>' +
-            '<span class="font-medium">Total: <span class="text-purple-600">' + totalTokens + '</span></span>' +
+          
+          // Input Tokens
+          metricsHtml += '<div class="metric-item">' +
+            '<div class="metric-icon">' +
+              '<svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>' +
+              '</svg>' +
+            '</div>' +
+            '<div>' +
+              '<div class="metric-label">Input</div>' +
+              '<div class="metric-value text-blue-600">' + inputTokens.toLocaleString() + '</div>' +
+            '</div>' +
+          '</div>';
+          
+          // Output Tokens
+          metricsHtml += '<div class="metric-item">' +
+            '<div class="metric-icon">' +
+              '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>' +
+              '</svg>' +
+            '</div>' +
+            '<div>' +
+              '<div class="metric-label">Output</div>' +
+              '<div class="metric-value text-green-600">' + outputTokens.toLocaleString() + '</div>' +
+            '</div>' +
+          '</div>';
+          
+          // Total Tokens
+          metricsHtml += '<div class="metric-item">' +
+            '<div class="metric-icon">' +
+              '<svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>' +
+              '</svg>' +
+            '</div>' +
+            '<div>' +
+              '<div class="metric-label">Total</div>' +
+              '<div class="metric-value text-purple-600">' + totalTokens.toLocaleString() + '</div>' +
+            '</div>' +
           '</div>';
         }
+        
+        metricsHtml += '</div></div>';
+        usageInfo.innerHTML = metricsHtml;
       } catch (err) {
         translationText.textContent = err.message || 'Unknown error';
         openInGoogleBtn.disabled = true;
@@ -287,16 +378,24 @@
 
     inputText.addEventListener('input', updatePreview);
     targetLanguageEl.addEventListener('input', () => {
-      if (targetLanguageEl.value && targetLanguageSelectEl.value !== '__custom') {
-        targetLanguageSelectEl.value = '__custom';
-      }
       updatePreview();
     });
     targetLanguageSelectEl.addEventListener('change', () => {
-      if (targetLanguageSelectEl.value && targetLanguageSelectEl.value !== '__custom') {
-        targetLanguageEl.value = targetLanguageSelectEl.value;
-      } else if (targetLanguageSelectEl.value === '') {
+      if (targetLanguageSelectEl.value === '__custom') {
+        // Enable the text field for custom input
+        targetLanguageEl.disabled = false;
         targetLanguageEl.value = '';
+        targetLanguageEl.placeholder = 'Type a language (e.g. Italian, Portuguese, etc.)';
+        targetLanguageEl.focus();
+      } else {
+        // Disable text field and use dropdown value
+        targetLanguageEl.disabled = true;
+        targetLanguageEl.placeholder = "Select 'Other' above to type a custom language";
+        if (targetLanguageSelectEl.value && targetLanguageSelectEl.value !== '') {
+          targetLanguageEl.value = targetLanguageSelectEl.value;
+        } else {
+          targetLanguageEl.value = '';
+        }
       }
       updatePreview();
     });
@@ -311,12 +410,21 @@
 
     function setFromSample() {
       inputText.value = samplePayload.payload.text;
-      targetLanguageEl.value = samplePayload.payload.targetLanguage;
+      
+      // Check if the sample language is in the dropdown
       if ([...targetLanguageSelectEl.options].some(o => o.value === samplePayload.payload.targetLanguage)) {
         targetLanguageSelectEl.value = samplePayload.payload.targetLanguage;
+        targetLanguageEl.value = samplePayload.payload.targetLanguage;
+        targetLanguageEl.disabled = true;
+        targetLanguageEl.placeholder = "Select 'Other' above to type a custom language";
       } else {
+        // It's a custom language
         targetLanguageSelectEl.value = '__custom';
+        targetLanguageEl.value = samplePayload.payload.targetLanguage;
+        targetLanguageEl.disabled = false;
+        targetLanguageEl.placeholder = 'Type a language (e.g. Italian, Portuguese, etc.)';
       }
+      
       providerEl.value = samplePayload.config.provider;
       updateModelOptions();
       modelEl.value = samplePayload.config.model;
