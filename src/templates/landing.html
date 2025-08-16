@@ -154,6 +154,10 @@
                         <div>OLLAMA_ENABLED=true</div>
                         <div>OLLAMA_BASE_URL=http://localhost:11434</div>
                         <div>OLLAMA_MODEL=llama3.2</div>
+                        <div class="mt-2"># LMStudio Configuration (optional)</div>
+                        <div>LMSTUDIO_API_KEY=your-lmstudio-api-key</div>
+                        <div>LMSTUDIO_BASE_URL=http://localhost:1234/v1</div>
+                        <div>LMSTUDIO_MODEL=local-model</div>
                     </div>
                 </div>
             </div>
@@ -281,6 +285,22 @@
                         </div>
                         <p class="text-gray-600 text-sm">Answer questions based on provided text context using LLM comprehension</p>
                     </div>
+
+                    <!-- Highlights Extraction -->
+                    <div class="group relative overflow-hidden bg-white rounded-xl p-6 border border-gray-200 hover:border-cyan-300 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Highlights Extraction</h3>
+                                <code class="text-sm text-cyan-600 font-mono">/api/highlights</code>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm">Extract and identify the most important highlights and key points from your text content</p>
+                    </div>
                 </div>
 
                 <!-- Call to Action -->
@@ -305,25 +325,23 @@
                     </p>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
                     <!-- OpenAI Card -->
-                    <div class="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-8 border border-blue-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300">
+                    <div class="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-8 border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl transition-all duration-300">
                         <div class="absolute top-4 right-4">
                             <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/>
                                 </svg>
                             </div>
                         </div>
-                        <div class="mb-6">
-                            <div class="flex items-center gap-3 mb-3">
-                                <h3 class="text-2xl font-bold text-gray-900">OpenAI</h3>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    Cloud API
-                                </span>
-                            </div>
-                            <p class="text-gray-700 leading-relaxed">
-                                Official OpenAI SDK integration with structured output support. Access to GPT-4, GPT-3.5, and other cutting-edge models.
+                        <div class="mb-4">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">OpenAI</h3>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                Cloud API
+                            </span>
+                            <p class="text-gray-700 text-sm mt-3 leading-relaxed">
+                                GPT-4 and GPT-5 with structured outputs & vision.
                             </p>
                         </div>
                         <div class="space-y-2">
@@ -331,49 +349,38 @@
                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
-                                Structured outputs & function calling
+                                Function calling
                             </div>
                             <div class="flex items-center text-sm text-gray-600">
                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
-                                Vision & image analysis capabilities
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                                Enterprise-grade reliability
+                                Vision API
                             </div>
                         </div>
-                        <div class="mt-6 pt-4 border-t border-blue-200">
-                            <a href="https://openai.com" target="_blank" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium group-hover:translate-x-1 transition-transform duration-200">
-                                Learn more
-                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
+                        <div class="mt-4 pt-3 border-t border-blue-200">
+                            <a href="https://openai.com" target="_blank" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
+                                Learn more →
                             </a>
                         </div>
                     </div>
 
                     <!-- Ollama Card -->
-                    <div class="group relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-8 border border-green-200 hover:border-green-300 hover:shadow-xl transition-all duration-300">
+                    <div class="group relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-8 border-2 border-green-200 hover:border-green-400 hover:shadow-2xl transition-all duration-300">
                         <div class="absolute top-4 right-4">
                             <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                                 </svg>
                             </div>
                         </div>
-                        <div class="mb-6">
-                            <div class="flex items-center gap-3 mb-3">
-                                <h3 class="text-2xl font-bold text-gray-900">Ollama</h3>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    Self-Hosted
-                                </span>
-                            </div>
-                            <p class="text-gray-700 leading-relaxed">
-                                Run powerful open-source models locally or on your own infrastructure. Complete privacy and control with no external API calls.
+                        <div class="mb-4">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Ollama</h3>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                Self-Hosted
+                            </span>
+                            <p class="text-gray-700 text-sm mt-3 leading-relaxed">
+                                Run open-source models locally with complete privacy.
                             </p>
                         </div>
                         <div class="space-y-2">
@@ -381,49 +388,38 @@
                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
-                                JSON mode & structured outputs
+                                100% private
                             </div>
                             <div class="flex items-center text-sm text-gray-600">
                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
-                                Health monitoring & auto-retry
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                                100% private & offline capable
+                                JSON mode
                             </div>
                         </div>
-                        <div class="mt-6 pt-4 border-t border-green-200">
-                            <a href="https://ollama.ai" target="_blank" class="inline-flex items-center text-green-600 hover:text-green-800 font-medium group-hover:translate-x-1 transition-transform duration-200">
-                                Learn more
-                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
+                        <div class="mt-4 pt-3 border-t border-green-200">
+                            <a href="https://ollama.ai" target="_blank" class="inline-flex items-center text-sm text-green-600 hover:text-green-800 font-medium">
+                                Learn more →
                             </a>
                         </div>
                     </div>
 
                     <!-- Anthropic Card -->
-                    <div class="group relative overflow-hidden bg-gradient-to-br from-orange-50 to-red-100 rounded-2xl p-8 border border-orange-200 hover:border-orange-300 hover:shadow-xl transition-all duration-300">
+                    <div class="group relative overflow-hidden bg-gradient-to-br from-orange-50 to-red-100 rounded-2xl p-8 border-2 border-orange-200 hover:border-orange-400 hover:shadow-2xl transition-all duration-300">
                         <div class="absolute top-4 right-4">
                             <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                                 </svg>
                             </div>
                         </div>
-                        <div class="mb-6">
-                            <div class="flex items-center gap-3 mb-3">
-                                <h3 class="text-2xl font-bold text-gray-900">Anthropic</h3>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                    Claude
-                                </span>
-                            </div>
-                            <p class="text-gray-700 leading-relaxed">
-                                Access Claude's advanced reasoning and safety-focused AI models with structured output capabilities and large context windows.
+                        <div class="mb-4">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Anthropic</h3>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                Claude
+                            </span>
+                            <p class="text-gray-700 text-sm mt-3 leading-relaxed">
+                                Advanced reasoning AI with safety focus and large context windows.
                             </p>
                         </div>
                         <div class="space-y-2">
@@ -431,49 +427,38 @@
                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
-                                Advanced reasoning capabilities
+                                200K+ context
                             </div>
                             <div class="flex items-center text-sm text-gray-600">
                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
-                                Large context windows (200K+)
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                                Safety-focused design
+                                Safety-focused
                             </div>
                         </div>
-                        <div class="mt-6 pt-4 border-t border-orange-200">
-                            <a href="https://anthropic.com" target="_blank" class="inline-flex items-center text-orange-600 hover:text-orange-800 font-medium group-hover:translate-x-1 transition-transform duration-200">
-                                Learn more
-                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
+                        <div class="mt-4 pt-3 border-t border-orange-200">
+                            <a href="https://anthropic.com" target="_blank" class="inline-flex items-center text-sm text-orange-600 hover:text-orange-800 font-medium">
+                                Learn more →
                             </a>
                         </div>
                     </div>
 
                     <!-- OpenRouter Card -->
-                    <div class="group relative overflow-hidden bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl p-8 border border-purple-200 hover:border-purple-300 hover:shadow-xl transition-all duration-300">
+                    <div class="group relative overflow-hidden bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl p-8 border-2 border-purple-200 hover:border-purple-400 hover:shadow-2xl transition-all duration-300">
                         <div class="absolute top-4 right-4">
                             <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                                 </svg>
                             </div>
                         </div>
-                        <div class="mb-6">
-                            <div class="flex items-center gap-3 mb-3">
-                                <h3 class="text-2xl font-bold text-gray-900">OpenRouter</h3>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                    Multi-Provider
-                                </span>
-                            </div>
-                            <p class="text-gray-700 leading-relaxed">
-                                Access dozens of AI models from multiple providers through a single unified API. Compare models and find the best fit for your use case.
+                        <div class="mb-4">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">OpenRouter</h3>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                Multi-Provider
+                            </span>
+                            <p class="text-gray-700 text-sm mt-3 leading-relaxed">
+                                Access 480+ AI models through a single unified API.
                             </p>
                         </div>
                         <div class="space-y-2">
@@ -481,27 +466,57 @@
                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
-                                480+ open source and proprietary models
+                                480+ models
                             </div>
                             <div class="flex items-center text-sm text-gray-600">
                                 <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
-                                Transparent pricing & usage
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                                OpenAI-compatible API
+                                OpenAI-compatible
                             </div>
                         </div>
-                        <div class="mt-6 pt-4 border-t border-purple-200">
-                            <a href="https://openrouter.ai" target="_blank" class="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium group-hover:translate-x-1 transition-transform duration-200">
-                                Learn more
-                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        <div class="mt-4 pt-3 border-t border-purple-200">
+                            <a href="https://openrouter.ai" target="_blank" class="inline-flex items-center text-sm text-purple-600 hover:text-purple-800 font-medium">
+                                Learn more →
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- LMStudio Card -->
+                    <div class="group relative overflow-hidden bg-gradient-to-br from-indigo-50 to-blue-100 rounded-2xl p-8 border-2 border-indigo-200 hover:border-indigo-400 hover:shadow-2xl transition-all duration-300">
+                        <div class="absolute top-4 right-4">
+                            <div class="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
                                 </svg>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">LMStudio</h3>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                                Local Desktop
+                            </span>
+                            <p class="text-gray-700 text-sm mt-3 leading-relaxed">
+                                Run LLMs locally with user-friendly desktop interface.
+                            </p>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                Desktop GUI
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                               Supports HuggingFace models and MLX format 
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-indigo-200">
+                            <a href="https://lmstudio.ai" target="_blank" class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                                Learn more →
                             </a>
                         </div>
                     </div>
@@ -596,6 +611,20 @@
                                             <div>
                                                 <div class="font-medium text-gray-900">"provider": "openrouter"</div>
                                                 <div class="text-sm text-gray-600">Models: any supported model</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3 13h-2v-2h2v2zm0-4h-2V7h2v4z"/>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-gray-900">"provider": "lmstudio"</div>
+                                                <div class="text-sm text-gray-600">Models: any locally loaded model</div>
                                             </div>
                                         </div>
                                     </div>
