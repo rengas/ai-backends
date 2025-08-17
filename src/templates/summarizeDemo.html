@@ -55,6 +55,7 @@
       font-weight: 600;
     }
   </style>
+  <script src="/api/shared/safedom.js"></script>
 </head>
 <body class="bg-white min-h-screen">
   <!-- Navigation -->
@@ -220,7 +221,7 @@
       const provider = providerEl.value;
       const source = modelOptions || fallbackModelOptions;
       const models = (source && source[provider]) ? source[provider] : [];
-      modelEl.innerHTML = models.map(m => '<option value="' + m.value + '">' + m.label + '</option>').join('');
+      setContent(modelEl, createOptions(models));
       updatePreview();
     }
 
@@ -249,7 +250,7 @@
       }
       const source = modelOptions || fallbackModelOptions;
       const providers = Object.keys(source);
-      providerEl.innerHTML = providers.map(p => '<option value="' + p + '">' + p + '</option>').join('');
+      setContent(providerEl, createOptions(providers.map(p => ({ value: p, label: p }))));
       if (!providers.includes(providerEl.value)) {
         providerEl.value = providers[0] || '';
       }
@@ -297,9 +298,9 @@
       runBtn.classList.add('hidden');
       cancelBtn.classList.remove('hidden');
 
-      summaryText.innerHTML = '<div class="text-gray-500">Generating summary...</div>';
+      setContent(summaryText, createElement('div', 'Generating summary...', { className: 'text-gray-500' }));
       usageInfo.classList.add('hidden');
-      usageInfo.innerHTML = '';
+      setContent(usageInfo, '');
 
       const startTime = performance.now();
 
@@ -386,15 +387,17 @@
         }
         
         metricsHtml += '</div></div>';
-        usageInfo.innerHTML = metricsHtml;
+        const metricsDiv = createElement('div');
+        metricsDiv.innerHTML = metricsHtml;
+        setContent(usageInfo, metricsDiv.firstChild);
       } catch (err) {
         if (err.name === 'AbortError') {
-          summaryText.innerHTML = '<div class="text-amber-600">Request cancelled by user</div>';
+          setContent(summaryText, createElement('div', 'Request cancelled by user', { className: 'text-amber-600' }));
         } else {
-          summaryText.innerHTML = '<div class="text-red-600">' + (err.message || 'Unknown error') + '</div>';
+          setContent(summaryText, createElement('div', err.message || 'Unknown error', { className: 'text-red-600' }));
         }
         usageInfo.classList.add('hidden');
-        usageInfo.innerHTML = '';
+        setContent(usageInfo, '');
       } finally {
         runBtn.classList.remove('hidden');
         cancelBtn.classList.add('hidden');

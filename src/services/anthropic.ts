@@ -3,12 +3,19 @@ import { z } from "zod";
 import { generateObject, generateText } from "ai";
 import { anthropic } from '@ai-sdk/anthropic';
 
+//fallback to cheapest model
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307';
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
-const anthropic1 = new Anthropic({
-  apiKey: ANTHROPIC_API_KEY,
-});
+export function getAnthropicClient() {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error('Anthropic API key is not configured. Set ANTHROPIC_API_KEY or use another provider.');
+  }
+  return new Anthropic({
+    apiKey,
+    baseURL: process.env.ANTHROPIC_BASE_URL,
+  });
+}
 
 export async function generateChatStructuredResponse(
   prompt: string,
@@ -48,7 +55,7 @@ export async function generateChatTextResponse(
   return result;
 }
 
-export { anthropic1 as anthropic, ANTHROPIC_MODEL };
+export { ANTHROPIC_MODEL };
 
 /**
  * Get available models from Anthropic

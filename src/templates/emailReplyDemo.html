@@ -58,6 +58,7 @@
       font-weight: 600;
     }
   </style>
+  <script src="/api/shared/safedom.js"></script>
 </head>
 <body class="bg-white min-h-screen">
   <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
@@ -214,7 +215,7 @@
       const provider = providerEl.value;
       const source = modelOptions || {};
       const models = (source && source[provider]) ? source[provider] : [];
-      modelEl.innerHTML = models.map(m => '<option value="' + m.value + '">' + m.label + '</option>').join('');
+      setContent(modelEl, createOptions(models));
       // Ensure a valid model is selected
       if (models.length > 0) {
         const current = modelEl.value;
@@ -239,7 +240,7 @@
       }
       source = filtered;
       const providers = Object.keys(source);
-      providerEl.innerHTML = providers.map(p => '<option value="' + p + '">' + p + '</option>').join('');
+      setContent(providerEl, createOptions(providers.map(p => ({ value: p, label: p }))));
       if (!providers.includes(providerEl.value)) providerEl.value = providers[0] || '';
       updateModelOptions();
     }
@@ -275,7 +276,7 @@
       cancelBtn.classList.remove('hidden');
       loadingIndicator.classList.remove('hidden');
       replyText.textContent = '';
-      usageInfo.classList.add('hidden'); usageInfo.innerHTML = '';
+      usageInfo.classList.add('hidden'); setContent(usageInfo, '');
       
       const startTime = performance.now();
       
@@ -353,10 +354,12 @@
         }
         
         metricsHtml += '</div></div>';
-        usageInfo.innerHTML = metricsHtml;
+        const metricsDiv = createElement('div');
+        metricsDiv.innerHTML = metricsHtml;
+        setContent(usageInfo, metricsDiv.firstChild);
       } catch (err) {
         replyText.textContent = err.message || 'Unknown error';
-        usageInfo.classList.add('hidden'); usageInfo.innerHTML = '';
+        usageInfo.classList.add('hidden'); setContent(usageInfo, '');
       } finally {
         runBtn.classList.remove('hidden');
         cancelBtn.classList.add('hidden');
@@ -401,8 +404,8 @@
         if (!preferredModel) preferredModel = models[0]?.value || '';
         if (preferredModel) modelEl.value = preferredModel;
       } else {
-        providerEl.innerHTML = '';
-        modelEl.innerHTML = '';
+        setContent(providerEl, '');
+        setContent(modelEl, '');
       }
       temperatureEl.value = samplePayload.config.temperature || 0;
       updatePreview();
