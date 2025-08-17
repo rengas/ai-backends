@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Backends - Meeting Notes Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-purple': '#B341F9',
+            'brand-pink': '#E453C0',
+            'terminal-bg': '#1C2128',
+            'terminal-text': '#A7B5C4'
+          },
+          backgroundImage: {
+            'gradient-brand': 'linear-gradient(135deg, #B341F9, #E453C0)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .metrics-container { background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); border-radius: 12px; padding: 12px; border: 1px solid #e5e7eb; }
+    .metric-item { background: white; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .metric-label { font-size: 12px; color: #6b7280; font-weight: 500; }
+    .metric-value { font-size: 14px; font-weight: 600; }
+  </style>
+  <script src="/api/shared/safedom.js"></script>
+</head>
+<body class="bg-white min-h-screen">
+  <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 rounded-xl bg-[#B341F9] flex items-center justify-center">
+            <span class="text-white font-bold text-xl">AI</span>
+          </div>
+          <span class="text-2xl font-bold text-gray-900">Backends</span>
+          <span class="ml-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700">Meeting Notes</span>
+        </a>
+        <div class="flex items-center space-x-6">
+          <a href="/api/ui" target="_blank" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">API Docs</a>
+          <a href="/api/demos" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">Demos</a>
+          <a href="/api/jsoneditor" target="_blank" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">JSON Editor</a>
+          <a href="/api/models" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">Models Guide</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-6 py-12">
+    <nav class="mb-6 text-sm">
+      <ol class="flex items-center space-x-2 text-gray-500">
+        <li><a href="/" class="hover:text-gray-700">Home</a></li>
+        <li><span>/</span></li>
+        <li><a href="/api/demos" class="hover:text-gray-700">Demos</a></li>
+        <li><span>/</span></li>
+        <li class="text-gray-900 font-medium">Meeting Notes</li>
+      </ol>
+    </nav>
+
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-3">Meeting Notes Demo</h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">Extract decisions, tasks, attendees, and summaries from meeting transcripts.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+      <section class="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h2 class="text-lg font-semibold mb-3">Input</h2>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Transcript</label>
+        <textarea id="inputText" class="w-full h-56 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple bg-white" placeholder="Paste meeting transcript..."></textarea>
+
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+            <select id="provider" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple"></select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+            <select id="model" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple"></select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mt-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Temperature</label>
+            <input id="temperature" type="number" step="0.1" min="0" max="1" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" value="0" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Bearer Token (optional)</label>
+            <input id="token" type="password" placeholder="Only needed in production" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" />
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center gap-2">
+          <button id="runBtn" class="px-4 py-2 rounded-lg bg-brand-purple text-white hover:bg-[#9935D9]">Extract</button>
+          <button id="cancelBtn" class="hidden px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Cancel</button>
+          <button id="loadSample" class="px-4 py-2 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200">Load Sample</button>
+        </div>
+
+        <details class="mt-4">
+          <summary class="text-sm text-gray-600 cursor-pointer">View JSON request</summary>
+          <pre id="jsonPreview" class="mt-2 bg-gray-900 text-green-400 p-3 rounded-lg text-xs mono overflow-auto"></pre>
+        </details>
+      </section>
+
+      <section class="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h2 class="text-lg font-semibold mb-3">Output</h2>
+        <div id="usageInfo" class="hidden mb-3 text-sm"></div>
+        <div id="loading" class="hidden mb-4 flex items-center gap-2 text-gray-500">
+          <svg class="animate-spin h-5 w-5 text-brand-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          <span>Analyzing transcript...</span>
+        </div>
+        <div class="space-y-6">
+          <div>
+            <h3 class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              Meeting Date/Time
+            </h3>
+            <div id="meetingDate" class="text-gray-900 font-medium"></div>
+          </div>
+          <div>
+            <h3 class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+              <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Summary
+            </h3>
+            <div id="summary" class="text-gray-900 font-medium"></div>
+          </div>
+          <div>
+            <h3 class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+              <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+              </svg>
+              Attendees
+            </h3>
+            <ul id="attendees" class="flex flex-wrap gap-2 min-h-[2rem]"></ul>
+          </div>
+          <div>
+            <h3 class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+              <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              Tasks
+            </h3>
+            <ul id="tasks" class="space-y-3 min-h-[2rem]"></ul>
+          </div>
+          <div>
+            <h3 class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+              <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Decisions
+            </h3>
+            <ul id="decisions" class="space-y-2 min-h-[2rem]"></ul>
+          </div>
+          <div>
+            <h3 class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+              <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Updates
+            </h3>
+            <ul id="updates" class="space-y-2 min-h-[2rem]"></ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const sampleTranscript = `Product Sync
+
+Date: August 18, 2025
+Attendees: Anna (PM), Mark (Engineer), Lisa (Designer), Tom (Marketing)
+
+Anna (PM): Let’s check progress on the mobile app update. Mark, how’s the engineering side?
+
+Mark (Engineer): The backend API is 90% done. Push notifications are still pending—we’re at about 60%. I expect another 2–3 days to finish testing.
+
+Anna: Good. Lisa, how’s design?
+
+Lisa (Designer): Design assets are completed, about 95%. Just need a final review and polish—half a day of work.
+
+Anna: Perfect. Tom, where do we stand with marketing?
+
+Tom (Marketing): Campaign draft is ready—roughly 80% complete. We need the confirmed release date to finalize creatives and schedule posts. That’ll take us 2–3 days once confirmed.
+
+Anna: Sounds good. Let’s aim for all testing and reviews by Friday so we can confirm the launch date by end of week.
+    `;
+
+    const samplePayload = {
+      payload: {
+        text: sampleTranscript
+      },
+      config: { provider: 'ollama', model: 'gemma3:4b', temperature: 0 }
+    };
+
+    const inputText = document.getElementById('inputText');
+    const providerEl = document.getElementById('provider');
+    const modelEl = document.getElementById('model');
+    const tokenEl = document.getElementById('token');
+    const temperatureEl = document.getElementById('temperature');
+    const runBtn = document.getElementById('runBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const loadSampleBtn = document.getElementById('loadSample');
+    const jsonPreview = document.getElementById('jsonPreview');
+    const usageInfo = document.getElementById('usageInfo');
+    const loadingEl = document.getElementById('loading');
+    const decisionsEl = document.getElementById('decisions');
+    const tasksEl = document.getElementById('tasks');
+    
+    const attendeesEl = document.getElementById('attendees');
+    const meetingDateEl = document.getElementById('meetingDate');
+    const updatesEl = document.getElementById('updates');
+    const summaryEl = document.getElementById('summary');
+
+    let abortController = null;
+    let modelOptions = null;
+
+    function formatDateTime(value) {
+      if (!value || typeof value !== 'string') return '';
+      const dateOnly = /^\d{4}-\d{2}-\d{2}$/;
+      const dateTime = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/;
+      try {
+        if (dateOnly.test(value)) {
+          const [y, m, d] = value.split('-').map(Number);
+          const dt = new Date(y, m - 1, d);
+          return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(dt);
+        }
+        const m = value.match(dateTime);
+        if (m) {
+          const y = Number(m[1]);
+          const mo = Number(m[2]);
+          const d = Number(m[3]);
+          const hh = Number(m[4]);
+          const mm = Number(m[5]);
+          const ss = m[6] ? Number(m[6]) : 0;
+          const dt = new Date(y, mo - 1, d, hh, mm, ss);
+          return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(dt);
+        }
+        const dt = new Date(value);
+        if (!isNaN(dt.getTime())) {
+          return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(dt);
+        }
+        return value;
+      } catch {
+        return value;
+      }
+    }
+
+    const fallbackModelOptions = {
+      ollama: [ { value: 'gemma3:4b', label: 'gemma3:4b (default)' } ],
+      openai: [ { value: 'gpt-4o-mini', label: 'gpt-4o-mini' } ],
+      openrouter: [ { value: 'openai/gpt-4o-mini', label: 'openai/gpt-4o-mini' } ],
+      lmstudio: [ { value: 'gemma-3-270m-it', label: 'gemma-3-270m-it' } ]
+    };
+
+    function updateModelOptions() {
+      const provider = providerEl.value;
+      const source = modelOptions || fallbackModelOptions;
+      const models = (source && source[provider]) ? source[provider] : [];
+      setContent(modelEl, createOptions(models));
+      updatePreview();
+    }
+
+    async function fetchModels() {
+      const headers = {};
+      const token = tokenEl.value.trim();
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const res = await fetch('/api/v1/services/models?source=config&view=capability', { headers });
+      if (!res.ok) throw new Error('Failed to load models: ' + res.status);
+      const data = await res.json();
+      const meeting = data && data.byCapability && data.byCapability.meetingNotes;
+      if (!meeting || typeof meeting !== 'object') throw new Error('Invalid models response');
+      const mapped = {};
+      for (const provider in meeting) {
+        const list = Array.isArray(meeting[provider]) ? meeting[provider] : [];
+        mapped[provider] = list.map(name => ({ value: name, label: name }));
+      }
+      return mapped;
+    }
+
+    async function initModels() {
+      try {
+        modelOptions = await fetchModels();
+      } catch (e) {
+        modelOptions = null;
+      }
+      const source = modelOptions || fallbackModelOptions;
+      const providers = Object.keys(source);
+      setContent(providerEl, createOptions(providers.map(p => ({ value: p, label: p }))));
+      if (!providers.includes(providerEl.value)) providerEl.value = providers[0] || '';
+      updateModelOptions();
+    }
+
+    function buildRequest() {
+      return {
+        payload: { text: inputText.value.trim() },
+        config: {
+          provider: providerEl.value,
+          model: modelEl.value,
+          temperature: Number(temperatureEl.value) || 0
+        }
+      }
+    }
+
+    function updatePreview() {
+      jsonPreview.textContent = JSON.stringify(buildRequest(), null, 2);
+    }
+
+    function setFromSample() {
+      inputText.value = samplePayload.payload.text;
+      providerEl.value = 'ollama';
+      updateModelOptions();
+      modelEl.value = 'gemma3:4b';
+      temperatureEl.value = samplePayload.config.temperature || 0;
+      updatePreview();
+    }
+
+    async function run() {
+      const req = buildRequest();
+      updatePreview();
+      const headers = { 'Content-Type': 'application/json' };
+      const token = tokenEl.value.trim();
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      abortController = new AbortController();
+      runBtn.classList.add('hidden');
+      cancelBtn.classList.remove('hidden');
+      loadingEl.classList.remove('hidden');
+
+      setContent(decisionsEl, '');
+      setContent(tasksEl, '');
+      
+      setContent(attendeesEl, '');
+      setContent(meetingDateEl, '');
+      setContent(updatesEl, '');
+      setContent(summaryEl, '');
+      usageInfo.classList.add('hidden');
+      setContent(usageInfo, '');
+
+      const startTime = performance.now();
+      try {
+        const res = await fetch('/api/v1/meeting-notes', { method: 'POST', headers, body: JSON.stringify(req), signal: abortController.signal });
+        const endTime = performance.now();
+        const responseTime = (endTime - startTime).toFixed(2);
+
+        if (!res.ok) throw new Error('Request failed: ' + res.status + ' ' + (await res.text()));
+        const data = await res.json();
+
+        const decisions = data?.decisions || data?.data?.decisions || [];
+        const tasks = data?.tasks || data?.data?.tasks || [];
+        
+        const attendees = data?.attendees || data?.data?.attendees || [];
+        const meetingDate = data?.meeting_date || data?.data?.meeting_date || '';
+        const updates = data?.updates || data?.data?.updates || [];
+        const summary = data?.summary || data?.data?.summary || '';
+
+        setContent(decisionsEl, decisions.map(d => {
+          const li = createElement('li', '', { className: 'flex items-start gap-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200' });
+          const icon = createElement('div', '✓', { className: 'text-emerald-600 font-bold text-sm mt-0.5' });
+          const text = createElement('div', d, { className: 'text-gray-800 leading-relaxed' });
+          li.appendChild(icon);
+          li.appendChild(text);
+          return li;
+        }));
+        setContent(tasksEl, tasks.map(t => {
+          const li = createElement('li', '', { className: 'p-3 rounded-lg bg-orange-50 border border-orange-200' });
+          const taskText = createElement('div', t.task, { className: 'text-gray-800 font-medium mb-1' });
+          li.appendChild(taskText);
+          
+          if (t.owner || t.estimate) {
+            const meta = createElement('div', '', { className: 'flex flex-wrap gap-2 text-xs' });
+            if (t.owner) {
+              const ownerChip = createElement('span', `👤 ${t.owner}`, { className: 'px-2 py-1 rounded-full bg-orange-200 text-orange-800' });
+              meta.appendChild(ownerChip);
+            }
+            if (t.estimate) {
+              const estimateChip = createElement('span', `⏱️ ${t.estimate}`, { className: 'px-2 py-1 rounded-full bg-orange-200 text-orange-800' });
+              meta.appendChild(estimateChip);
+            }
+            li.appendChild(meta);
+          }
+          return li;
+        }));
+        
+        setContent(attendeesEl, attendees.map(a => {
+          const chip = createElement('span', a, { className: 'inline-block px-3 py-1.5 rounded-full bg-purple-100 border border-purple-200 text-purple-800 text-sm font-medium' });
+          const li = createElement('li');
+          li.appendChild(chip);
+          return li;
+        }));
+        meetingDateEl.textContent = formatDateTime(meetingDate) || '';
+        setContent(updatesEl, updates.map(u => {
+          const li = createElement('li', '', { className: 'flex items-start gap-3 p-3 rounded-lg bg-cyan-50 border border-cyan-200' });
+          const icon = createElement('div', 'ℹ️', { className: 'text-cyan-600 text-sm mt-0.5' });
+          const text = createElement('div', u, { className: 'text-gray-800 leading-relaxed' });
+          li.appendChild(icon);
+          li.appendChild(text);
+          return li;
+        }));
+        summaryEl.textContent = summary;
+
+        const usage = data?.usage || data?.data?.usage;
+        usageInfo.classList.remove('hidden');
+        let metricsHtml = '<div class="metrics-container">';
+        metricsHtml += '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">';
+        metricsHtml += '<div class="metric-item"><div><div class="metric-label">Response</div><div class="metric-value text-orange-600">' + responseTime + ' ms</div></div></div>';
+        if (usage) {
+          const inputTokens = usage.input_tokens || usage.prompt_tokens || 0;
+          const outputTokens = usage.output_tokens || usage.completion_tokens || 0;
+          const totalTokens = usage.total_tokens || (inputTokens + outputTokens);
+          metricsHtml += '<div class="metric-item"><div><div class="metric-label">Input</div><div class="metric-value text-blue-600">' + inputTokens.toLocaleString() + '</div></div></div>';
+          metricsHtml += '<div class="metric-item"><div><div class="metric-label">Output</div><div class="metric-value text-green-600">' + outputTokens.toLocaleString() + '</div></div></div>';
+          metricsHtml += '<div class="metric-item"><div><div class="metric-label">Total</div><div class="metric-value text-purple-600">' + totalTokens.toLocaleString() + '</div></div></div>';
+        }
+        metricsHtml += '</div></div>';
+        const metricsDiv = createElement('div');
+        metricsDiv.innerHTML = metricsHtml;
+        setContent(usageInfo, metricsDiv.firstChild);
+      } catch (err) {
+        const msg = err && err.message ? err.message : 'Unknown error';
+        setContent(decisionsEl, createElement('li', msg, { className: 'text-red-600' }));
+      } finally {
+        runBtn.classList.remove('hidden');
+        cancelBtn.classList.add('hidden');
+        loadingEl.classList.add('hidden');
+        abortController = null;
+      }
+    }
+
+    inputText.addEventListener('input', updatePreview);
+    providerEl.addEventListener('change', updateModelOptions);
+    modelEl.addEventListener('change', updatePreview);
+    temperatureEl.addEventListener('input', updatePreview);
+    tokenEl.addEventListener('change', initModels);
+    runBtn.addEventListener('click', run);
+    cancelBtn.addEventListener('click', () => abortController && abortController.abort());
+    loadSampleBtn.addEventListener('click', setFromSample);
+
+    initModels().then(setFromSample);
+  </script>
+
+  <footer class="bg-gray-900 text-white py-12 mt-20">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Documentation</h3>
+          <ul class="space-y-2">
+            <li><a href="/api/ui" target="_blank" class="text-gray-300 hover:text-white transition-colors">Swagger UI</a></li>
+            <li><a href="/api/doc" target="_blank" class="text-gray-300 hover:text-white transition-colors">API Reference</a></li>
+            <li><a href="/api/demos" class="text-gray-300 hover:text-white transition-colors">Live Demos</a></li>
+            <li><a href="/api/models" class="text-gray-300 hover:text-white transition-colors">Models Guide</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Resources</h3>
+          <ul class="space-y-2">
+            <li><a href="https://github.com/donvito/ai-backend" class="text-gray-300 hover:text-white transition-colors">GitHub Repository</a></li>
+            <li><a href="https://github.com/donvito/ai-backend/issues" class="text-gray-300 hover:text-white transition-colors">Issues & Support</a></li>
+            <li><a href="https://github.com/donvito/ai-backend/blob/main/README.md" class="text-gray-300 hover:text-white transition-colors">Setup Guide</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-4">About</h3>
+          <p class="text-gray-300 text-sm leading-relaxed">Open source AI backend making common AI use cases easily accessible and customizable. 100% self-hosted with complete control over your data.</p>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+        <p>&copy; 2025 AI Backends. Open source under MIT License.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+
+
