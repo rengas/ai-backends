@@ -27,7 +27,7 @@ describe('checkLLMStudioAvailability', () => {
             // Second call for models
             .mockResolvedValueOnce({
                 ok: true,
-                json: () => Promise.resolve(mockModels)
+                json: () => Promise.resolve({ data: mockModels })
             });
 
         const result = await checkLLMStudioAvailability(baseUrl);
@@ -59,7 +59,7 @@ describe('checkLLMStudioAvailability', () => {
             .mockResolvedValueOnce({ ok: true }) // health check
             .mockResolvedValueOnce({
                 ok: true,
-                json: () => Promise.resolve([])
+                json: () => Promise.resolve({data: []})
             });
 
         await expect(checkLLMStudioAvailability(baseUrl))
@@ -80,7 +80,7 @@ describe('checkLLMStudioAvailability', () => {
             .mockResolvedValueOnce({ ok: true })
             .mockResolvedValueOnce({
                 ok: true,
-                json: () => Promise.resolve(mockModels)
+                json: () => Promise.resolve({ data: mockModels })
             });
 
         const result = await checkLLMStudioAvailability(baseUrl);
@@ -102,7 +102,7 @@ describe('checkLLMStudioAvailability', () => {
             .mockResolvedValueOnce({ ok: true })
             .mockResolvedValueOnce({
                 ok: true,
-                json: () => Promise.resolve(mockModels)
+                json: () => Promise.resolve({ data: mockModels })
             });
 
         const result = await checkLLMStudioAvailability(baseUrl);

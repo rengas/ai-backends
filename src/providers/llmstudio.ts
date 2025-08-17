@@ -8,7 +8,7 @@ export async function checkLLMStudioAvailability(baseUrl: string): Promise<Provi
 
         // Check for available models
         const modelsResponse = await fetch(`${baseUrl}/v1/models`);
-        const models: LLMStudioModel[] = await modelsResponse.json();
+        const models: LLMStudioModel[] = (await modelsResponse.json()).data;
 
         if (models.length === 0) {
             throw new Error('No models available in LLMStudio');

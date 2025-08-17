@@ -102,55 +102,82 @@ function configureCors() {
     };
 }
 
-export async function configureToken(): Promise<string> {
-    const token: string | undefined = process.env.DEFAULT_ACCESS_TOKEN;
-
-    if (!token) {
-        const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-        const llmStudioBaseUrl = process.env.LLMSTUDIO_BASE_URL || 'http://localhost:1234';
-
-        // Try connecting to Ollama first
-        try {
-            const ollamaConfig = await checkOllamaAvailability(ollamaBaseUrl);
-            return JSON.stringify(ollamaConfig);
-        } catch (ollamaError) {
-            console.log('Ollama not available, trying LLMStudio...');
-
-            // Try connecting to LLMStudio
-            try {
-                const llmStudioConfig = await checkLLMStudioAvailability(llmStudioBaseUrl);
-                return JSON.stringify(llmStudioConfig);
-            } catch (llmStudioError) {
-                throw new Error(
-                    'No LLM provider available. Please either:\n' +
-                    '1. Set DEFAULT_ACCESS_TOKEN, or\n' +
-                    '2. Ensure either Ollama or LLMStudio is running with at least one model available.'
-                );
-            }
-        }
-    }
-
-    return token;
-}
-
 export async function configureAuth(app: OpenAPIHono): Promise<void> {
     try {
         // Get the authentication token
-        const token = await configureToken();
+        const token: string | undefined = process.env.DEFAULT_ACCESS_TOKEN;
 
-        if (!token) {
-            throw new Error('Failed to configure authentication token');
+        if (!token && process.env.NODE_ENV !== 'development') {
+            throw new Error('Failed to configure auth. Set DEFAULT_ACCESS_TOKEN in .env');
         }
 
         // Configure API security with the token
-        configureApiSecurity(app, token);
+        configureApiSecurity(app, token || '');
 
         console.log('Authentication and security configuration initialized successfully');
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        throw new Error(`Failed to initialize authentication: ${errorMessage}`);
+        throw new Error(`\nFailed to initialize authentication: ${errorMessage}`);
     }
 }
+
+export async function checkLLMProvidersAvailability() {
+    
+    // Check if OpenAI, Anthropic, or OpenRouter are available via API keys
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+    const openrouterApiKey = process.env.OPENROUTER_API_KEY;
+
+    if (!openaiApiKey && !anthropicApiKey && !openrouterApiKey) {
+        throw new Error('No API keys found for external LLM providers');
+    }
+
+    const availableProviders: string[] = [];
+    if (openaiApiKey) availableProviders.push('OpenAI');
+    if (anthropicApiKey) availableProviders.push('Anthropic');
+    if (openrouterApiKey) availableProviders.push('OpenRouter');
+    
+    return availableProviders;
+}
+
+export async function checkProvidersAvailability() {
+    
+    const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+    const llmStudioBaseUrl = process.env.LLMSTUDIO_BASE_URL || 'http://localhost:1234';
+    const availableProviders: string[] = [];
+
+    // Try local providers Ollama and LLMStudio first
+    try {
+        await checkOllamaAvailability(ollamaBaseUrl);
+        availableProviders.push('Ollama');
+    } catch (ollamaError) {
+        console.log('[WARN] Ollama not available, trying LLMStudio...');
+        // Try connecting to LLMStudio
+        try {
+            await checkLLMStudioAvailability(llmStudioBaseUrl);
+            availableProviders.push('LLMStudio');
+        } catch (llmStudioError) {
+            console.log('[WARN] LLMStudio is not available, trying external LLM providers...');            
+        }    
+    }
+
+    // Try external providers OpenAI, Anthropic, and OpenRouter
+    try {
+        const llmProviders = await checkLLMProvidersAvailability();
+        if (llmProviders.length > 0) {
+            availableProviders.push(...llmProviders);            
+        } 
+    } catch (llmProvidersError) {
+        console.log('[WARN] No external LLM providers available. Set one of: OPENAI_API_KEY, ANTHROPIC_API_KEY, or OPENROUTER_API_KEY in .env');
+    }
+
+    if (availableProviders.length > 0) {
+        console.log('Available LLM providers:', availableProviders);
+    } else {
+        throw new Error('No LLM providers available. Either run a local LLM (Ollama/LLMStudio) or set one of: OPENAI_API_KEY, ANTHROPIC_API_KEY, or OPENROUTER_API_KEY in .env');
+    }
+}                
+
 
 const app = new OpenAPIHono();
 // Configure CORS first
@@ -165,9 +192,10 @@ app.use('/*', cors({
 
 // Initialize authentication and security
 const initialize = async () => {
-    await configureAuth(app)
+    await configureAuth(app)    
     await configureRoutes(app)
     await configureApiDocs(app)
+    await checkProvidersAvailability()
     return app;
 };
 
