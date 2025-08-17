@@ -9,6 +9,7 @@ export type ModelCapability =
   | 'emailReply'
   | 'translate'
   | 'askText'
+  | 'meetingNotes'
 
 export interface ProviderModelConfigItem {
   name: string

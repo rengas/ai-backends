@@ -162,3 +162,36 @@ Text:
 ${text}
 """`;
 }
+
+/**
+ * System prompt for meeting notes extraction
+ */
+export function meetingNotesPrompt(text: string): string {
+  return `Extract structured meeting notes from the transcript below.
+
+Return STRICT JSON that matches this TypeScript type exactly:
+{
+  "decisions": string[],
+  "tasks": { "task": string, "owner": string | null, "estimate": string | null }[],
+  "attendees": string[],
+  "meeting_date": string | null,
+  "updates": string[],
+  "summary": string
+}
+
+Rules:
+- Identify explicit decisions made.
+- Extract actionable tasks; include owner names if present (e.g., Alice, Bob). If not present, omit the owner field.
+- Include task estimates when mentioned (e.g., "2 weeks", "3 days", "quick task", "high priority"). If not present, omit the estimate field.
+- Normalize dates to ISO 8601 (YYYY-MM-DD or YYYY-MM-DDTHH:mm) when possible; otherwise omit fields.
+- Do not include any text outside JSON.
+- Extract attendee names if mentioned; include distinct names only.
+- Extract meeting date/time if present and normalize to ISO 8601 (YYYY-MM-DD or YYYY-MM-DDTHH:mm) as meeting_date.
+ - Extract short status updates or progress statements as "updates".
+ - Provide a concise 1–2 sentence "summary" of the meeting at the end.
+
+Transcript:
+"""
+${text}
+"""`;
+}
