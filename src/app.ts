@@ -35,7 +35,9 @@ function configureApiSecurity(app: OpenAPIHono, tokenConfig: string) {
                 path === '/api/email-reply-demo' ||
                 path === '/api/translate-demo' ||
                 path === '/api/models' ||
-                path === '/api/jsoneditor'
+                path === '/api/jsoneditor' ||
+                // Public read-only service catalog for demos
+                path === '/api/v1/services/models'
             ) {
                 await next();
                 return;
