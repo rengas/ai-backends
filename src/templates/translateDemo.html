@@ -18,6 +18,7 @@
       }
     }
   </script>
+  <script src="/api/shared/safedom.js"></script>
   <style>
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;}
     .loading-dots { display: inline-flex; gap: 6px; }
@@ -221,7 +222,16 @@
       const provider = providerEl.value;
       const source = modelOptions || fallbackModelOptions;
       const models = (source && source[provider]) ? source[provider] : [];
-      modelEl.innerHTML = models.map(m => '<option value="' + m.value + '">' + m.label + '</option>').join('');
+      console.log('updateModelOptions called, provider:', provider, 'models:', models);
+      console.log('setContent function:', typeof setContent);
+      console.log('createOptions function:', typeof createOptions);
+      try {
+        setContent(modelEl, createOptions(models));
+      } catch (e) {
+        console.error('Error updating model options:', e);
+        // Fallback to innerHTML if functions not available
+        modelEl.innerHTML = models.map(m => '<option value="' + escapeHtml(m.value) + '">' + escapeHtml(m.label) + '</option>').join('');
+      }
       updatePreview();
     }
 
@@ -229,7 +239,7 @@
       try { modelOptions = await fetchCapabilityModels('translate'); } catch { modelOptions = null; }
       const source = modelOptions || fallbackModelOptions;
       const providers = Object.keys(source);
-      providerEl.innerHTML = providers.map(p => '<option value="' + p + '">' + p + '</option>').join('');
+      setContent(providerEl, createOptions(providers.map(p => ({ value: p, label: p }))));
       if (!providers.includes(providerEl.value)) providerEl.value = providers[0] || '';
       updateModelOptions();
     }
@@ -255,7 +265,7 @@
       loadingIndicator.classList.remove('hidden');
       translationText.textContent = '';
       openInGoogleBtn.disabled = true;
-      usageInfo.classList.add('hidden'); usageInfo.innerHTML = '';
+      usageInfo.classList.add('hidden'); setContent(usageInfo, '');
       
       const startTime = performance.now();
       
@@ -334,11 +344,13 @@
         }
         
         metricsHtml += '</div></div>';
-        usageInfo.innerHTML = metricsHtml;
+        const metricsDiv = createElement('div');
+        metricsDiv.innerHTML = metricsHtml;
+        setContent(usageInfo, metricsDiv.firstChild);
       } catch (err) {
         translationText.textContent = err.message || 'Unknown error';
         openInGoogleBtn.disabled = true;
-        usageInfo.classList.add('hidden'); usageInfo.innerHTML = '';
+        usageInfo.classList.add('hidden'); setContent(usageInfo, '');
       } finally {
         runBtn.classList.remove('hidden');
         cancelBtn.classList.add('hidden');

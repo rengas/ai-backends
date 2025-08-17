@@ -79,6 +79,7 @@
       font-weight: 600;
     }
   </style>
+  <script src="/api/shared/safedom.js"></script>
 </head>
 <body class="bg-white min-h-screen">
   <!-- Navigation -->
@@ -247,7 +248,7 @@
     function updateModelOptions() {
       const provider = providerEl.value;
       const models = modelOptions[provider] || [];
-      modelEl.innerHTML = models.map(m => '<option value="' + m.value + '">' + m.label + '</option>').join('');
+      setContent(modelEl, createOptions(models));
       updatePreview();
     }
 
@@ -345,9 +346,15 @@
       cancelBtn.classList.remove('hidden');
       
       // Show loading animation
-      renderedText.innerHTML = '<div class="flex items-center justify-center py-8"><div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div></div>';
-      highlightsList.innerHTML = '';
-      labelLegend.innerHTML = '';
+      const loadingDiv = createElement('div', '', { className: 'flex items-center justify-center py-8' });
+      const dotsDiv = createElement('div', '', { className: 'loading-dots' });
+      dotsDiv.appendChild(createElement('div', '', { className: 'loading-dot' }));
+      dotsDiv.appendChild(createElement('div', '', { className: 'loading-dot' }));
+      dotsDiv.appendChild(createElement('div', '', { className: 'loading-dot' }));
+      loadingDiv.appendChild(dotsDiv);
+      setContent(renderedText, loadingDiv);
+      setContent(highlightsList, '');
+      setContent(labelLegend, '');
       usageInfo.classList.add('hidden');
       summaryLine.textContent = '';
       
@@ -370,22 +377,36 @@
         const data = await res.json();
         const highlights = (data?.highlights) || (data?.data?.highlights) || [];
         // Render text
-        renderedText.innerHTML = applyHighlights(req.payload.text, highlights);
+        const highlightedDiv = createElement('div');
+        highlightedDiv.innerHTML = applyHighlights(req.payload.text, highlights);
+        setContent(renderedText, highlightedDiv);
         // Render list
-        highlightsList.innerHTML = highlights.map(h => {
+        const highlightItems = highlights.map(h => {
           const c = colorFor(h.label || 'Highlight');
-          return '<li class="p-3 bg-gray-50 border border-gray-200 rounded-lg">' +
-            '<div class="flex items-center justify-between">' +
-            '<span class="label-pill ' + c.pill + '">' + escapeHtml(String(h.label || 'Highlight')) + '</span>' +
-            '<span class="text-xs text-gray-500 mono">[' + h.char_start_position + ', ' + h.char_end_position + ')</span>' +
-            '</div>' +
-            '<div class="text-gray-800 mt-1">' + escapeHtml(String(h.description || '')) + '</div>' +
-          '</li>';
-        }).join('');
+          const li = createElement('li', '', { className: 'p-3 bg-gray-50 border border-gray-200 rounded-lg' });
+          
+          const flexDiv = createElement('div', '', { className: 'flex items-center justify-between' });
+          const labelSpan = createElement('span', '', { className: 'label-pill ' + c.pill });
+          labelSpan.textContent = String(h.label || 'Highlight');
+          flexDiv.appendChild(labelSpan);
+          flexDiv.appendChild(createElement('span', '[' + h.char_start_position + ', ' + h.char_end_position + ')', { className: 'text-xs text-gray-500 mono' }));
+          
+          li.appendChild(flexDiv);
+          li.appendChild(createElement('div', String(h.description || ''), { className: 'text-gray-800 mt-1' }));
+          return li;
+        });
+        setContent(highlightsList, highlightItems);
         // Legend
         const counts = {};
         for (const h of highlights) counts[h.label || 'Highlight'] = (counts[h.label || 'Highlight'] || 0) + 1;
-        labelLegend.innerHTML = Object.entries(counts).map(([label, count]) => { const c = colorFor(label); return '<span class="label-pill ' + c.pill + '">' + escapeHtml(label) + '<span class="text-gray-500">(' + count + ')</span></span>'; }).join('');
+        const legendItems = Object.entries(counts).map(([label, count]) => {
+          const c = colorFor(label);
+          const span = createElement('span', '', { className: 'label-pill ' + c.pill });
+          span.appendChild(document.createTextNode(label));
+          span.appendChild(createElement('span', '(' + count + ')', { className: 'text-gray-500' }));
+          return span;
+        });
+        setContent(labelLegend, legendItems);
         // Usage - handle different response formats
         const usage = data?.usage || data?.data?.usage;
         usageInfo.classList.remove('hidden');
@@ -452,19 +473,21 @@
         }
         
         metricsHtml += '</div></div>';
-        usageInfo.innerHTML = metricsHtml;
+        const metricsDiv = createElement('div');
+        metricsDiv.innerHTML = metricsHtml;
+        setContent(usageInfo, metricsDiv.firstChild);
         // Summary
         summaryLine.textContent = 'Conversation Analysis: ' + highlights.length + ' key highlights identified';
       } catch (err) {
         if (err.name === 'AbortError') {
-          renderedText.innerHTML = '<div class="text-amber-600">Request cancelled by user</div>';
+          setContent(renderedText, createElement('div', 'Request cancelled by user', { className: 'text-amber-600' }));
         } else {
-          renderedText.innerHTML = '<div class="text-red-600">' + escapeHtml(err.message) + '</div>';
+          setContent(renderedText, createElement('div', err.message || 'Unknown error', { className: 'text-red-600' }));
         }
-        highlightsList.innerHTML = '';
-        labelLegend.innerHTML = '';
+        setContent(highlightsList, '');
+        setContent(labelLegend, '');
         usageInfo.classList.add('hidden');
-        usageInfo.innerHTML = '';
+        setContent(usageInfo, '');
         summaryLine.textContent = '';
       } finally {
         runBtn.classList.remove('hidden');
