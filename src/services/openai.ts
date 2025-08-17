@@ -4,11 +4,17 @@ import { openai } from '@ai-sdk/openai';
 import { generateObject, generateText } from "ai";
 
 const OPENAI_MODEL = 'gpt-4.1-nano'
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
-const openai1 = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});
+export function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OpenAI API key is not configured. Set OPENAI_API_KEY or use another provider.');
+  }
+  return new OpenAI({
+    apiKey,
+    baseURL: process.env.OPENAI_BASE_URL,
+  });
+}
 
 export async function generateChatStructuredResponse(
   prompt: string,
@@ -47,7 +53,7 @@ export async function generateChatTextResponse(
 }
 
 
-export { openai1 as openai, OPENAI_MODEL } 
+export { OPENAI_MODEL } 
 
 /**
  * Get available models from OpenAI
