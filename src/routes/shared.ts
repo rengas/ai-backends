@@ -27,8 +27,10 @@ function getSafedomJs() {
 }
 
 router.openapi(safedomRoute, (c) => {
-  c.header('Content-Type', 'application/javascript')
-  return c.text(getSafedomJs())
+  const jsContent = getSafedomJs()
+  return c.newResponse(jsContent, 200, {
+    'Content-Type': 'application/javascript; charset=utf-8'
+  })
 })
 
 export default {
