@@ -2,7 +2,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-import type {ProviderConfig} from "./providers/types";
 import {bearerAuth} from "hono/bearer-auth";
 import configureRoutes from "./utils/apiRoutes";
 import configureApiDocs from "./utils/apiDocs";
@@ -40,17 +39,6 @@ function configureApiSecurity(app: OpenAPIHono, tokenConfig: string) {
             ) {
                 await next();
                 return;
-            }
-
-            try {
-                const config = JSON.parse(tokenConfig) as ProviderConfig;
-                // Skip bearer auth for local LLM providers
-                if (config.type === 'ollama' || config.type === 'llmstudio') {
-                    await next();
-                    return;
-                }
-            } catch (e) {
-                // If tokenConfig is not JSON, treat it as a regular token
             }
 
             return bearerAuth({ token: tokenConfig })(c, next);

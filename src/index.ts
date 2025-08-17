@@ -2,15 +2,14 @@ import initialise from './app'
 import displayLogo from './utils/logo'
 import { serve } from '@hono/node-server';
 
-
-// Display ASCII logo on startup
-displayLogo()
-
 const PORT = process.env.PORT || 3000;
 
 async function startServer() {
     try {
         const app = await initialise();
+
+        // Display ASCII logo on startup
+        displayLogo()
 
         console.log(`Server is starting on port ${PORT}...`);
 
