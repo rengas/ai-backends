@@ -116,6 +116,7 @@
       background-size: 1000px 100%;
     }
   </style>
+  <script src="/api/shared/safedom.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
   <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
@@ -358,6 +359,19 @@
   </div>
 
   <script>
+    // HTML escape function for safe rendering - redefine if not already available from safedom.js
+    if (typeof escapeHtml === 'undefined') {
+      window.escapeHtml = function(str) {
+        if (str == null) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+    }
+    
     const state = {
       data: null,
       selectedProviders: new Set(),
@@ -597,11 +611,11 @@
             const caps = (m.capabilities || []).map(capBadge).join(' ')
             const notes = state.showNotes && m.notes ? truncate(m.notes, 120) : ''
             row.innerHTML = `
-              <td class="px-4 py-3 text-sm ${idx === 0 ? 'font-medium text-gray-900' : 'text-gray-500'}">${idx === 0 ? provider : ''}</td>
+              <td class="px-4 py-3 text-sm ${idx === 0 ? 'font-medium text-gray-900' : 'text-gray-500'}">${idx === 0 ? escapeHtml(provider) : ''}</td>
               <td class="px-4 py-3 text-sm">
                 <div class="flex items-center gap-1">
-                  <button class="font-mono text-purple-700 hover:underline model-link" data-provider="${provider}" data-model='${JSON.stringify(m).replace(/'/g, '&apos;')}'>${m.name}</button>
-                  <button class="copy-btn text-gray-400 hover:text-gray-600" data-copy="${m.name}" title="Copy model name" aria-label="Copy model name">
+                  <button class="font-mono text-purple-700 hover:underline model-link" data-provider="${escapeHtml(provider)}" data-model='${escapeHtml(JSON.stringify(m))}'>${escapeHtml(m.name)}</button>
+                  <button class="copy-btn text-gray-400 hover:text-gray-600" data-copy="${escapeHtml(m.name)}" title="Copy model name" aria-label="Copy model name">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
@@ -609,7 +623,7 @@
                 </div>
               </td>
               <td class="px-4 py-3 text-sm"><div class="flex flex-wrap gap-1">${caps}</div></td>
-              ${state.showNotes ? `<td class="px-4 py-3 text-sm text-gray-600">${notes}</td>` : ''}
+              ${state.showNotes ? `<td class="px-4 py-3 text-sm text-gray-600">${escapeHtml(notes)}</td>` : ''}
             `
             tbody.appendChild(row)
           })
@@ -628,7 +642,7 @@
           section.className = 'mb-5'
           const title = document.createElement('div')
           title.className = 'flex items-center justify-between'
-          title.innerHTML = `<h3 class=\"font-semibold text-gray-900\">${provider}</h3><span class=\"text-xs text-gray-500\">${models.length} / ${allModels.length}</span>`
+          title.innerHTML = `<h3 class=\"font-semibold text-gray-900\">${escapeHtml(provider)}</h3><span class=\"text-xs text-gray-500\">${models.length} / ${allModels.length}</span>`
           section.appendChild(title)
 
           const grid = document.createElement('div')
@@ -638,11 +652,11 @@
             const card = document.createElement('div')
             card.className = 'model-card p-4 rounded-lg border border-gray-200 hover:border-purple-300'
             const caps = (m.capabilities || []).map(capBadge).join(' ')
-            const notesHtml = state.showNotes && m.notes ? `<div class="text-gray-600 text-sm mt-2 leading-relaxed">${truncate(m.notes, 180)}</div>` : ''
+            const notesHtml = state.showNotes && m.notes ? `<div class="text-gray-600 text-sm mt-2 leading-relaxed">${escapeHtml(truncate(m.notes, 180))}</div>` : ''
             card.innerHTML = `
               <div class="flex items-start justify-between mb-2">
-                <button class="font-mono text-purple-700 font-semibold hover:underline text-left model-link" data-provider="${provider}" data-model='${JSON.stringify(m).replace(/'/g, '&apos;')}'>${m.name}</button>
-                <button class="copy-btn text-gray-400 hover:text-gray-600 opacity-70 hover:opacity-100" data-copy="${m.name}" title="Copy model name" aria-label="Copy model name">
+                <button class="font-mono text-purple-700 font-semibold hover:underline text-left model-link" data-provider="${escapeHtml(provider)}" data-model='${escapeHtml(JSON.stringify(m))}'>${escapeHtml(m.name)}</button>
+                <button class="copy-btn text-gray-400 hover:text-gray-600 opacity-70 hover:opacity-100" data-copy="${escapeHtml(m.name)}" title="Copy model name" aria-label="Copy model name">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
@@ -703,11 +717,11 @@
             row.className = 'table-row'
             row.innerHTML = `
               <td class="px-4 py-3 text-sm ${capRowIndex === 0 ? 'font-medium' : 'text-gray-500'}">${capRowIndex === 0 ? capBadge(cap) : ''}</td>
-              <td class="px-4 py-3 text-sm text-gray-900">${provider}</td>
+              <td class="px-4 py-3 text-sm text-gray-900">${escapeHtml(provider)}</td>
               <td class="px-4 py-3 text-sm font-mono text-purple-700">
                 ${filtered.map(m => `<span class=\"inline-flex items-center gap-1 mr-2\">
-                  <button class=\"hover:underline model-link\" data-provider=\"${provider}\" data-model='${JSON.stringify(m).replace(/'/g, '&apos;')}'>${m.name}</button>
-                  <button class=\"copy-btn text-gray-400 hover:text-gray-600\" data-copy=\"${m.name}\" title=\"Copy model name\" aria-label=\"Copy model name\">
+                  <button class=\"hover:underline model-link\" data-provider=\"${escapeHtml(provider)}\" data-model='${escapeHtml(JSON.stringify(m))}'>${escapeHtml(m.name)}</button>
+                  <button class=\"copy-btn text-gray-400 hover:text-gray-600\" data-copy=\"${escapeHtml(m.name)}\" title=\"Copy model name\" aria-label=\"Copy model name\">
                     <svg class=\"w-3.5 h-3.5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
                       <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2\" />
                     </svg>
@@ -768,11 +782,11 @@
             <div class="absolute inset-0 opacity-10">
               <svg class="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <pattern id="pattern-${cap}" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <pattern id="pattern-${escapeHtml(cap)}" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
                     <circle cx="20" cy="20" r="2" fill="currentColor" />
                   </pattern>
                 </defs>
-                <rect width="100%" height="100%" fill="url(#pattern-${cap})" />
+                <rect width="100%" height="100%" fill="url(#pattern-${escapeHtml(cap)})" />
               </svg>
             </div>
             <div class="absolute inset-0 shimmer opacity-20"></div>
@@ -782,8 +796,8 @@
                   ${getCapabilityIcon(cap)}
                 </div>
                 <div>
-                  <h3 class="font-bold text-xl capitalize">${cap}</h3>
-                  <p class="text-white/80 text-sm mt-0.5">${getCapabilityDescription(cap)}</p>
+                  <h3 class="font-bold text-xl capitalize">${escapeHtml(cap)}</h3>
+                  <p class="text-white/80 text-sm mt-0.5">${escapeHtml(getCapabilityDescription(cap))}</p>
                 </div>
               </div>
               <div class="flex flex-col items-end gap-1 text-right">
@@ -818,14 +832,14 @@
                 <div class="relative flex items-start gap-3 ${!isLast ? 'mb-3 pb-3 border-b border-gray-100' : ''} group/item">
                   <div class="flex-1 min-w-0">
                     <button class="font-mono text-${config.accent}-700 hover:text-${config.accent}-900 hover:underline text-left model-link text-sm font-medium break-all" 
-                            data-provider="${provider}" 
-                            data-model='${JSON.stringify(m).replace(/'/g, '&apos;')}'>
-                      ${m.name}
+                            data-provider="${escapeHtml(provider)}" 
+                            data-model='${escapeHtml(JSON.stringify(m))}'>
+                      ${escapeHtml(m.name)}
                     </button>
-                    ${state.showNotes && m.notes ? `<div class="text-xs text-gray-600 mt-1 leading-relaxed line-clamp-2">${m.notes}</div>` : ''}
+                    ${state.showNotes && m.notes ? `<div class="text-xs text-gray-600 mt-1 leading-relaxed line-clamp-2">${escapeHtml(m.notes)}</div>` : ''}
                   </div>
                   <button class="copy-btn flex-shrink-0 p-1.5 rounded-md text-gray-400 hover:text-${config.accent}-600 hover:bg-${config.accent}-50 opacity-0 group-hover/item:opacity-100 transition-all duration-200" 
-                          data-copy="${m.name}" 
+                          data-copy="${escapeHtml(m.name)}" 
                           title="Copy model name" 
                           aria-label="Copy model name">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -840,7 +854,7 @@
               <div class="p-5">
                 <div class="mb-4 pb-3 border-b border-gray-200">
                   <div class="flex items-center justify-between">
-                    <h4 class="font-semibold text-gray-900 text-base">${provider}</h4>
+                    <h4 class="font-semibold text-gray-900 text-base">${escapeHtml(provider)}</h4>
                     <span class="px-2 py-1 text-xs font-medium text-${config.accent}-700 bg-${config.accent}-100 rounded-full">
                       ${filtered.length} model${filtered.length !== 1 ? 's' : ''}
                     </span>

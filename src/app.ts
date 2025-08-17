@@ -37,7 +37,9 @@ function configureApiSecurity(app: OpenAPIHono, tokenConfig: string) {
                 path === '/api/models' ||
                 path === '/api/jsoneditor' ||
                 // Public read-only service catalog for demos
-                path === '/api/v1/services/models'
+                path === '/api/v1/services/models' ||
+                // Public shared resources
+                path.startsWith('/api/shared/')
             ) {
                 await next();
                 return;

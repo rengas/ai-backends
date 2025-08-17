@@ -60,6 +60,7 @@
       font-weight: 600;
     }
   </style>
+  <script src="/api/shared/safedom.js"></script>
 </head>
 <body class="bg-white min-h-screen">
   <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
@@ -204,7 +205,7 @@
       const provider = providerEl.value;
       const source = modelOptions || fallbackModelOptions;
       const models = (source && source[provider]) ? source[provider] : [];
-      modelEl.innerHTML = models.map(m => '<option value="' + m.value + '">' + m.label + '</option>').join('');
+      setContent(modelEl, createOptions(models));
       updatePreview();
     }
 
@@ -233,7 +234,7 @@
       }
       const source = modelOptions || fallbackModelOptions;
       const providers = Object.keys(source);
-      providerEl.innerHTML = providers.map(p => '<option value="' + p + '">' + p + '</option>').join('');
+      setContent(providerEl, createOptions(providers.map(p => ({ value: p, label: p }))));
       if (!providers.includes(providerEl.value)) {
         providerEl.value = providers[0] || '';
       }
@@ -266,7 +267,7 @@
     }
 
     function renderUsage(usage, responseTime) {
-      if (!usage && !responseTime) { usageInfo.classList.add('hidden'); usageInfo.innerHTML = ''; return; }
+      if (!usage && !responseTime) { usageInfo.classList.add('hidden'); setContent(usageInfo, ''); return; }
       usageInfo.classList.remove('hidden');
       
       let metricsHtml = '<div class="metrics-container">';
@@ -333,7 +334,9 @@
       }
       
       metricsHtml += '</div></div>';
-      usageInfo.innerHTML = metricsHtml;
+      const metricsDiv = createElement('div');
+      metricsDiv.innerHTML = metricsHtml;
+      setContent(usageInfo, metricsDiv.firstChild);
     }
 
     function renderResult(data, responseTime) {
@@ -342,13 +345,14 @@
       const emotions = data?.emotions || data?.data?.emotions || [];
       sentimentBadge.textContent = sentiment ? ('Sentiment: ' + sentiment) : '';
       confidenceEl.textContent = (typeof confidence === 'number') ? ('Confidence: ' + (confidence * 100).toFixed(1) + '%') : '';
-      emotionsList.innerHTML = emotions.map(e => {
+      const emotionItems = emotions.map(e => {
         const score = (typeof e.score === 'number') ? (e.score * 100).toFixed(1) + '%' : '';
-        return '<li class="p-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between">' +
-          '<span class="font-medium text-gray-800">' + String(e.emotion || '') + '</span>' +
-          '<span class="text-xs text-gray-500">' + score + '</span>' +
-        '</li>'
-      }).join('');
+        const li = createElement('li', '', { className: 'p-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between' });
+        li.appendChild(createElement('span', String(e.emotion || ''), { className: 'font-medium text-gray-800' }));
+        li.appendChild(createElement('span', score, { className: 'text-xs text-gray-500' }));
+        return li;
+      });
+      setContent(emotionsList, emotionItems);
       const usage = data?.usage || data?.data?.usage;
       renderUsage(usage, responseTime);
     }
@@ -366,9 +370,9 @@
       loadingIndicator.classList.remove('hidden');
       sentimentBadge.textContent = '';
       confidenceEl.textContent = '';
-      emotionsList.innerHTML = '';
+      setContent(emotionsList, '');
       usageInfo.classList.add('hidden');
-      usageInfo.innerHTML = '';
+      setContent(usageInfo, '');
 
       const startTime = performance.now();
 
@@ -384,9 +388,9 @@
         const data = await res.json();
         renderResult(data, responseTime);
       } catch (err) {
-        emotionsList.innerHTML = '<li class="text-red-600">' + (err.message || 'Unknown error') + '</li>';
+        setContent(emotionsList, createElement('li', err.message || 'Unknown error', { className: 'text-red-600' }));
         usageInfo.classList.add('hidden');
-        usageInfo.innerHTML = '';
+        setContent(usageInfo, '');
       } finally {
         runBtn.classList.remove('hidden');
         cancelBtn.classList.add('hidden');

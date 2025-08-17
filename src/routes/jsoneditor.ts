@@ -400,11 +400,12 @@ const jsonEditorHTML = `
         });
 
         // Add tooltips for keyboard shortcuts
-        document.querySelector('.controls').innerHTML += \`
-            <div style="margin-top: 15px; font-size: 12px; color: #6c757d;">
-                💡 Shortcuts: Ctrl+Enter (Copy), Ctrl+L (Format), Ctrl+M (Minify)
-            </div>
-        \`;
+        const tooltipDiv = document.createElement('div');
+        tooltipDiv.style.marginTop = '15px';
+        tooltipDiv.style.fontSize = '12px';
+        tooltipDiv.style.color = '#6c757d';
+        tooltipDiv.textContent = '💡 Shortcuts: Ctrl+Enter (Copy), Ctrl+L (Format), Ctrl+M (Minify)';
+        document.querySelector('.controls').appendChild(tooltipDiv);
     </script>
 </body>
 </html>
