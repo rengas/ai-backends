@@ -222,16 +222,7 @@
       const provider = providerEl.value;
       const source = modelOptions || fallbackModelOptions;
       const models = (source && source[provider]) ? source[provider] : [];
-      console.log('updateModelOptions called, provider:', provider, 'models:', models);
-      console.log('setContent function:', typeof setContent);
-      console.log('createOptions function:', typeof createOptions);
-      try {
-        setContent(modelEl, createOptions(models));
-      } catch (e) {
-        console.error('Error updating model options:', e);
-        // Fallback to innerHTML if functions not available
-        modelEl.innerHTML = models.map(m => '<option value="' + escapeHtml(m.value) + '">' + escapeHtml(m.label) + '</option>').join('');
-      }
+      setContent(modelEl, createOptions(models));
       updatePreview();
     }
 
