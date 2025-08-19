@@ -78,7 +78,10 @@ router.openapi(
           }
         }
       }
-    }
+    },
+    summary: 'Analyze sentiment of text',
+    description: 'This endpoint receives a text and uses an LLM to analyze the sentiment of the text.',
+    tags: ['API']
   }),
   handleSentimentRequest as any
 )

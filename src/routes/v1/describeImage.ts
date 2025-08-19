@@ -33,7 +33,10 @@ router.openapi(
       200: { description: 'Returns the image description.', content: { 'application/json': { schema: describeImageResponseSchema } } },
       400: { description: 'Bad Request - Invalid input, missing images, unsupported service, or unsupported model', content: { 'application/json': { schema: describeImageErrorSchema } } },
       401: { description: 'Unauthorized - Bearer token required', content: { 'application/json': { schema: { type: 'object', properties: { error: { type: 'string' } } } } } }
-    }
+    },
+    summary: 'Describe an image',
+    description: 'This endpoint receives an image and uses an LLM to generate a description of the image.',
+    tags: ['API']
   }),
   handleDescribeImageRequest as any
 )

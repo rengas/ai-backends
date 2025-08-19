@@ -63,7 +63,10 @@ router.openapi(
           }
         }
       }
-    }
+    },
+    summary: 'Extract keywords from text',
+    description: 'This endpoint receives a text and uses an LLM to extract keywords from the text.',
+    tags: ['API']
   }),
   handleKeywordsRequest as any
 )

@@ -64,7 +64,10 @@ router.openapi(
           }
         }
       }
-    }
+    },
+    summary: 'Summarize text',
+    description: 'This endpoint receives a text and uses an LLM to summarize the text.',
+    tags: ['API']
   }),
   handleSummarizeRequest as any
 )

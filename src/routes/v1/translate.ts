@@ -51,7 +51,10 @@ router.openapi(
           }
         }
       }
-    }
+    },
+    summary: 'Translate text',
+    description: 'This endpoint receives a text and uses an LLM to translate the text to the target language.',
+    tags: ['API']
   }),
   handleTranslateRequest as any
 )

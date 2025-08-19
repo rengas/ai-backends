@@ -56,13 +56,16 @@ router.openapi(
         },
       },
     },
+    summary: 'Generate an email reply',
+    description: 'This endpoint receives an email text and uses an LLM to generate a reply to the email.',
+    tags: ['API']
   }),
   handleEmailReplyRequest as any
 )
 
 export default {
   handler: router,
-  mountPath: 'emailReply',
+  mountPath: 'email-reply',
 }
 
 

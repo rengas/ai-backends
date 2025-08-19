@@ -281,7 +281,7 @@
       const startTime = performance.now();
       
       try {
-        const res = await fetch('/api/v1/emailReply', { method: 'POST', headers, body: JSON.stringify(req), signal: abortController.signal });
+        const res = await fetch('/api/v1/email-reply', { method: 'POST', headers, body: JSON.stringify(req), signal: abortController.signal });
         const endTime = performance.now();
         const responseTime = (endTime - startTime).toFixed(2);
         

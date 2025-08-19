@@ -216,8 +216,7 @@ export async function processStructuredOutputRequest(
 
 export async function processTextOutputRequest(
   prompt: string,
-  config: z.infer<typeof llmRequestSchema>,
-  temperature: number = 0
+  config: z.infer<typeof llmRequestSchema>,  
 ): Promise<any> {
   const provider = config.provider;
   const model = config.model;
@@ -232,7 +231,7 @@ export async function processTextOutputRequest(
     case Provider.anthropic:
       return await anthropicService.generateChatTextResponse(prompt, model);
     case Provider.openrouter:
-      return await openrouterService.generateChatTextResponse(prompt, model, temperature);
+      return await openrouterService.generateChatTextResponse(prompt, model);
     case Provider.lmstudio:
       return await lmstudioService.generateChatTextResponse(prompt, model);
     default:

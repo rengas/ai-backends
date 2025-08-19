@@ -40,14 +40,12 @@ export async function generateChatStructuredResponse<T extends z.ZodType>(
  */
 export async function generateChatTextResponse(
   prompt: string,
-  model: string = openrouterConfig.model,
-  temperature: number = 0
+  model: string = openrouterConfig.model
 ): Promise<any> {
   try {
     const result = await generateText({
       model: openrouter(model),
       prompt,
-      temperature,
     });
 
     return {

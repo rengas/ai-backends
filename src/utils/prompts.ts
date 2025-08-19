@@ -195,3 +195,75 @@ Transcript:
 ${text}
 """`;
 }
+
+/**
+ * System prompt for task planning
+ */
+export function plannerPrompt(
+  task: string,
+  context?: string,
+  maxSteps?: number,
+  detailLevel?: 'basic' | 'detailed' | 'comprehensive',
+  includeTimeEstimates?: boolean,
+  includeRisks?: boolean,
+  domain?: string
+): string {
+  const contextLine = context ? `\nContext/Constraints: ${context}` : '';
+  const domainLine = domain ? `\nDomain/Field: ${domain}` : '';
+  const stepsLine = maxSteps ? `\nMaximum number of steps: ${maxSteps}` : '';
+  
+  let detailInstructions = '';
+  switch (detailLevel) {
+    case 'basic':
+      detailInstructions = 'Keep descriptions brief and high-level.';
+      break;
+    case 'comprehensive':
+      detailInstructions = 'Provide comprehensive, detailed descriptions for each step with specific implementation details.';
+      break;
+    default: // 'detailed'
+      detailInstructions = 'Provide clear, actionable descriptions with moderate detail.';
+  }
+
+  return `Create a well-structured, actionable plan to accomplish the following task.
+
+Task: ${task}${contextLine}${domainLine}${stepsLine}
+
+${detailInstructions}
+
+Format the plan as follows:
+
+# [Plan Title]
+
+## Overview
+[Brief description of what the plan accomplishes]
+
+## Timeline
+[Detailed timeline of the plan in a table markdown format]
+
+${includeTimeEstimates ? '## Estimated Total Time\n[Total time estimate]\n\n' : ''}## Steps
+
+[For each step, format as:]
+### Step [number]: [Step Title]
+${includeTimeEstimates ? '**Time Estimate:** [time]\n' : ''}**Priority:** [high/medium/low]
+**Dependencies:** [List any prerequisite steps or "None"]
+
+[Detailed description of what needs to be done]
+
+${includeRisks ? '## Potential Risks\n\n[List potential risks or challenges with mitigation strategies]\n\n' : ''}## Success Criteria
+
+[List clear criteria for successful completion]
+
+## Key Assumptions
+
+[List any assumptions made while creating this plan]
+
+Rules:
+- Number steps sequentially (Step 1, Step 2, etc.)
+- Make each step actionable and specific
+- Clearly indicate dependencies between steps
+- ${includeTimeEstimates ? 'Provide realistic time estimates in human-readable format (e.g., "30 minutes", "2 hours")' : 'Focus on clear action items'}
+- ${includeRisks ? 'Include mitigation strategies for each risk' : 'Focus on actionable steps'}
+- Ensure the plan is practical and achievable
+- Use clear, professional language
+- Structure the plan for easy reading and understanding`;
+}
