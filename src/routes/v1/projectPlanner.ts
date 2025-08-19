@@ -49,8 +49,7 @@ async function handlePlannerRequest(c: Context) {
     // Make API call to LLM using text output
     const result = await processTextOutputRequest(
       prompt,
-      config,
-      config.temperature || 0.3
+      config
     )
     
     // Calculate processing time
