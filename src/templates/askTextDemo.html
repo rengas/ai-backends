@@ -54,6 +54,34 @@
       font-size: 14px;
       font-weight: 600;
     }
+
+    /* Markdown table styling */
+    .md-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 1rem 0;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: white;
+    }
+    .md-table thead th {
+      background: #f9fafb;
+      color: #374151;
+      font-weight: 600;
+      padding: 0.75rem 0.875rem;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+    .md-table td {
+      padding: 0.75rem 0.875rem;
+      border-bottom: 1px solid #f3f4f6;
+      color: #1f2937;
+      vertical-align: top;
+    }
+    .md-table tbody tr:nth-child(odd) td { background: #fafafa; }
+    .md-table tbody tr:last-child td { border-bottom: none; }
   </style>
   <script src="/api/shared/safedom.js"></script>
 </head>
@@ -127,6 +155,14 @@
           <div class="flex flex-wrap gap-2">
             <button type="button" id="chipSupport" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Support Chat</button>
             <button type="button" id="chipLHC" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">LHC Article</button>
+            <button type="button" id="chipDocQA" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Document Q&A</button>
+            <button type="button" id="chipStudy" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Study Assistant</button>
+            <button type="button" id="chipContext" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Context Analysis</button>
+            <button type="button" id="chipTriage" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Support Triage</button>
+            <button type="button" id="chipCompliance" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Compliance</button>
+            <button type="button" id="chipExtract" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Data Extraction</button>
+            <button type="button" id="chipMeetings" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Meetings Q&A</button>
+            <button type="button" id="chipFAQ" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">FAQ Builder</button>
           </div>
         </div>
 
@@ -167,12 +203,17 @@
       <section class="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
         <h2 class="text-lg font-semibold mb-3">Answer</h2>
         <div id="usageInfo" class="hidden mb-3 text-sm"></div>
-        <div id="answerText" class="p-4 rounded-lg bg-gray-50 border border-gray-200 leading-7 text-gray-900 min-h-[200px]">
-          <span class="text-gray-500">Your answer will appear here...</span>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden">
+          <div class="flex items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-purple"></div>
+          </div>
+          <p class="text-center text-gray-600 mt-2">Processing your question...</p>
         </div>
-        
-        <!-- Token Usage Info -->
-        <div id="tokenInfo" class="mt-4 hidden">
+
+        <!-- Token Usage Info (moved above response) -->
+        <div id="tokenInfo" class="mb-4 hidden">
           <div class="metrics-container">
             <div class="grid grid-cols-3 gap-2">
               <div class="metric-item">
@@ -211,6 +252,10 @@
             </div>
           </div>
         </div>
+
+        <div id="answerText" class="p-4 rounded-lg bg-gray-50 border border-gray-200 leading-7 text-gray-900 min-h-[200px]">
+          <span class="text-gray-500">Your answer will appear here...</span>
+        </div>
       </section>
     </div>
 
@@ -227,6 +272,7 @@
           </div>
           <h3 class="text-lg font-semibold text-gray-900 mb-1">Document Q&amp;A</h3>
           <p class="text-gray-600 text-sm">Answer specific questions about documents, articles, or reports based on their content.</p>
+          <button id="loadDocQA" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
         </div>
         <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
           <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
@@ -234,6 +280,7 @@
           </div>
           <h3 class="text-lg font-semibold text-gray-900 mb-1">Study Assistant</h3>
           <p class="text-gray-600 text-sm">Help students understand complex topics by answering questions about study materials.</p>
+          <button id="loadStudy" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
         </div>
         <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
           <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
@@ -241,6 +288,7 @@
           </div>
           <h3 class="text-lg font-semibold text-gray-900 mb-1">Context Analysis</h3>
           <p class="text-gray-600 text-sm">Extract specific information or insights from any given text context quickly and accurately.</p>
+          <button id="loadContext" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
         </div>
         <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
           <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
@@ -248,6 +296,7 @@
           </div>
           <h3 class="text-lg font-semibold text-gray-900 mb-1">Customer Support Triage</h3>
           <p class="text-gray-600 text-sm">Identify intent and extract key details from support chats to speed up resolution.</p>
+          <button id="loadSupportTriage" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
         </div>
         <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
           <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mb-4">
@@ -255,6 +304,7 @@
           </div>
           <h3 class="text-lg font-semibold text-gray-900 mb-1">Compliance Checking</h3>
           <p class="text-gray-600 text-sm">Check text against policy or regulatory requirements and surface issues.</p>
+          <button id="loadCompliance" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
         </div>
         <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
           <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
@@ -262,6 +312,7 @@
           </div>
           <h3 class="text-lg font-semibold text-gray-900 mb-1">Data Extraction</h3>
           <p class="text-gray-600 text-sm">Pull names, dates, IDs, and key facts from unstructured text.</p>
+          <button id="loadExtraction" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
         </div>
         <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
           <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
@@ -269,6 +320,7 @@
           </div>
           <h3 class="text-lg font-semibold text-gray-900 mb-1">Meeting Minutes Q&amp;A</h3>
           <p class="text-gray-600 text-sm">Ask targeted questions on meeting transcripts and decisions.</p>
+          <button id="loadMeetings" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
         </div>
         <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
           <div class="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center mb-4">
@@ -276,6 +328,7 @@
           </div>
           <h3 class="text-lg font-semibold text-gray-900 mb-1">FAQ Builder</h3>
           <p class="text-gray-600 text-sm">Generate or validate FAQs from a corpus and answer user queries.</p>
+          <button id="loadFAQ" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
         </div>
       </div>
     </div>
@@ -310,6 +363,23 @@
     const totalTokensEl = document.getElementById('totalTokens');
     const chipSupport = document.getElementById('chipSupport');
     const chipLHC = document.getElementById('chipLHC');
+    const chipDocQA = document.getElementById('chipDocQA');
+    const chipStudy = document.getElementById('chipStudy');
+    const chipContext = document.getElementById('chipContext');
+    const chipTriage = document.getElementById('chipTriage');
+    const chipCompliance = document.getElementById('chipCompliance');
+    const chipExtract = document.getElementById('chipExtract');
+    const chipMeetings = document.getElementById('chipMeetings');
+    const chipFAQ = document.getElementById('chipFAQ');
+    // Footer example buttons
+    const btnDocQA = document.getElementById('loadDocQA');
+    const btnStudy = document.getElementById('loadStudy');
+    const btnContext = document.getElementById('loadContext');
+    const btnSupportTriage = document.getElementById('loadSupportTriage');
+    const btnCompliance = document.getElementById('loadCompliance');
+    const btnExtraction = document.getElementById('loadExtraction');
+    const btnMeetings = document.getElementById('loadMeetings');
+    const btnFAQ = document.getElementById('loadFAQ');
 
     let abortController = null;
 
@@ -405,7 +475,9 @@
 
       runBtn.classList.add('hidden');
       cancelBtn.classList.remove('hidden');
-      answerText.innerHTML = '<span class="text-gray-500">Processing your question...</span>';
+      document.getElementById('loadingState').classList.remove('hidden');
+      answerText.classList.add('hidden');
+      answerText.innerHTML = '';
       tokenInfo.classList.add('hidden');
       
       abortController = new AbortController();
@@ -442,8 +514,13 @@
 
         const data = await response.json();
         
-        // Display the answer
-        answerText.textContent = data.answer;
+        // Display the answer with Markdown support (or placeholder if empty)
+        const ans = (data.answer || '').trim();
+        if (ans) {
+          answerText.innerHTML = renderMarkdownSimple(ans);
+        } else {
+          answerText.innerHTML = '<span class="text-gray-500">Your answer will appear here...</span>';
+        }
         
         // Display token usage
         if (data.usage) {
@@ -476,6 +553,12 @@
       } finally {
         runBtn.classList.remove('hidden');
         cancelBtn.classList.add('hidden');
+        document.getElementById('loadingState').classList.add('hidden');
+        answerText.classList.remove('hidden');
+        // If nothing was rendered, show placeholder
+        if (!answerText.innerHTML || !answerText.innerHTML.trim()) {
+          answerText.innerHTML = '<span class="text-gray-500">Your answer will appear here...</span>';
+        }
         abortController = null;
       }
     }
@@ -487,6 +570,79 @@
     }
 
     
+
+    // Basic Markdown renderer (safe: escapes HTML first)
+    function renderMarkdownSimple(md) {
+      if (!md) return '';
+      let s = escapeHtml(String(md));
+
+      // Tables: detect header + separator + rows
+      s = s.replace(/(^|\n)(\|.*\|)\n(\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?)\n([\s\S]*?)(\n{2,}|$)/g, (m, pfx, header, sep, _g, body, tail) => {
+        const split = line => line.trim().replace(/^\|/, '').replace(/\|$/, '').split(/\s*\|\s*/);
+        const headers = split(header);
+        const aligns = split(sep).map(c => {
+          const t = c.trim();
+          const left = t.startsWith(':');
+          const right = t.endsWith(':');
+          if (left && right) return 'center';
+          if (right) return 'right';
+          if (left) return 'left';
+          return 'left';
+        });
+        const rows = [];
+        body.split('\n').forEach(line => {
+          if (line.trim().startsWith('|')) rows.push(split(line));
+        });
+        let html = '<table class="md-table"><thead><tr>' + headers.map((h, i) => `<th style="text-align:${aligns[i] || 'left'}">${h}</th>`).join('') + '</tr></thead>';
+        if (rows.length) {
+          html += '<tbody>' + rows.map(r => '<tr>' + r.map((c, i) => `<td style="text-align:${aligns[i] || 'left'}">${c}</td>`).join('') + '</tr>').join('') + '</tbody>';
+        }
+        html += '</table>';
+        return (pfx || '\n') + html + (tail || '\n');
+      });
+
+      // Code blocks: ```lang\ncode\n```
+      s = s.replace(/```([\s\S]*?)```/g, (m, p1) => {
+        const code = p1.replace(/^\w+\n/, '');
+        return `<pre class="bg-gray-900 text-gray-100 rounded-lg p-3 overflow-auto"><code>${code}</code></pre>`;
+      });
+
+      // Headings
+      s = s
+        .replace(/^# (.+)$/gm, '<h2 class="text-2xl font-bold text-gray-900 mt-4 mb-2">$1</h2>')
+        .replace(/^## (.+)$/gm, '<h3 class="text-xl font-semibold text-gray-800 mt-3 mb-2">$1</h3>')
+        .replace(/^### (.+)$/gm, '<h4 class="text-lg font-medium text-gray-700 mt-2 mb-2">$1</h4>');
+
+      // Bold and italics
+      s = s.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>');
+      s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+      // Inline code
+      s = s.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-gray-800">$1</code>');
+
+      // Lists to <li>
+      s = s
+        .replace(/^\* (.+)$/gm, '<li class="ml-4 mb-1">$1</li>')
+        .replace(/^- (.+)$/gm, '<li class="ml-4 mb-1">$1</li>')
+        .replace(/^\d+\. (.+)$/gm, '<li class="ml-4 mb-1">$1</li>');
+      // Wrap list groups with <ul>
+      s = s
+        .replace(/^<li/gm, '<ul class="list-disc list-inside mb-3">\n<li')
+        .replace(/<\/li>\n(?!<li)/g, '</li></ul>');
+
+      // Paragraphs: keep pre, ul, headings intact; wrap others
+      const blocks = s.split(/\n{2,}/);
+      s = blocks.map(block => {
+        const b = block.trim();
+        if (!b) return '';
+        if (b.startsWith('<pre') || b.startsWith('<ul') || b.startsWith('<h2') || b.startsWith('<h3') || b.startsWith('<h4')) {
+          return b;
+        }
+        return '<p class="mb-3">' + b.replace(/\n/g, '<br />') + '</p>';
+      }).join('\n');
+
+      return s;
+    }
 
     // Additional Support Chat Sample
     const sampleSupportPayload = {
@@ -511,7 +667,7 @@ Agent Jane Smith: My pleasure! Have a great day!`,
       }
     };
 
-    function loadSupportSample() {
+    function loadSupportSample(shouldFocus = true) {
       inputText.value = sampleSupportPayload.payload.text;
       questionText.value = sampleSupportPayload.payload.question;
 
@@ -531,6 +687,24 @@ Agent Jane Smith: My pleasure! Have a great day!`,
         }
         updateJsonPreview();
       }, 0);
+      if (shouldFocus) inputText.focus();
+    }
+
+    // Generic loader for examples
+    function loadExample(text, question) {
+      inputText.value = text;
+      questionText.value = question;
+      // Keep current provider; if none valid, switch to first available
+      const providers = Array.isArray(modelOptions) ? modelOptions.map(p => p.provider) : [];
+      if (!providers.includes(providerEl.value) && providers.length) {
+        providerEl.value = providers[0];
+      }
+      updateModelDropdown();
+      setTimeout(() => {
+        if (modelEl.options.length) modelEl.value = modelEl.options[0].value;
+        updateJsonPreview();
+      }, 0);
+      inputText.focus();
     }
 
     // Event listeners
@@ -546,7 +720,7 @@ Agent Jane Smith: My pleasure! Have a great day!`,
     
     runBtn.addEventListener('click', askQuestion);
     cancelBtn.addEventListener('click', cancelRequest);
-    if (chipSupport) chipSupport.addEventListener('click', loadSupportSample);
+    if (chipSupport) chipSupport.addEventListener('click', () => loadSupportSample(true));
     if (chipLHC) {
       chipLHC.addEventListener('click', function () {
         inputText.value = samplePayload.payload.text;
@@ -557,13 +731,31 @@ Agent Jane Smith: My pleasure! Have a great day!`,
           modelEl.value = samplePayload.config.model;
           updateJsonPreview();
         }, 100);
+        inputText.focus();
       });
     }
+    if (chipDocQA) chipDocQA.addEventListener('click', () => loadExample(`Title: The Rise of Renewable Energy\n\nRenewable energy sources such as solar, wind, and hydro are increasingly becoming a larger share of global electricity generation. In 2024, several countries reported record-breaking adoption rates, driven by decreasing technology costs and supportive policies. Analysts project continued growth as storage technologies improve and grid modernization continues.`, 'What are the main drivers of renewable energy adoption?'));
+    if (chipStudy) chipStudy.addEventListener('click', () => loadExample(`Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods from carbon dioxide and water. Photosynthesis in plants generally involves the green pigment chlorophyll and generates oxygen as a byproduct. The overall chemical reaction can be summarized as: 6 CO2 + 6 H2O + light → C6H12O6 + 6 O2.`, 'What is the role of chlorophyll in photosynthesis?'));
+    if (chipContext) chipContext.addEventListener('click', () => loadExample(`Quarterly Report Excerpt:\n\nOur Q2 revenue increased by 12% year-over-year, primarily due to strong performance in the enterprise segment. Churn decreased from 3.2% to 2.6%, and average deal size grew by 15%. Marketing spend was reallocated to product-led growth initiatives, resulting in a 9% improvement in conversion rate.`, 'What were the primary factors contributing to revenue growth?'));
+    if (chipTriage) chipTriage.addEventListener('click', () => loadExample(sampleSupportPayload.payload.text, 'What is the customer requesting?'));
+    if (chipCompliance) chipCompliance.addEventListener('click', () => loadExample(`Policy Excerpt:\n\nAll customer data must be encrypted at rest using AES-256 and in transit using TLS 1.2 or higher. Access to production databases is restricted to authorized personnel with MFA enabled. Logs containing personal data must be retained for no longer than 30 days unless otherwise required by law.`, 'List any non-compliance risks mentioned in the text.'));
+    if (chipExtract) chipExtract.addEventListener('click', () => loadExample(`Invoice #INV-2048\nDate: 2025-02-15\nBill To: Horizon Labs, 77 Market Street, SF, CA\nItems:\n - Data Pipeline Setup: $3,200\n - Monthly Support (Jan): $800\nTotal: $4,000\nNotes: Payment due within 15 days.`, 'Extract the invoice number, date, client, line items, and total.'));
+    if (chipMeetings) chipMeetings.addEventListener('click', () => loadExample(`Meeting Notes (Product Sync)\n\nDecisions:\n- Launch beta on March 10\n- Prioritize OAuth integration\nAction Items:\n- Sara: finalize onboarding screens\n- Tim: set up staging environment\n- Leo: prepare beta feedback form`, 'When is the beta launch date and who is responsible for staging?'));
+    if (chipFAQ) chipFAQ.addEventListener('click', () => loadExample(`Knowledge Base Excerpt:\n\nOur app supports offline mode, automatic backups, and real-time collaboration. The Pro plan includes custom templates and priority support. Typical sync issues are resolved by signing out and back in or clearing the cache.`, 'Provide a concise answer to: Does the app support offline mode?'));
+    // Footer examples wiring
+    if (btnDocQA) btnDocQA.addEventListener('click', () => loadExample(`Title: The Rise of Renewable Energy\n\nRenewable energy sources such as solar, wind, and hydro are increasingly becoming a larger share of global electricity generation. In 2024, several countries reported record-breaking adoption rates, driven by decreasing technology costs and supportive policies. Analysts project continued growth as storage technologies improve and grid modernization continues.`, 'What are the main drivers of renewable energy adoption?'));
+    if (btnStudy) btnStudy.addEventListener('click', () => loadExample(`Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods from carbon dioxide and water. Photosynthesis in plants generally involves the green pigment chlorophyll and generates oxygen as a byproduct. The overall chemical reaction can be summarized as: 6 CO2 + 6 H2O + light → C6H12O6 + 6 O2.`, 'What is the role of chlorophyll in photosynthesis?'));
+    if (btnContext) btnContext.addEventListener('click', () => loadExample(`Quarterly Report Excerpt:\n\nOur Q2 revenue increased by 12% year-over-year, primarily due to strong performance in the enterprise segment. Churn decreased from 3.2% to 2.6%, and average deal size grew by 15%. Marketing spend was reallocated to product-led growth initiatives, resulting in a 9% improvement in conversion rate.`, 'What were the primary factors contributing to revenue growth?'));
+    if (btnSupportTriage) btnSupportTriage.addEventListener('click', () => loadExample(sampleSupportPayload.payload.text, 'What is the customer requesting?'));
+    if (btnCompliance) btnCompliance.addEventListener('click', () => loadExample(`Policy Excerpt:\n\nAll customer data must be encrypted at rest using AES-256 and in transit using TLS 1.2 or higher. Access to production databases is restricted to authorized personnel with MFA enabled. Logs containing personal data must be retained for no longer than 30 days unless otherwise required by law.`, 'List any non-compliance risks mentioned in the text.'));
+    if (btnExtraction) btnExtraction.addEventListener('click', () => loadExample(`Invoice #INV-2048\nDate: 2025-02-15\nBill To: Horizon Labs, 77 Market Street, SF, CA\nItems:\n - Data Pipeline Setup: $3,200\n - Monthly Support (Jan): $800\nTotal: $4,000\nNotes: Payment due within 15 days.`, 'Extract the invoice number, date, client, line items, and total.'));
+    if (btnMeetings) btnMeetings.addEventListener('click', () => loadExample(`Meeting Notes (Product Sync)\n\nDecisions:\n- Launch beta on March 10\n- Prioritize OAuth integration\nAction Items:\n- Sara: finalize onboarding screens\n- Tim: set up staging environment\n- Leo: prepare beta feedback form`, 'When is the beta launch date and who is responsible for staging?'));
+    if (btnFAQ) btnFAQ.addEventListener('click', () => loadExample(`Knowledge Base Excerpt:\n\nOur app supports offline mode, automatic backups, and real-time collaboration. The Pro plan includes custom templates and priority support. Typical sync issues are resolved by signing out and back in or clearing the cache.`, 'Provide a concise answer to: Does the app support offline mode?'));
     
 
     // Initialize: fetch models then load Support Chat sample by default
     fetchModelOptions().finally(() => {
-      loadSupportSample();
+      loadSupportSample(false);
     });
 
     // Re-fetch models if token changes (prod setups may require it)
