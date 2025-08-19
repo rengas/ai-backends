@@ -1,12 +1,12 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
-import { askTextPrompt } from '../../utils/prompts'
+import { plannerPrompt } from '../../utils/prompts'
 import { handleError } from '../../utils/errorHandler'
 import { 
-  askTextRequestSchema, 
-  askTextResponseSchema, 
-  createAskTextResponse 
-} from '../../schemas/v1/askText'
+  plannerRequestSchema, 
+  plannerResponseSchema,
+  createPlannerResponse 
+} from '../../schemas/v1/planner'
 import { processTextOutputRequest } from '../../services/ai'
 import { apiVersion } from './versionConfig'
 import { createFinalResponse } from './finalResponse'
@@ -14,31 +14,59 @@ import { createFinalResponse } from './finalResponse'
 const router = new OpenAPIHono()
 
 /**
- * Handler for askText requests
- * Receives text and a question, then uses an LLM to answer the question based on the text
+ * Handler for planner requests
+ * Receives a task and generates a text-based plan to accomplish it
  */
-async function handleAskTextRequest(c: Context) {
+async function handlePlannerRequest(c: Context) {
   try {
+    const startTime = Date.now()
     const { payload, config } = await c.req.json()
     const provider = config.provider
     const model = config.model
     
-    // Create prompt combining text and question
-    const prompt = askTextPrompt(payload.text, payload.question)
+    // Extract parameters from payload
+    const {
+      task,
+      context,
+      maxSteps,
+      detailLevel,
+      includeTimeEstimates,
+      includeRisks,
+      domain
+    } = payload
     
-    // Make single API call to LLM using processTextOutputRequest
-    const result = await processTextOutputRequest(prompt, config)
+    // Create prompt for plan generation
+    const prompt = plannerPrompt(
+      task,
+      context,
+      maxSteps,
+      detailLevel,
+      includeTimeEstimates,
+      includeRisks,
+      domain
+    )
     
-    // Create response with answer and metadata
-    const finalResponse = createAskTextResponse(
+    // Make API call to LLM using text output
+    const result = await processTextOutputRequest(
+      prompt,
+      config,
+      config.temperature || 0.3
+    )
+    
+    // Calculate processing time
+    const processingTime = Date.now() - startTime
+    
+    // Create response with plan text and metadata
+    const finalResponse = createPlannerResponse(
       result.text, 
       provider, 
       model, 
       {
-        input_tokens: result.usage.promptTokens,
-        output_tokens: result.usage.completionTokens,
-        total_tokens: result.usage.totalTokens,
-      }
+        input_tokens: result.usage?.promptTokens || 0,
+        output_tokens: result.usage?.completionTokens || 0,
+        total_tokens: result.usage?.totalTokens || 0,
+      },
+      processingTime
     )
     
     // Add API version to response
@@ -46,7 +74,7 @@ async function handleAskTextRequest(c: Context) {
     
     return c.json(finalResponseWithVersion, 200)
   } catch (error) {
-    return handleError(c, error, 'Failed to answer question based on text')
+    return handleError(c, error, 'Failed to generate plan')
   }
 }
 
@@ -60,17 +88,17 @@ router.openapi(
       body: {
         content: {
           'application/json': {
-            schema: askTextRequestSchema
+            schema: plannerRequestSchema
           }
         }
       }
     },
     responses: {
       200: {
-        description: 'Returns an answer to the question based on the provided text.',
+        description: 'Returns a structured plan to accomplish the given task.',
         content: {
           'application/json': {
-            schema: askTextResponseSchema
+            schema: plannerResponseSchema
           }
         }
       },
@@ -105,13 +133,15 @@ router.openapi(
         }
       }
     },
-    summary: 'Answer questions based on provided text',
-    description: 'This endpoint receives a text and a question, then uses an LLM to generate an answer based solely on the provided text context.'
+    summary: 'Generate structured plans for tasks',
+    description: 'This endpoint receives a task description and generates a detailed, structured plan with steps, dependencies, time estimates, and success criteria.'
   }),
-  handleAskTextRequest as any
+  handlePlannerRequest as any
 )
 
 export default {
   handler: router,
-  mountPath: 'askText'
+  mountPath: 'project-planner'
 }
+
+

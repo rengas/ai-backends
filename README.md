@@ -91,9 +91,10 @@ LMSTUDIO_BASE_URL=http://localhost:1234
 - **/api/sentiment**: Analyze sentiment
 - **/api/keywords**: Extract keywords
 - **/api/describe-image**: Describe an image
-- **/api/emailReply**: Reply to an email
+- **/api/email-reply**: Reply to an email
 - **/api/askText**: Ask a question
 - **/api/highlighter**: Describe an image
+- **/api/project-planner**: Plan a project
 - More to come...check swagger docs for updated endpoints.
 
 ## Swagger Docs

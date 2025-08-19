@@ -62,7 +62,7 @@ router.openapi(
 
 export default {
   handler: router,
-  mountPath: 'emailReply',
+  mountPath: 'email-reply',
 }
 
 
