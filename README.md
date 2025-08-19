@@ -10,35 +10,43 @@ The purpose of this project is to make common AI use cases easily accessible to 
 
 Since APIs are ready to use, you don't need to understand prompt engineering. Just prompt the API documentation and you are good to go. For those who want use with online app builders, you need to host AIBackends on your own server. I have tested in Railway and it is a good option.
 
-
-## Supported LLM Providers
-
-- [Ollama](https://ollama.ai/) for local models (self-hosted)
-- [LM Studio](https://lmstudio.ai/) for local models via OpenAI-compatible API (self-hosted)
-- [OpenAI](https://openai.com/) for GPT models 
-- [Anthropic](https://www.anthropic.com/) for Claude models 
-- [OpenRouter](https://openrouter.ai/) for open source and private models
-- [Vercel AI Gateway](https://vercel.com/ai) for open source and private models (coming soon)
-- [Google](https://ai.google.dev/) for Gemini models (coming soon)
+![AI Backends](images/run-aibackends.png)
 
 ## Available APIs
 
 ### Text Processing
-- **/api/summarize**: Summarize text
-- **/api/translate**: Translate text
-- **/api/sentiment**: Analyze sentiment
-- **/api/keywords**: Extract keywords
-- **/api/email-reply**: Reply to an email
-- **/api/ask-text**: Ask a question
-- **/api/highlighter**: Highlight important information in a text
-- **/api/meeting-notes**: Summarize meeting notes
-- **/api/project-planner**: Plan a project
+| Endpoint | Description |
+|----------|-------------|
+| **/api/summarize** | Summarize long text content into concise, key points |
+| **/api/translate** | Translate text between different languages |
+| **/api/sentiment** | Analyze the emotional tone and sentiment of text |
+| **/api/keywords** | Extract important keywords and phrases from text |
+| **/api/email-reply** | Generate professional email responses based on context |
+| **/api/ask-text** | Ask questions about provided text and get intelligent answers |
+| **/api/highlighter** | Identify and highlight the most important information in text |
+| **/api/meeting-notes** | Transform meeting notes into structured summaries |
+| **/api/project-planner** | Create detailed project plans with steps, timelines, and considerations |
 
 ### Image Processing
-- **/api/describe-image**: Describe an image (work in progress)
-- More to come...check swagger docs for updated endpoints.
 
-![AI Backends](images/run-aibackends.png)
+| Endpoint | Description |
+|----------|-------------|
+| **/api/describe-image** | Describe an image (work in progress) |
+
+More to come...check swagger docs for updated endpoints.
+
+## Supported LLM Providers
+
+| Provider | Description | Status |
+|----------|-------------|--------|
+| [Ollama](https://ollama.ai/) | Local models (self-hosted) |  Available |
+| [LM Studio](https://lmstudio.ai/) | Local models via OpenAI-compatible API (self-hosted) | Available |
+| [OpenAI](https://openai.com/) | GPT models | Available |
+| [Anthropic](https://www.anthropic.com/) | Claude models | Available |
+| [OpenRouter](https://openrouter.ai/) | Open source and private models |  Available |
+| [Vercel AI Gateway](https://vercel.com/ai) | Open source and private models | In Progress |
+| [Google](https://ai.google.dev/) | Gemini models | In Progress |
+
 
 ## Run the project
 
