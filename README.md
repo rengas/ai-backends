@@ -1,18 +1,44 @@
 # AI Backends
 
-AIBackends is an API server that you can use to integrate AI into your applications. It is a turnkey and cost effective solution for your AI integration needs. 
+AIBackends is an API server that you can use to integrate AI into your applications. You can run it locally or self-host it.
 
-The project supports open source models using Ollama and LM Studio. It also supports cloud models from OpenAI and Anthropic.
+The project supports running open source models locally with Ollama and LM Studio. It also supports OpenRouter, OpenAI and Anthropic.
+
+## Why use AI Backends?
+
+The purpose of this project is to make common AI use cases easily accessible to non-coders who want to add AI features to their applications. AIBackends have been tested with popular AI app builder tools like [Bolt.new](https://bolt.new), [v0](https://v0.dev) and [Lovable](https://lovable.dev). You can also use it with [Warp](https://warp.dev), [Cursor](https://cursor.com/), [Claude Code](https://www.anthropic.com/claude-code) or [Windsurf](https://windsurf.com/).
+
+Since APIs are ready to use, you don't need to understand prompt engineering. Just prompt the API documentation and you are good to go. For those who want use with online app builders, you need to host AIBackends on your own server. I have tested in Railway and it is a good option.
+
+
+## Supported LLM Providers
+
+- Ollama for local models (self-hosted)
+- LM Studio for local models via OpenAI-compatible API (self-hosted)
+- OpenAI for GPT models 
+- Anthropic for Claude models 
+- OpenRouter for open source and private models
+- Vercel AI Gateway for open source and private models (coming soon)
+- Google for Gemini models (coming soon)
+
+## Available APIs
+
+### Text Processing
+- **/api/summarize**: Summarize text
+- **/api/translate**: Translate text
+- **/api/sentiment**: Analyze sentiment
+- **/api/keywords**: Extract keywords
+- **/api/email-reply**: Reply to an email
+- **/api/ask-text**: Ask a question
+- **/api/highlighter**: Highlight important information in a text
+- **/api/meeting-notes**: Summarize meeting notes
+- **/api/project-planner**: Plan a project
+
+### Image Processing
+- **/api/describe-image**: Describe an image (work in progress)
+- More to come...check swagger docs for updated endpoints.
 
 ![AI Backends](images/run-aibackends.png)
-
-## Purpose of the project
-
-The purpose of this project is to make common AI use cases easily accessible to developers. To implement common AI use cases, you need to understand prompt engineering and API integration with different AI providers. This project aims to skip that learning curve so developers can focus on integrating AI into applications and automation workflows.
-
-## Vision
-
-![High level architecture](images/ai-backend-diagram.png)
 
 ## Run the project
 
@@ -62,10 +88,6 @@ LMSTUDIO_BASE_URL=http://localhost:1234
 
 **Important:** Make sure to add `.env` to your `.gitignore` file to avoid committing sensitive information to version control.
 
-## Technical Architecture
-
-![Technical Architecture](images/aibackends-architecture.png)
-
 
 ## Tech Stack
 
@@ -75,27 +97,6 @@ LMSTUDIO_BASE_URL=http://localhost:1234
 - Vercel AI SDK for AI integration
 - Docker for containerization
 
-## Supported LLM Providers
-
-- Ollama for local models (self-hosted)
-- LM Studio for local models via OpenAI-compatible API (self-hosted)
-- OpenAI for GPT models (cloud-based)
-- Anthropic for Claude models (cloud-based)
-- OpenRouter for multiple open source and private models (coming soon)
-- Google for Gemini models (coming soon)
-
-## Available Endpoints
-
-- **/api/summarize**: Summarize text
-- **/api/translate**: Translate text
-- **/api/sentiment**: Analyze sentiment
-- **/api/keywords**: Extract keywords
-- **/api/describe-image**: Describe an image
-- **/api/email-reply**: Reply to an email
-- **/api/askText**: Ask a question
-- **/api/highlighter**: Describe an image
-- **/api/project-planner**: Plan a project
-- More to come...check swagger docs for updated endpoints.
 
 ## Swagger Docs
 
@@ -131,7 +132,7 @@ curl --location 'http://localhost:3000/api/v1/summarize' \
     },
     "config": {
         "provider": "ollama",
-        "model": "qwen2.5-coder",
+        "model": "gemma3:4b",
         "temperature": 0
     }
 }'
@@ -149,6 +150,16 @@ Check swagger docs for examples.
 The project is in active development. More endpoints and providers will be added in the future. If you want to support me with API credits from your provider, please contact me.
 
 I am also open to sponsorship to support the development of the project.
+
+## Vision
+
+![High level architecture](images/ai-backend-diagram.png)
+
+
+## Technical Architecture
+
+![Technical Architecture](images/aibackends-architecture.png)
+
 
 ## Star History
 
