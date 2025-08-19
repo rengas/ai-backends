@@ -106,12 +106,13 @@ router.openapi(
       }
     },
     summary: 'Answer questions based on provided text',
-    description: 'This endpoint receives a text and a question, then uses an LLM to generate an answer based solely on the provided text context.'
+    description: 'This endpoint receives a text and a question, then uses an LLM to generate an answer based solely on the provided text context.',
+    tags: ['API']
   }),
   handleAskTextRequest as any
 )
 
 export default {
   handler: router,
-  mountPath: 'askText'
+  mountPath: 'ask-text'
 }

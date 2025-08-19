@@ -134,7 +134,8 @@ router.openapi(
       }
     },
     summary: 'Generate structured plans for tasks',
-    description: 'This endpoint receives a task description and generates a detailed, structured plan with steps, dependencies, time estimates, and success criteria.'
+    description: 'This endpoint receives a task description and generates a detailed, structured plan with steps, dependencies, time estimates, and success criteria.',
+    tags: ['API']
   }),
   handlePlannerRequest as any
 )

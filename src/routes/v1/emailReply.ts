@@ -56,6 +56,9 @@ router.openapi(
         },
       },
     },
+    summary: 'Generate an email reply',
+    description: 'This endpoint receives an email text and uses an LLM to generate a reply to the email.',
+    tags: ['API']
   }),
   handleEmailReplyRequest as any
 )

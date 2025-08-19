@@ -62,7 +62,10 @@ router.openapi(
         description: 'Returns structured meeting notes (date, attendees, tasks, decisions, updates, summary).',
         content: { 'application/json': { schema: meetingNotesResponseSchema } }
       }
-    }
+    },
+    summary: 'Extract meeting notes from text',
+    description: 'This endpoint receives a text and uses an LLM to extract meeting notes from the text.',
+    tags: ['API']
   }),
   handleMeetingNotesRequest as any
 )

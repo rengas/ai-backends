@@ -136,7 +136,10 @@ router.openapi(
 					}
 				}
 			}
-		}
+		},
+		summary: 'Highlight key parts of text',
+		description: 'This endpoint receives a text and uses an LLM to generate highlight spans with labels and descriptions for key parts of the text.',
+		tags: ['API']
 	}),
 	handleHighlighterRequest as any
 )
