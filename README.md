@@ -4,22 +4,22 @@ AIBackends is an API server that you can use to integrate AI into your applicati
 
 The project supports running open source models locally with Ollama and LM Studio. It also supports OpenRouter, OpenAI and Anthropic.
 
-## Why use AI Backends?
+## Why AI Backends?
 
-The purpose of this project is to make common AI use cases easily accessible to non-coders who want to add AI features to their applications. AIBackends have been tested with popular AI app builder tools like [Bolt.new](https://bolt.new), [v0](https://v0.dev) and [Lovable](https://lovable.dev). You can also use it with [Warp](https://warp.dev), [Cursor](https://cursor.com/), [Claude Code](https://www.anthropic.com/claude-code) or [Windsurf](https://windsurf.com/).
+The purpose of this project is to make common AI use cases easily accessible to non-coders who want to add AI features to their applications. AIBackends have been tested with popular AI app builder tools like [Bolt.new](https://bolt.new), [v0](https://v0.dev) and [Lovable](https://lovable.dev). You can also use it with [Warp](https://warp.dev), [Cursor](https://cursor.com/), [Claude Code](https://www.anthropic.com/claude-code), [Windsurf](https://windsurf.com/) or [AmpCode](https://ampcode.com/).
 
 Since APIs are ready to use, you don't need to understand prompt engineering. Just prompt the API documentation and you are good to go. For those who want use with online app builders, you need to host AIBackends on your own server. I have tested in Railway and it is a good option.
 
 
 ## Supported LLM Providers
 
-- Ollama for local models (self-hosted)
-- LM Studio for local models via OpenAI-compatible API (self-hosted)
-- OpenAI for GPT models 
-- Anthropic for Claude models 
-- OpenRouter for open source and private models
-- Vercel AI Gateway for open source and private models (coming soon)
-- Google for Gemini models (coming soon)
+- [Ollama](https://ollama.ai/) for local models (self-hosted)
+- [LM Studio](https://lmstudio.ai/) for local models via OpenAI-compatible API (self-hosted)
+- [OpenAI](https://openai.com/) for GPT models 
+- [Anthropic](https://www.anthropic.com/) for Claude models 
+- [OpenRouter](https://openrouter.ai/) for open source and private models
+- [Vercel AI Gateway](https://vercel.com/ai) for open source and private models (coming soon)
+- [Google](https://ai.google.dev/) for Gemini models (coming soon)
 
 ## Available APIs
 
@@ -160,7 +160,9 @@ I am also open to sponsorship to support the development of the project.
 
 ![Technical Architecture](images/aibackends-architecture.png)
 
-
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=donvito/ai-backends&type=Date)](https://www.star-history.com/#donvito/ai-backends&Date)
+
+## Supporting the project
+You can support my AI Backends project by becoming a Github Sponsor.
