@@ -220,8 +220,14 @@ export async function processTextOutputRequest(
 ): Promise<any> {
   const provider = config.provider;
   const model = config.model;
+  const stream = config.stream || false;
 
-  console.log('MODEL TO USE', model);
+  console.log('MODEL TO USE', model, 'STREAMING:', stream);
+
+  // If streaming is enabled, use streaming functions
+  if (stream) {
+    return processTextOutputStreamRequest(prompt, config);
+  }
 
   switch (provider) {
     case Provider.ollama:
@@ -234,6 +240,39 @@ export async function processTextOutputRequest(
       return await openrouterService.generateChatTextResponse(prompt, model);
     case Provider.lmstudio:
       return await lmstudioService.generateChatTextResponse(prompt, model);
+    default:
+      throw new Error(`Unsupported service: ${provider}`);
+  }
+}
+
+export async function processTextOutputStreamRequest(
+  prompt: string,
+  config: z.infer<typeof llmRequestSchema>,  
+): Promise<any> {
+  const provider = config.provider;
+  const model = config.model;
+
+  console.log('STREAMING MODEL TO USE', model);
+
+  switch (provider) {
+    case Provider.ollama:
+      // TODO: Add streaming support for Ollama
+      return await ollamaService.generateChatTextStreamResponse?.(prompt, model) || 
+             await ollamaService.generateChatTextResponse(prompt, model);
+    case Provider.openai:
+      return await openaiService.generateChatTextStreamResponse(prompt, model);
+    case Provider.anthropic:
+      // TODO: Add streaming support for Anthropic
+      return await anthropicService.generateChatTextStreamResponse?.(prompt, model) ||
+             await anthropicService.generateChatTextResponse(prompt, model);
+    case Provider.openrouter:
+      // TODO: Add streaming support for OpenRouter
+      return await openrouterService.generateChatTextStreamResponse?.(prompt, model) ||
+             await openrouterService.generateChatTextResponse(prompt, model);
+    case Provider.lmstudio:
+      // TODO: Add streaming support for LMStudio
+      return await lmstudioService.generateChatTextStreamResponse?.(prompt, model) ||
+             await lmstudioService.generateChatTextResponse(prompt, model);
     default:
       throw new Error(`Unsupported service: ${provider}`);
   }
