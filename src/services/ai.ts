@@ -256,23 +256,15 @@ export async function processTextOutputStreamRequest(
 
   switch (provider) {
     case Provider.ollama:
-      // TODO: Add streaming support for Ollama
-      return await ollamaService.generateChatTextStreamResponse?.(prompt, model) || 
-             await ollamaService.generateChatTextResponse(prompt, model);
+      return await ollamaService.generateChatTextStreamResponse(prompt, model);
     case Provider.openai:
       return await openaiService.generateChatTextStreamResponse(prompt, model);
     case Provider.anthropic:
-      // TODO: Add streaming support for Anthropic
-      return await anthropicService.generateChatTextStreamResponse?.(prompt, model) ||
-             await anthropicService.generateChatTextResponse(prompt, model);
+      return await anthropicService.generateChatTextStreamResponse(prompt, model);
     case Provider.openrouter:
-      // TODO: Add streaming support for OpenRouter
-      return await openrouterService.generateChatTextStreamResponse?.(prompt, model) ||
-             await openrouterService.generateChatTextResponse(prompt, model);
+      return await openrouterService.generateChatTextStreamResponse(prompt, model);
     case Provider.lmstudio:
-      // TODO: Add streaming support for LMStudio
-      return await lmstudioService.generateChatTextStreamResponse?.(prompt, model) ||
-             await lmstudioService.generateChatTextResponse(prompt, model);
+      return await lmstudioService.generateChatTextStreamResponse(prompt, model);
     default:
       throw new Error(`Unsupported service: ${provider}`);
   }
