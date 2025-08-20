@@ -179,8 +179,8 @@ const app = new OpenAPIHono();
 app.use('/*', cors({
     origin: configureCors(),
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Cache-Control', 'Connection'],
-    exposeHeaders: ['Content-Length', 'X-Request-Id', 'Content-Type', 'Cache-Control', 'Connection'],
+    allowHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Cache-Control', 'Connection', 'Accept', 'Last-Event-ID'],
+    exposeHeaders: ['Content-Length', 'X-Request-Id'],
     maxAge: 3600,
     credentials: true,
 }));

@@ -27,8 +27,6 @@ async function handleSummarizeRequest(c: Context) {
       c.header('Content-Type', 'text/event-stream')
       c.header('Cache-Control', 'no-cache')
       c.header('Connection', 'keep-alive')
-      c.header('Access-Control-Allow-Origin', '*')
-      c.header('Access-Control-Allow-Headers', 'Cache-Control')
       
       return streamSSE(c, async (stream) => {
         try {
