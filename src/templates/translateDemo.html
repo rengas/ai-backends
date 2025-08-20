@@ -138,6 +138,13 @@
           </div>
         </div>
 
+        <div class="mt-3 flex items-center gap-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input id="streaming" type="checkbox" class="w-4 h-4 text-brand-purple rounded focus:ring-2 focus:ring-brand-purple" checked />
+            <span class="text-sm font-medium text-gray-700">Enable Streaming</span>
+          </label>
+        </div>
+
         <div class="mt-3">
           <label class="block text-sm font-medium text-gray-700 mb-1">Bearer Token (optional)</label>
           <input id="token" type="password" placeholder="Only needed in production deployments" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" />
@@ -238,7 +245,12 @@
     function buildRequest() {
       return {
         payload: { text: inputText.value.trim(), targetLanguage: targetLanguageEl.value.trim() },
-        config: { provider: providerEl.value, model: modelEl.value, temperature: Number(temperatureEl.value) || 0 }
+        config: { 
+          provider: providerEl.value, 
+          model: modelEl.value, 
+          temperature: Number(temperatureEl.value) || 0,
+          stream: document.getElementById('streaming').checked
+        }
       };
     }
 
@@ -262,19 +274,93 @@
       
       try {
         const res = await fetch('/api/v1/translate', { method: 'POST', headers, body: JSON.stringify(req), signal: abortController.signal });
-        const endTime = performance.now();
-        const responseTime = (endTime - startTime).toFixed(2);
         
-        if (!res.ok) { const txt = await res.text(); throw new Error('Request failed: ' + res.status + ' ' + txt); }
-        const data = await res.json();
-        const translation = data?.translation || data?.data?.translation || '';
-        translationText.textContent = translation || 'No translation returned.';
-        openInGoogleBtn.disabled = !translation;
-        const usage = data?.usage || data?.data?.usage;
-        usageInfo.classList.remove('hidden');
+        if (!res.ok) { 
+          const txt = await res.text(); 
+          throw new Error('Request failed: ' + res.status + ' ' + txt); 
+        }
         
-        let metricsHtml = '<div class="metrics-container">';
-        metricsHtml += '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">';
+        // Check if streaming is enabled and supported
+        const contentType = res.headers.get('content-type');
+        if (req.config.stream && contentType && contentType.includes('text/event-stream')) {
+          // Streaming mode
+          loadingIndicator.classList.add('hidden');
+          let accumulatedText = '';
+          let usage = null;
+          
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+            
+            for (const line of lines) {
+              if (line.trim().startsWith('data:')) {
+                const data = line.replace(/^data:\s*/, '');
+                if (data.trim() === '[DONE]' || data.trim() === '') continue;
+                
+                try {
+                  const parsed = JSON.parse(data);
+                  if (parsed.chunk) {
+                    accumulatedText += parsed.chunk;
+                    translationText.textContent = accumulatedText;
+                  }
+                  if (parsed.done && parsed.usage) {
+                    usage = parsed.usage;
+                  }
+                  if (parsed.error) {
+                    throw new Error(parsed.error);
+                  }
+                } catch (e) {
+                  if (!(e instanceof SyntaxError)) throw e;
+                }
+              }
+            }
+          }
+          
+          const endTime = performance.now();
+          const responseTime = (endTime - startTime).toFixed(2);
+          openInGoogleBtn.disabled = !accumulatedText;
+          
+          // Display usage metrics if available
+          if (usage) {
+            displayUsageMetrics(usage, responseTime);
+          } else {
+            displayUsageMetrics(null, responseTime);
+          }
+        } else {
+          // Non-streaming mode
+          const endTime = performance.now();
+          const responseTime = (endTime - startTime).toFixed(2);
+          const data = await res.json();
+          const translation = data?.translation || data?.data?.translation || '';
+          translationText.textContent = translation || 'No translation returned.';
+          openInGoogleBtn.disabled = !translation;
+          const usage = data?.usage || data?.data?.usage;
+          displayUsageMetrics(usage, responseTime);
+        }
+      } catch (err) {
+        translationText.textContent = err.message || 'Unknown error';
+        openInGoogleBtn.disabled = true;
+        usageInfo.classList.add('hidden'); setContent(usageInfo, '');
+      } finally {
+        runBtn.classList.remove('hidden');
+        cancelBtn.classList.add('hidden');
+        loadingIndicator.classList.add('hidden');
+        abortController = null;
+      }
+    }
+    
+    function displayUsageMetrics(usage, responseTime) {
+      usageInfo.classList.remove('hidden');
+      let metricsHtml = '<div class="metrics-container">';
+      metricsHtml += '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">';
         
         // Response Time metric
         metricsHtml += '<div class="metric-item">' +
@@ -334,20 +420,10 @@
           '</div>';
         }
         
-        metricsHtml += '</div></div>';
-        const metricsDiv = createElement('div');
-        metricsDiv.innerHTML = metricsHtml;
-        setContent(usageInfo, metricsDiv.firstChild);
-      } catch (err) {
-        translationText.textContent = err.message || 'Unknown error';
-        openInGoogleBtn.disabled = true;
-        usageInfo.classList.add('hidden'); setContent(usageInfo, '');
-      } finally {
-        runBtn.classList.remove('hidden');
-        cancelBtn.classList.add('hidden');
-        loadingIndicator.classList.add('hidden');
-        abortController = null;
-      }
+      metricsHtml += '</div></div>';
+      const metricsDiv = createElement('div');
+      metricsDiv.innerHTML = metricsHtml;
+      setContent(usageInfo, metricsDiv.firstChild);
     }
 
     function languageNameToGoogleCode(name) {
