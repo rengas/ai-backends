@@ -67,14 +67,23 @@ async function handleSummarizeRequest(c: Context) {
             })
           }
         } catch (error) {
-          await stream.writeSSE({
-            data: JSON.stringify({
-              error: error instanceof Error ? error.message : 'Streaming error',
-              done: true
+          console.error('Streaming error:', error)
+          try {
+            await stream.writeSSE({
+              data: JSON.stringify({
+                error: error instanceof Error ? error.message : 'Streaming error',
+                done: true
+              })
             })
-          })
+          } catch (writeError) {
+            console.error('Error writing error message to stream:', writeError)
+          }
         } finally {
-          await stream.close()
+          try {
+            await stream.close()
+          } catch (closeError) {
+            console.error('Error closing stream:', closeError)
+          }
         }
       })
     }
