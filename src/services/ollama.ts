@@ -8,7 +8,7 @@ const OLLAMA_CHAT_MODEL = process.env.OLLAMA_CHAT_MODEL || 'qwen3:4b';
 const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL || 'llama3.2-vision:11b';
 
 import { createOllama } from 'ollama-ai-provider';
-import { generateObject, generateText } from "ai";
+import { generateObject, generateText, streamText } from "ai";
 
 const ollama = createOllama({
   baseURL: OLLAMA_BASE_URL + '/api',
@@ -211,6 +211,23 @@ export async function generateChatTextResponse(
   console.log('OLLAMA_BASE_URL', OLLAMA_BASE_URL);
 
   const result = await generateText({
+    model: modelToUse,
+    prompt: prompt
+  });
+
+  return result;
+}
+
+export async function generateChatTextStreamResponse(
+  prompt: string,
+  model?: string,
+): Promise<any> {  
+  
+  const modelToUse = ollama(model || OLLAMA_CHAT_MODEL);
+  
+  console.log('OLLAMA STREAMING - BASE_URL', OLLAMA_BASE_URL);
+
+  const result = await streamText({
     model: modelToUse,
     prompt: prompt
   });

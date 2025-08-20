@@ -1,5 +1,6 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
+import { streamSSE } from 'hono/streaming'
 import { summarizePrompt } from '../../utils/prompts'
 import { handleError, handleValidationError } from '../../utils/errorHandler'
 import { summarizeRequestSchema, summarizeResponseSchema } from '../../schemas/v1/summarize'
@@ -15,7 +16,70 @@ async function handleSummarizeRequest(c: Context) {
     const { payload, config } = await c.req.json()
     const provider = config.provider
     const model = config.model
+    const isStreaming = config.stream || false
     const prompt = summarizePrompt(payload.text, payload.maxLength)
+    
+    // Handle streaming response
+    if (isStreaming) {
+      const result = await processTextOutputRequest(prompt, config)
+      
+      // Set SSE headers
+      c.header('Content-Type', 'text/event-stream')
+      c.header('Cache-Control', 'no-cache')
+      c.header('Connection', 'keep-alive')
+      
+      return streamSSE(c, async (stream) => {
+        try {
+          // Get the text stream from the result
+          const textStream = result.textStream
+          
+          if (!textStream) {
+            throw new Error('Streaming not supported for this provider/model')
+          }
+          
+          // Stream chunks to the client
+          for await (const chunk of textStream) {
+            await stream.writeSSE({
+              data: JSON.stringify({
+                chunk: chunk,
+                provider: provider,
+                model: model,
+                version: apiVersion
+              })
+            })
+          }
+          
+          // Send final message with usage stats if available
+          const usage = await result.usage
+          if (usage) {
+            await stream.writeSSE({
+              data: JSON.stringify({
+                done: true,
+                usage: {
+                  input_tokens: usage.promptTokens,
+                  output_tokens: usage.completionTokens,
+                  total_tokens: usage.totalTokens
+                },
+                provider: provider,
+                model: model,
+                version: apiVersion
+              })
+            })
+          }
+        } catch (error) {
+          await stream.writeSSE({
+            data: JSON.stringify({
+              error: error instanceof Error ? error.message : 'Streaming error',
+              done: true
+            })
+          })
+        } finally {
+          await stream.close()
+        }
+      })
+    }
+    
+    // Handle non-streaming response (existing logic)
     const result = await processTextOutputRequest(prompt, config)
     const finalResponse = createSummarizeResponse(result.text, provider, model, {
       input_tokens: result.usage.promptTokens,

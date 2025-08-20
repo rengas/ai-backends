@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { generateObject, generateText } from "ai";
+import { generateObject, generateText, streamText } from "ai";
 import { anthropic } from '@ai-sdk/anthropic';
 
 //fallback to cheapest model
@@ -51,6 +51,23 @@ export async function generateChatTextResponse(
   });
 
   console.log('ANTHROPIC RESULT', result);
+
+  return result;
+}
+
+export async function generateChatTextStreamResponse(
+  prompt: string,
+  model?: string,
+): Promise<any> {  
+
+  console.log('streaming model', model);
+  
+  const modelToUse = anthropic(model || ANTHROPIC_MODEL);
+
+  const result = await streamText({
+    model: modelToUse,
+    prompt: prompt
+  });
 
   return result;
 }

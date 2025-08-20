@@ -141,6 +141,13 @@
           </div>
         </div>
 
+        <div class="mt-3 flex items-center gap-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input id="streaming" type="checkbox" class="w-4 h-4 text-brand-purple rounded focus:ring-2 focus:ring-brand-purple" checked />
+            <span class="text-sm font-medium text-gray-700">Enable Streaming</span>
+          </label>
+        </div>
+
         <div class="mt-3">
           <label class="block text-sm font-medium text-gray-700 mb-1">Bearer Token (optional)</label>
           <input id="token" type="password" placeholder="Only needed in production deployments" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" />
@@ -170,13 +177,14 @@
   <script>
     const samplePayload = {
       payload: {
-        text: "In recent years, the conversation around artificial intelligence has largely been dominated by large language models (LLMs) such as GPT-4, Claude, and Gemini. These models have captured attention due to their impressive performance across a wide range of general-purpose tasks. However, this trend is starting to shift as more organizations begin to explore the power and practicality of small language models (SLMs). While LLMs continue to hold value in tasks requiring broad context and general reasoning, SLMs are emerging as a sustainable, cost-efficient, and highly specialized alternative for many enterprise use cases. SLMs, typically ranging from 1B to 13B parameters, are significantly lighter and more agile. They can be fine-tuned for specific domains such as customer support, legal document review, technical troubleshooting, and enterprise knowledge retrieval. Unlike LLMs, which often require dedicated infrastructure or third-party API access, SLMs can often be deployed on-premises or within a company’s private cloud. This allows for tighter integration with internal systems and better control over sensitive data—an increasingly important factor in regulated industries like finance, healthcare, and government. Companies like IBM, HuggingFace, and NVIDIA are already rolling out tools and models designed for on-device or edge use. One of the most compelling advantages of SLMs is their efficiency. Because they are smaller in size, inference and training costs are lower. Inference latency is shorter, which makes them ideal for real-time applications. Moreover, SLMs can be tailored to individual departments or workflows, enabling teams to deploy multiple specialized agents rather than relying on a single monolithic AI system. For example, a bank might use a fine-tuned SLM to automate fraud detection workflows, another for processing compliance reports, and another to assist customer service agents in responding to complex client queries. As open-source innovation continues to accelerate, we are seeing an explosion in the availability of high-performing models like Qwen1.5, Phi-3, Gemma, and TinyLlama. Each is designed with efficient training and deployment in mind, and most can be hosted on consumer-grade hardware or edge devices such as smartphones, routers, and IoT gateways. This democratization of language models allows smaller businesses and startups to access powerful AI capabilities without relying on costly commercial APIs. Of course, SLMs are not without limitations. They generally underperform LLMs in open-ended reasoning tasks and may struggle when context exceeds a certain limit. However, with clever retrieval techniques (such as RAG or document chunking) and tight task definitions, these challenges can often be mitigated. Looking ahead, the future of enterprise AI will likely involve a hybrid approach: LLMs for general, high-level reasoning tasks and SLMs for day-to-day operations. This model allows organizations to leverage the best of both worlds—using massive models when necessary while relying on smaller, sustainable systems for the bulk of operational tasks. In summary, SLMs represent a pivotal opportunity for enterprises seeking AI-powered transformation without the overhead of large-scale model deployment. Their combination of affordability, customizability, and data privacy compliance makes them particularly well-suited for long-term integration into business workflows. As toolchains and model architectures continue to evolve, SLMs will become an even more attractive option for companies aiming to build scalable, efficient, and privacy-conscious AI solutions.",
+        text: "In recent years, the conversation around artificial intelligence has largely been dominated by large language models (LLMs) such as GPT-4, Claude, and Gemini. These models have captured attention due to their impressive performance across a wide range of general-purpose tasks. However, this trend is starting to shift as more organizations begin to explore the power and practicality of small language models (SLMs). While LLMs continue to hold value in tasks requiring broad context and general reasoning, SLMs are emerging as a sustainable, cost-efficient, and highly specialized alternative for many enterprise use cases. SLMs, typically ranging from 1B to 13B parameters, are significantly lighter and more agile. They can be fine-tuned for specific domains such as customer support, legal document review, technical troubleshooting, and enterprise knowledge retrieval. Unlike LLMs, which often require dedicated infrastructure or third-party API access, SLMs can often be deployed on-premises or within a company's private cloud. This allows for tighter integration with internal systems and better control over sensitive data—an increasingly important factor in regulated industries like finance, healthcare, and government. Companies like IBM, HuggingFace, and NVIDIA are already rolling out tools and models designed for on-device or edge use. One of the most compelling advantages of SLMs is their efficiency. Because they are smaller in size, inference and training costs are lower. Inference latency is shorter, which makes them ideal for real-time applications. Moreover, SLMs can be tailored to individual departments or workflows, enabling teams to deploy multiple specialized agents rather than relying on a single monolithic AI system. For example, a bank might use a fine-tuned SLM to automate fraud detection workflows, another for processing compliance reports, and another to assist customer service agents in responding to complex client queries. As open-source innovation continues to accelerate, we are seeing an explosion in the availability of high-performing models like Qwen1.5, Phi-3, Gemma, and TinyLlama. Each is designed with efficient training and deployment in mind, and most can be hosted on consumer-grade hardware or edge devices such as smartphones, routers, and IoT gateways. This democratization of language models allows smaller businesses and startups to access powerful AI capabilities without relying on costly commercial APIs. Of course, SLMs are not without limitations. They generally underperform LLMs in open-ended reasoning tasks and may struggle when context exceeds a certain limit. However, with clever retrieval techniques (such as RAG or document chunking) and tight task definitions, these challenges can often be mitigated. Looking ahead, the future of enterprise AI will likely involve a hybrid approach: LLMs for general, high-level reasoning tasks and SLMs for day-to-day operations. This model allows organizations to leverage the best of both worlds—using massive models when necessary while relying on smaller, sustainable systems for the bulk of operational tasks. In summary, SLMs represent a pivotal opportunity for enterprises seeking AI-powered transformation without the overhead of large-scale model deployment. Their combination of affordability, customizability, and data privacy compliance makes them particularly well-suited for long-term integration into business workflows. As toolchains and model architectures continue to evolve, SLMs will become an even more attractive option for companies aiming to build scalable, efficient, and privacy-conscious AI solutions.",
         maxLength: 100
       },
       config: {
         provider: "ollama",
         model: "gemma3:4b",
-        temperature: 0
+        temperature: 0,
+        stream: true
       }
     };
 
@@ -186,6 +194,7 @@
     const providerEl = document.getElementById('provider');
     const modelEl = document.getElementById('model');
     const tokenEl = document.getElementById('token');
+    const streamingEl = document.getElementById('streaming');
     const runBtn = document.getElementById('runBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const loadSampleBtn = document.getElementById('loadSample');
@@ -194,6 +203,7 @@
     const jsonPreview = document.getElementById('jsonPreview');
 
     let abortController = null;
+    let eventSource = null;
 
     // Dynamic model options fetched from backend (summarize capability)
     let modelOptions = null;
@@ -266,7 +276,8 @@
         config: {
           provider: providerEl.value,
           model: modelEl.value,
-          temperature: Number(temperatureEl.value) || 0
+          temperature: Number(temperatureEl.value) || 0,
+          stream: streamingEl.checked
         }
       };
     }
@@ -279,6 +290,7 @@
     function setFromSample() {
       inputText.value = samplePayload.payload.text;
       maxLengthEl.value = samplePayload.payload.maxLength || 100;
+      streamingEl.checked = samplePayload.config.stream !== false;
       providerEl.value = 'ollama';
       updateModelOptions();
       modelEl.value = 'gemma3:4b';
@@ -305,91 +317,133 @@
       const startTime = performance.now();
 
       try {
-        const res = await fetch('/api/v1/summarize', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(req),
-          signal: abortController.signal
-        });
-        const endTime = performance.now();
-        const responseTime = (endTime - startTime).toFixed(2);
-        
-        if (!res.ok) {
-          const txt = await res.text();
-          throw new Error('Request failed: ' + res.status + ' ' + txt);
-        }
-        const data = await res.json();
-        const summary = data?.summary || data?.data?.summary || '';
-        summaryText.textContent = summary || 'No summary returned.';
+        if (req.config.stream) {
+          // Streaming mode using Server-Sent Events
+          const response = await fetch('/api/v1/summarize', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(req),
+            signal: abortController.signal
+          });
 
-        const usage = data?.usage || data?.data?.usage;
-        usageInfo.classList.remove('hidden');
-        
-        let metricsHtml = '<div class="metrics-container">';
-        metricsHtml += '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">';
-        
-        // Response Time metric
-        metricsHtml += '<div class="metric-item">' +
-          '<div class="metric-icon">' +
-            '<svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>' +
-            '</svg>' +
-          '</div>' +
-          '<div>' +
-            '<div class="metric-label">Response</div>' +
-            '<div class="metric-value text-orange-600">' + responseTime + ' ms</div>' +
-          '</div>' +
-        '</div>';
-        
-        if (usage) {
-          const inputTokens = usage.input_tokens || usage.prompt_tokens || 0;
-          const outputTokens = usage.output_tokens || usage.completion_tokens || 0;
-          const totalTokens = usage.total_tokens || (inputTokens + outputTokens);
+          if (!response.ok) {
+            const txt = await response.text();
+            throw new Error('Request failed: ' + response.status + ' ' + txt);
+          }
+
+          // Check if we got SSE content type
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('text/event-stream')) {
+            // Fallback to non-streaming if server didn't return SSE
+            const data = await response.json();
+            const summary = data?.summary || data?.data?.summary || '';
+            summaryText.textContent = summary || 'No summary returned.';
+            const endTime = performance.now();
+            const responseTime = (endTime - startTime).toFixed(2);
+            const usage = data?.usage || data?.data?.usage;
+            if (usage) {
+              displayUsageMetrics(usage, responseTime);
+            }
+            return;
+          }
+
+          // Clear the initial message
+          summaryText.textContent = '';
+          let accumulatedText = '';
+          let usage = null;
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (line.trim().startsWith('data:')) {
+                const data = line.replace(/^data:\s*/, '');
+                if (data.trim() === '[DONE]' || data.trim() === '') {
+                  continue;
+                }
+                try {
+                  const parsed = JSON.parse(data);
+                  if (parsed.chunk) {
+                    accumulatedText += parsed.chunk;
+                    summaryText.textContent = accumulatedText;
+                  }
+                  if (parsed.done && parsed.usage) {
+                    usage = parsed.usage;
+                  }
+                  if (parsed.error) {
+                    throw new Error(parsed.error);
+                  }
+                } catch (e) {
+                  if (e instanceof SyntaxError) {
+                    console.warn('Failed to parse SSE data:', data);
+                  } else {
+                    throw e;
+                  }
+                }
+              }
+            }
+          }
+
+          const endTime = performance.now();
+          const responseTime = (endTime - startTime).toFixed(2);
+
+          // Display usage metrics if available
+          if (usage) {
+            displayUsageMetrics(usage, responseTime);
+          } else {
+            // If no usage data in stream, just show response time
+            usageInfo.classList.remove('hidden');
+            let metricsHtml = '<div class="metrics-container">';
+            metricsHtml += '<div class="grid grid-cols-1 gap-3">';
+            metricsHtml += '<div class="metric-item">' +
+              '<div class="metric-icon">' +
+                '<svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>' +
+                '</svg>' +
+              '</div>' +
+              '<div>' +
+                '<div class="metric-label">Response</div>' +
+                '<div class="metric-value text-orange-600">' + responseTime + ' ms</div>' +
+              '</div>' +
+            '</div>';
+            metricsHtml += '</div></div>';
+            const metricsDiv = createElement('div');
+            metricsDiv.innerHTML = metricsHtml;
+            setContent(usageInfo, metricsDiv.firstChild);
+          }
+        } else {
+          // Non-streaming mode (original implementation)
+          const res = await fetch('/api/v1/summarize', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(req),
+            signal: abortController.signal
+          });
+          const endTime = performance.now();
+          const responseTime = (endTime - startTime).toFixed(2);
           
-          // Input Tokens
-          metricsHtml += '<div class="metric-item">' +
-            '<div class="metric-icon">' +
-              '<svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>' +
-              '</svg>' +
-            '</div>' +
-            '<div>' +
-              '<div class="metric-label">Input</div>' +
-              '<div class="metric-value text-blue-600">' + inputTokens.toLocaleString() + '</div>' +
-            '</div>' +
-          '</div>';
-          
-          // Output Tokens
-          metricsHtml += '<div class="metric-item">' +
-            '<div class="metric-icon">' +
-              '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>' +
-              '</svg>' +
-            '</div>' +
-            '<div>' +
-              '<div class="metric-label">Output</div>' +
-              '<div class="metric-value text-green-600">' + outputTokens.toLocaleString() + '</div>' +
-            '</div>' +
-          '</div>';
-          
-          // Total Tokens
-          metricsHtml += '<div class="metric-item">' +
-            '<div class="metric-icon">' +
-              '<svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>' +
-              '</svg>' +
-            '</div>' +
-            '<div>' +
-              '<div class="metric-label">Total</div>' +
-              '<div class="metric-value text-purple-600">' + totalTokens.toLocaleString() + '</div>' +
-            '</div>' +
-          '</div>';
+          if (!res.ok) {
+            const txt = await res.text();
+            throw new Error('Request failed: ' + res.status + ' ' + txt);
+          }
+          const data = await res.json();
+          const summary = data?.summary || data?.data?.summary || '';
+          summaryText.textContent = summary || 'No summary returned.';
+
+          const usage = data?.usage || data?.data?.usage;
+          if (usage) {
+            displayUsageMetrics(usage, responseTime);
+          }
         }
-        
-        metricsHtml += '</div></div>';
-        const metricsDiv = createElement('div');
-        metricsDiv.innerHTML = metricsHtml;
-        setContent(usageInfo, metricsDiv.firstChild);
       } catch (err) {
         if (err.name === 'AbortError') {
           setContent(summaryText, createElement('div', 'Request cancelled by user', { className: 'text-amber-600' }));
@@ -405,9 +459,80 @@
       }
     }
 
+    function displayUsageMetrics(usage, responseTime) {
+      usageInfo.classList.remove('hidden');
+      
+      let metricsHtml = '<div class="metrics-container">';
+      metricsHtml += '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">';
+      
+      // Response Time metric
+      metricsHtml += '<div class="metric-item">' +
+        '<div class="metric-icon">' +
+          '<svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>' +
+          '</svg>' +
+        '</div>' +
+        '<div>' +
+          '<div class="metric-label">Response</div>' +
+          '<div class="metric-value text-orange-600">' + responseTime + ' ms</div>' +
+        '</div>' +
+      '</div>';
+      
+      if (usage) {
+        const inputTokens = usage.input_tokens || usage.prompt_tokens || 0;
+        const outputTokens = usage.output_tokens || usage.completion_tokens || 0;
+        const totalTokens = usage.total_tokens || (inputTokens + outputTokens);
+        
+        // Input Tokens
+        metricsHtml += '<div class="metric-item">' +
+          '<div class="metric-icon">' +
+            '<svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>' +
+            '</svg>' +
+          '</div>' +
+          '<div>' +
+            '<div class="metric-label">Input</div>' +
+            '<div class="metric-value text-blue-600">' + inputTokens.toLocaleString() + '</div>' +
+          '</div>' +
+        '</div>';
+        
+        // Output Tokens
+        metricsHtml += '<div class="metric-item">' +
+          '<div class="metric-icon">' +
+            '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>' +
+            '</svg>' +
+          '</div>' +
+          '<div>' +
+            '<div class="metric-label">Output</div>' +
+            '<div class="metric-value text-green-600">' + outputTokens.toLocaleString() + '</div>' +
+          '</div>' +
+        '</div>';
+        
+        // Total Tokens
+        metricsHtml += '<div class="metric-item">' +
+          '<div class="metric-icon">' +
+            '<svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>' +
+            '</svg>' +
+          '</div>' +
+          '<div>' +
+            '<div class="metric-label">Total</div>' +
+            '<div class="metric-value text-purple-600">' + totalTokens.toLocaleString() + '</div>' +
+          '</div>' +
+        '</div>';
+      }
+      
+      metricsHtml += '</div></div>';
+      const metricsDiv = createElement('div');
+      metricsDiv.innerHTML = metricsHtml;
+      setContent(usageInfo, metricsDiv.firstChild);
+    }
+
     inputText.addEventListener('input', updatePreview);
     maxLengthEl.addEventListener('input', updatePreview);
     temperatureEl.addEventListener('input', updatePreview);
+    streamingEl.addEventListener('change', updatePreview);
     providerEl.addEventListener('change', () => {
       updateModelOptions();
     });
@@ -418,7 +543,13 @@
     modelEl.addEventListener('change', updatePreview);
 
     runBtn.addEventListener('click', run);
-    cancelBtn.addEventListener('click', () => abortController && abortController.abort());
+    cancelBtn.addEventListener('click', () => {
+      if (abortController) abortController.abort();
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+    });
     loadSampleBtn.addEventListener('click', () => setFromSample());
 
     // Initialize models from backend, then load sample

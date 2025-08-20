@@ -181,7 +181,15 @@
                         </div>
                     </div>
 
-                    <!-- Provider and Model Selection -->
+                    <!-- Streaming Option -->
+                    <div class="flex items-center mb-3">
+                        <input type="checkbox" id="streaming" name="streaming" checked
+                            class="h-4 w-4 text-brand-purple focus:ring-brand-purple border-gray-300 rounded" />
+                        <label for="streaming" class="ml-2 text-sm text-gray-700">
+                            Enable streaming (see plan as it's generated)
+                        </label>
+                    </div>
+
                     <!-- Provider and Model Selection -->
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -274,7 +282,8 @@
                     <div class="flex items-center justify-center py-12">
                         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-purple"></div>
                     </div>
-                    <p class="text-center text-gray-600 mt-4">Generating your plan...</p>
+                    <p id="loadingMessage" class="text-center text-gray-600 mt-4">Generating your plan...</p>
+                    <p id="streamingHint" class="text-center text-gray-500 text-sm mt-2 hidden">Your plan will appear as it's being generated</p>
                 </div>
 
                 <!-- Error State -->
@@ -717,6 +726,7 @@
             const detailLevel = document.getElementById('detailLevel').value;
             const includeTimeEstimates = document.getElementById('includeTimeEstimates').checked;
             const includeRisks = document.getElementById('includeRisks').checked;
+            const streaming = document.getElementById('streaming').checked;
 
             let model = document.getElementById('model').value;
 
@@ -738,6 +748,8 @@
             cancelBtn.classList.remove('hidden');
             abortController = new AbortController();
 
+            const startTime = performance.now();
+
             try {
                 // Prepare request body
                 const requestBody = {
@@ -752,7 +764,8 @@
                     },
                     config: {
                         provider,
-                        model
+                        model,
+                        stream: streaming
                     }
                 };
 
@@ -769,33 +782,106 @@
                     signal: abortController.signal
                 });
 
-                const data = await response.json();
-
                 if (!response.ok) {
-                    // Better error handling
+                    const data = await response.json();
                     const errorMsg = data.error || data.message || data.detail || 'Failed to generate plan';
                     console.error('API Error:', data);
                     throw new Error(errorMsg);
                 }
 
-                // Store the plan text
-                currentPlanText = data.plan;
+                // Check if streaming is enabled and supported
+                const contentType = response.headers.get('content-type');
+                if (streaming && contentType && contentType.includes('text/event-stream')) {
+                    // Streaming mode
+                    document.getElementById('loadingState').classList.add('hidden');
+                    document.getElementById('resultState').classList.remove('hidden');
+                    document.getElementById('copyButton').classList.remove('hidden');
+                    document.getElementById('copyButton').classList.add('flex');
+                    document.getElementById('fullscreenButton').classList.remove('hidden');
+                    document.getElementById('fullscreenButton').classList.add('flex');
 
-                // Display the result
-                document.getElementById('planContent').innerHTML = formatPlanForDisplay(currentPlanText);
-                document.getElementById('metaProvider').textContent = data.metadata?.provider || '';
-                document.getElementById('metaModel').textContent = data.metadata?.model || '';
-                document.getElementById('metaTime').textContent = (data.metadata?.processingTime != null) ? `${data.metadata.processingTime}ms` : '';
-                document.getElementById('metaTokens').textContent = (data.usage?.total_tokens != null) ? data.usage.total_tokens : '';
+                    // Clear and prepare for streaming
+                    currentPlanText = '';
+                    document.getElementById('planContent').innerHTML = '';
+                    
+                    let usage = null;
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
 
-                // Show result state
-                document.getElementById('loadingState').classList.add('hidden');
-                document.getElementById('resultState').classList.remove('hidden');
-                // Show copy and fullscreen buttons
-                document.getElementById('copyButton').classList.remove('hidden');
-                document.getElementById('copyButton').classList.add('flex');
-                document.getElementById('fullscreenButton').classList.remove('hidden');
-                document.getElementById('fullscreenButton').classList.add('flex');
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+
+                        for (const line of lines) {
+                            if (line.trim().startsWith('data:')) {
+                                const data = line.replace(/^data:\s*/, '');
+                                if (data.trim() === '[DONE]' || data.trim() === '') {
+                                    continue;
+                                }
+                                try {
+                                    const parsed = JSON.parse(data);
+                                    if (parsed.chunk) {
+                                        currentPlanText += parsed.chunk;
+                                        document.getElementById('planContent').innerHTML = formatPlanForDisplay(currentPlanText);
+                                    }
+                                    if (parsed.done && parsed.usage) {
+                                        usage = parsed.usage;
+                                    }
+                                    if (parsed.metadata) {
+                                        document.getElementById('metaProvider').textContent = parsed.metadata.provider || '';
+                                        document.getElementById('metaModel').textContent = parsed.metadata.model || '';
+                                    }
+                                    if (parsed.error) {
+                                        throw new Error(parsed.error);
+                                    }
+                                } catch (e) {
+                                    if (e instanceof SyntaxError) {
+                                        console.warn('Failed to parse SSE data:', data);
+                                    } else {
+                                        throw e;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    const endTime = performance.now();
+                    const processingTime = Math.round(endTime - startTime);
+
+                    // Update metadata
+                    document.getElementById('metaTime').textContent = `${processingTime}ms`;
+                    if (usage) {
+                        const totalTokens = usage.total_tokens || (usage.input_tokens + usage.output_tokens) || 0;
+                        document.getElementById('metaTokens').textContent = totalTokens.toString();
+                    }
+                } else {
+                    // Non-streaming mode (fallback or when streaming is disabled)
+                    const data = await response.json();
+
+                    // Store the plan text
+                    currentPlanText = data.plan;
+
+                    // Display the result
+                    document.getElementById('planContent').innerHTML = formatPlanForDisplay(currentPlanText);
+                    document.getElementById('metaProvider').textContent = data.metadata?.provider || '';
+                    document.getElementById('metaModel').textContent = data.metadata?.model || '';
+                    document.getElementById('metaTime').textContent = (data.metadata?.processingTime != null) ? `${data.metadata.processingTime}ms` : '';
+                    document.getElementById('metaTokens').textContent = (data.usage?.total_tokens != null) ? data.usage.total_tokens : '';
+
+                    // Show result state
+                    document.getElementById('loadingState').classList.add('hidden');
+                    document.getElementById('resultState').classList.remove('hidden');
+                    // Show copy and fullscreen buttons
+                    document.getElementById('copyButton').classList.remove('hidden');
+                    document.getElementById('copyButton').classList.add('flex');
+                    document.getElementById('fullscreenButton').classList.remove('hidden');
+                    document.getElementById('fullscreenButton').classList.add('flex');
+                }
 
             } catch (error) {
                 console.error('Full error:', error);
@@ -821,6 +907,15 @@
         document.getElementById('cancelButton').addEventListener('click', function () {
             if (abortController) {
                 abortController.abort();
+                // If streaming, update UI immediately
+                const loadingState = document.getElementById('loadingState');
+                const resultState = document.getElementById('resultState');
+                if (!loadingState.classList.contains('hidden')) {
+                    // Was loading, show appropriate message
+                    document.getElementById('errorMessage').textContent = 'Request cancelled by user';
+                    loadingState.classList.add('hidden');
+                    document.getElementById('errorState').classList.remove('hidden');
+                }
             }
         });
 
