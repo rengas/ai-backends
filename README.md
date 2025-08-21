@@ -85,12 +85,14 @@ OLLAMA_BASE_URL=http://host.docker.internal:11434
 If deploying to production, set this in your .env file:
 ```env
 NODE_ENV=production
+DEFAULT_ACCESS_TOKEN=your-secret-api-key
 OPENAI_API_KEY=your-openai-api-key
 ANTHROPIC_API_KEY=your-anthropic-api-key
 OPENROUTER_API_KEY=your-openrouter-api-key
 ```
+You need to configure at least one provider api key. Otherwise, the app will not start.
 
-### Using Docker Compose (experimental)
+### Using Docker Compose (work in progress)
 This will run AI Backends API server and Ollama containers using Docker
 - Ensure you have a .env configured as described in "Set up environment variables" below. You must set DEFAULT_ACCESS_TOKEN and at least one provider credential (or enable a local provider such as Ollama).
 - Start all services:
