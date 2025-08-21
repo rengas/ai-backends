@@ -6,8 +6,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - OLLAMA_URL=http://ollama:11434/v1/
-      - NODE_ENV=production
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - NODE_ENV=development
       - OLLAMA_ENABLED=true
     depends_on:
       ollama:
@@ -25,7 +25,12 @@ services:
     networks:
       - ollama-net
     entrypoint: /bin/sh
-    command: -c "ollama serve & sleep 5 && ollama pull gemma3:4b && wait"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 120s
+      retries: 3
+    command: -c "ollama serve & sleep 5 && ollama pull gemma3:270m && wait"
 
 volumes:
   ollama-data:
