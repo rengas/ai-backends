@@ -63,6 +63,49 @@ bun run dev
 bun run build
 ```
 
+## Run with Docker
+
+### Using a single container (recommended)
+Right now this only works with OpenAI, Anthropic and OpenRouter since the docker container
+- Build the image:
+```bash
+docker build -t ai-backends .
+```
+- Run the container in the background (loads variables from your .env):
+```bash
+docker run --env-file .env -p 3000:3000 ai-backends &
+```
+
+Set this in your .env file if you're using for development with Ollama in your local machine.
+```env
+NODE_ENV=development
+OLLAMA_BASE_URL=http://host.docker.internal:11434
+```
+
+If deploying to production, set this in your .env file:
+```env
+NODE_ENV=production
+OPENAI_API_KEY=your-openai-api-key
+ANTHROPIC_API_KEY=your-anthropic-api-key
+OPENROUTER_API_KEY=your-openrouter-api-key
+```
+
+### Using Docker Compose (experimental)
+This will run AI Backends API server and Ollama containers using Docker
+- Ensure you have a .env configured as described in "Set up environment variables" below. You must set DEFAULT_ACCESS_TOKEN and at least one provider credential (or enable a local provider such as Ollama).
+- Start all services:
+```bash
+docker compose --env-file .env up -d --build
+```
+
+- Useful commands:
+  - View logs: docker compose logs -f app
+  - Stop/remove: docker compose down
+
+Notes
+- With Docker Compose, the app container can reach the Ollama service over the compose network (service name: ollama, port: 11434).
+- You can customize which models are pulled by editing the ollama service command in docker-compose.yml.
+
 ## Set up environment variables
 
 Create a `.env` file in the root directory of this project and configure your preferred AI services:
