@@ -26,7 +26,7 @@ services:
       - ollama-net
     entrypoint: /bin/sh
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      test: ["CMD", "ollama", "list"]
       interval: 30s
       timeout: 120s
       retries: 3

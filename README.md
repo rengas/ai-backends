@@ -92,7 +92,7 @@ OPENROUTER_API_KEY=your-openrouter-api-key
 ```
 You need to configure at least one provider api key. Otherwise, the app will not start.
 
-### Using Docker Compose (work in progress)
+### Using Docker Compose
 This will run AI Backends API server and Ollama containers using Docker
 - Ensure you have a .env configured as described in "Set up environment variables" below. You must set DEFAULT_ACCESS_TOKEN and at least one provider credential (or enable a local provider such as Ollama).
 - Start all services:
@@ -100,7 +100,22 @@ This will run AI Backends API server and Ollama containers using Docker
 docker compose --env-file .env up -d --build
 ```
 
-- Useful commands:
+### Adding more models to Ollama container
+To add more models, you can edit the ollama service command in docker-compose.yml.
+
+
+For example, to add gemma3:4b, llama3.2:latest and llama3.2-vision:11b models, you can add the following to the ollama service command:
+```yml
+command: -c "ollama serve & sleep 5 && ollama pull gemma3:270m && ollama pull gemma3:4b && ollama pull llama3.2:latest && ollama pull llama3.2-vision:11b && wait"
+```
+You might need to adjust the timeout to give enough time for the models to be pulled.
+
+```yml
+ healthcheck:      
+      timeout: 120s //increase this if you're adding more models
+```
+
+  Useful commands:
   - View logs: docker compose logs -f app
   - Stop/remove: docker compose down
 
@@ -185,7 +200,7 @@ curl --location 'http://localhost:3000/api/v1/summarize' \
     },
     "config": {
         "provider": "ollama",
-        "model": "gemma3:4b",
+        "model": "gemma3:270m",
         "temperature": 0
     }
 }'
