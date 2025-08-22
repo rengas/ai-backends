@@ -98,11 +98,7 @@ export async function generateImageResponse(
             total_tokens: (result.prompt_eval_count || 0) + (result.eval_count || 0),
           },
           service: service
-        };
-        
-      case 'aigateway':
-        return await aigatewayService.describeImage(images, model, stream, temperature);
-
+        };              
       default:
         throw new Error(`Vision capabilities not supported for service: ${service}`);
     }

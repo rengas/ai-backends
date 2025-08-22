@@ -7,7 +7,7 @@ import OpenAI from 'openai'
 const aigateway = createOpenAICompatible({
   name: 'aigateway',
   baseURL: `${aigatewayConfig.baseURL}`,
-  apiKey: process.env.AI_GATEWAY_API_KEY || 'ai-gateway',
+  apiKey: `${aigatewayConfig.apiKey}`
 })
 
 export async function generateChatStructuredResponse<T extends z.ZodType>(
@@ -35,7 +35,7 @@ export async function generateChatStructuredResponse<T extends z.ZodType>(
       warnings: result.warnings,
     };
   } catch (error) {
-    throw new Error(`OpenRouter structured response error: ${error}`);
+    throw new Error(`AI Gateway structured response error: ${error}`);
   }
 }
 

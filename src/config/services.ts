@@ -99,7 +99,7 @@ export const aigatewayConfig: AIGatewayConfig = {
   name: 'AIGateway',
   enabled: process.env.AIGATEWAY_ENABLED === 'true' || process.env.AIGATEWAY_BASE_URL !== undefined,
   priority: 6,
-  apiKey: process.env.AIGATEWAY_API_KEY || '',
+  apiKey: process.env.AI_GATEWAY_API_KEY || '',
   model: process.env.AIGATEWAY_MODEL || '',
   chatModel: process.env.AIGATEWAY_CHAT_MODEL || '',
   baseURL: process.env.AIGATEWAY_BASE_URL || 'https://ai-gateway.vercel.sh/v1',
