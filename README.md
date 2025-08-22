@@ -44,7 +44,7 @@ More to come...check swagger docs for updated endpoints.
 | [OpenAI](https://openai.com/) | GPT models | Available |
 | [Anthropic](https://www.anthropic.com/) | Claude models | Available |
 | [OpenRouter](https://openrouter.ai/) | Open source and private models |  Available |
-| [Vercel AI Gateway](https://vercel.com/ai) | Open source and private models | In Progress |
+| [Vercel AI Gateway](https://vercel.com/ai-gateway) | Open source and private models | Available |
 | [Google](https://ai.google.dev/) | Gemini models | In Progress |
 
 
