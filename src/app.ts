@@ -122,8 +122,9 @@ export async function checkLLMProvidersAvailability() {
     const openaiApiKey = process.env.OPENAI_API_KEY;
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
     const openrouterApiKey = process.env.OPENROUTER_API_KEY;
+    const aigatewayApiKey = process.env.AI_GATEWAY_API_KEY;
 
-    if (!openaiApiKey && !anthropicApiKey && !openrouterApiKey) {
+    if (!openaiApiKey && !anthropicApiKey && !openrouterApiKey && !aigatewayApiKey) {
         throw new Error('No API keys found for external LLM providers');
     }
 
@@ -131,6 +132,7 @@ export async function checkLLMProvidersAvailability() {
     if (openaiApiKey) availableProviders.push('OpenAI');
     if (anthropicApiKey) availableProviders.push('Anthropic');
     if (openrouterApiKey) availableProviders.push('OpenRouter');
+    if (aigatewayApiKey) availableProviders.push('AIGateway');
     
     return availableProviders;
 }

@@ -106,7 +106,7 @@ export const aigatewayConfig: AIGatewayConfig = {
 };
 
 // Available services
-export const availableServices = [openaiConfig, anthropicConfig, ollamaConfig, openrouterConfig, lmstudioConfig];
+export const availableServices = [openaiConfig, anthropicConfig, ollamaConfig, openrouterConfig, lmstudioConfig, aigatewayConfig];
 
 // Get the primary service (highest priority enabled service)
 export function getPrimaryService(): ServiceConfig | null {
