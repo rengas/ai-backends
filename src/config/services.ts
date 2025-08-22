@@ -37,6 +37,13 @@ export interface OpenRouterConfig extends ServiceConfig {
   baseURL?: string;
 }
 
+export interface AIGatewayConfig extends ServiceConfig {
+  apiKey: string;
+  model: string;
+  chatModel: string;
+  baseURL?: string;
+}
+
 // OpenAI Configuration
 export const openaiConfig: OpenAIConfig = {
   name: 'OpenAI',
@@ -86,6 +93,16 @@ export const lmstudioConfig: LMStudioConfig = {
   model: process.env.LMSTUDIO_MODEL || 'gemma-3-270m-it',
   chatModel: process.env.LMSTUDIO_CHAT_MODEL || process.env.LMSTUDIO_MODEL || 'gemma-3-270m-it',
   timeout: parseInt(process.env.LMSTUDIO_TIMEOUT || '30000'),
+};
+
+export const aigatewayConfig: AIGatewayConfig = {
+  name: 'AIGateway',
+  enabled: process.env.AIGATEWAY_ENABLED === 'true' || process.env.AIGATEWAY_BASE_URL !== undefined,
+  priority: 6,
+  apiKey: process.env.AIGATEWAY_API_KEY || '',
+  model: process.env.AIGATEWAY_MODEL || '',
+  chatModel: process.env.AIGATEWAY_CHAT_MODEL || '',
+  baseURL: process.env.AIGATEWAY_BASE_URL || 'https://ai-gateway.vercel.sh/v1',
 };
 
 // Available services
