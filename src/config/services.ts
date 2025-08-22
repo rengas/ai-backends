@@ -37,6 +37,13 @@ export interface OpenRouterConfig extends ServiceConfig {
   baseURL?: string;
 }
 
+export interface AIGatewayConfig extends ServiceConfig {
+  apiKey: string;
+  model: string;
+  chatModel: string;
+  baseURL?: string;
+}
+
 // OpenAI Configuration
 export const openaiConfig: OpenAIConfig = {
   name: 'OpenAI',
@@ -88,8 +95,18 @@ export const lmstudioConfig: LMStudioConfig = {
   timeout: parseInt(process.env.LMSTUDIO_TIMEOUT || '30000'),
 };
 
+export const aigatewayConfig: AIGatewayConfig = {
+  name: 'AIGateway',
+  enabled: process.env.AIGATEWAY_ENABLED === 'true' || process.env.AIGATEWAY_BASE_URL !== undefined,
+  priority: 6,
+  apiKey: process.env.AI_GATEWAY_API_KEY || '',
+  model: process.env.AIGATEWAY_MODEL || '',
+  chatModel: process.env.AIGATEWAY_CHAT_MODEL || '',
+  baseURL: process.env.AIGATEWAY_BASE_URL || 'https://ai-gateway.vercel.sh/v1',
+};
+
 // Available services
-export const availableServices = [openaiConfig, anthropicConfig, ollamaConfig, openrouterConfig, lmstudioConfig];
+export const availableServices = [openaiConfig, anthropicConfig, ollamaConfig, openrouterConfig, lmstudioConfig, aigatewayConfig];
 
 // Get the primary service (highest priority enabled service)
 export function getPrimaryService(): ServiceConfig | null {

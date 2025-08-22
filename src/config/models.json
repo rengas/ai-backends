@@ -50,6 +50,16 @@
       "models": [
         { "name": "claude-3-haiku-20240307", "capabilities": ["summarize", "planning", "keywords", "sentiment", "askText", "emailReply", "translate", "meetingNotes"], "notes": "Anthropic Claude 3 Haiku; fast and cost-effective with Q&A support." }
       ]
+    },
+    "aigateway": {
+      "enabled": true,
+      "models": [
+        { "name": "openai/gpt-5-nano", "capabilities": ["summarize", "planning", "keywords", "sentiment", "askText", "emailReply", "translate", "meetingNotes"], "notes": "GPT-5 nano is a high throughput model that excels at simple instruction or classification tasks." },
+        { "name": "gemini-2.0-flash-lite-preview-02-05", "capabilities": ["summarize", "planning", "keywords", "sentiment", "askText", "emailReply", "translate", "meetingNotes"], "notes": "Gemini 2.0 Flash Lite Preview 02-05" },
+        { "name": "mistral-small-2503", "capabilities": ["summarize", "planning", "keywords", "sentiment", "askText", "emailReply", "translate", "meetingNotes"], "notes": "Mistral Small" }
+
+        
+      ]
     }
   }
 }
