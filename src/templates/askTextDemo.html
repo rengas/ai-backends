@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Backends - AskText Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-purple': '#B341F9',
+            'brand-pink': '#E453C0',
+            'terminal-bg': '#1C2128',
+            'terminal-text': '#A7B5C4'
+          },
+          backgroundImage: {
+            'gradient-brand': 'linear-gradient(135deg, #B341F9, #E453C0)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .metrics-container {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+    }
+    .metric-item {
+      background: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .metric-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    .metric-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Markdown table styling */
+    .md-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 1rem 0;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: white;
+    }
+    .md-table thead th {
+      background: #f9fafb;
+      color: #374151;
+      font-weight: 600;
+      padding: 0.75rem 0.875rem;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+    .md-table td {
+      padding: 0.75rem 0.875rem;
+      border-bottom: 1px solid #f3f4f6;
+      color: #1f2937;
+      vertical-align: top;
+    }
+    .md-table tbody tr:nth-child(odd) td { background: #fafafa; }
+    .md-table tbody tr:last-child td { border-bottom: none; }
+  </style>
+  <script src="/api/shared/safedom.js"></script>
+</head>
+<body class="bg-white min-h-screen">
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 rounded-xl bg-[#B341F9] flex items-center justify-center">
+            <span class="text-white font-bold text-xl">AI</span>
+          </div>
+          <span class="text-2xl font-bold text-gray-900">Backends</span>
+          <span class="ml-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700">
+            <svg class="w-4 h-4 mr-1" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"/>
+            </svg>
+            Open Source
+          </span>
+        </a>
+        <div class="flex items-center space-x-6">
+          <a href="/api/ui" target="_blank" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">API Docs</a>
+          <a href="/api/demos" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">Demos</a>
+          <a href="/api/jsoneditor" target="_blank" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">JSON Editor</a>
+          <a href="/api/models" class="text-gray-700 hover:text-brand-purple transition-colors duration-300">Models Guide</a>
+          <a href="https://github.com/donvito/ai-backend" class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors duration-300">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"/>
+            </svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-6 py-12">
+    <!-- Breadcrumb -->
+    <nav class="mb-6 text-sm">
+      <ol class="flex items-center space-x-2 text-gray-500">
+        <li><a href="/" class="hover:text-gray-700">Home</a></li>
+        <li><span>/</span></li>
+        <li><a href="/api/demos" class="hover:text-gray-700">Demos</a></li>
+        <li><span>/</span></li>
+        <li class="text-gray-900 font-medium">AskText</li>
+      </ol>
+    </nav>
+
+    <!-- Demo Title and Description -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-3">AskText Demo</h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Ask questions about any text and get AI-powered answers based on the provided context
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+      <!-- Controls -->
+      <section class="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h2 class="text-lg font-semibold mb-3">Input</h2>
+        
+        <label class="block text-sm font-medium text-gray-700 mb-1">Context Text</label>
+        <textarea id="inputText" class="w-full h-40 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple bg-white" placeholder="Enter the text you want to ask questions about..."></textarea>
+
+        <label class="block text-sm font-medium text-gray-700 mb-1 mt-4">Your Question</label>
+        <textarea id="questionText" class="w-full h-20 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple bg-white" placeholder="What would you like to know about the text above?"></textarea>
+
+        <!-- Quick Samples -->
+        <div class="mt-3">
+          <div class="text-xs text-gray-500 mb-2">Quick samples:</div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" id="chipSupport" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Support Chat</button>
+            <button type="button" id="chipLHC" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">LHC Article</button>
+            <button type="button" id="chipDocQA" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Document Q&A</button>
+            <button type="button" id="chipStudy" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Study Assistant</button>
+            <button type="button" id="chipContext" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Context Analysis</button>
+            <button type="button" id="chipTriage" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Support Triage</button>
+            <button type="button" id="chipCompliance" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Compliance</button>
+            <button type="button" id="chipExtract" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Data Extraction</button>
+            <button type="button" id="chipMeetings" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">Meetings Q&A</button>
+            <button type="button" id="chipFAQ" class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100">FAQ Builder</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Provider</label>
+            <select id="provider" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple">
+              <option value="ollama">ollama</option>
+              <option value="openai">openai</option>
+              <option value="anthropic">anthropic</option>
+              <option value="openrouter">openrouter</option>
+              <option value="lmstudio">lmstudio</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+            <select id="model" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple"></select>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Bearer Token (optional)</label>
+          <input id="token" type="password" placeholder="Only needed in production deployments" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-purple" />
+        </div>
+
+        <div class="mt-3">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="streamingEnabled" class="rounded border-gray-300 text-brand-purple focus:ring-brand-purple" checked>
+            <span class="text-sm font-medium text-gray-700">Enable streaming</span>
+          </label>
+        </div>
+
+        <div class="mt-4 flex items-center gap-2">
+          <button id="runBtn" class="px-4 py-2 rounded-lg bg-brand-purple text-white hover:bg-[#9935D9]">Ask Question</button>
+          <button id="cancelBtn" class="hidden px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Cancel</button>
+        </div>
+
+        <details class="mt-4">
+          <summary class="text-sm text-gray-600 cursor-pointer">View JSON request</summary>
+          <pre id="jsonPreview" class="mt-2 bg-gray-900 text-green-400 p-3 rounded-lg text-xs mono overflow-auto"></pre>
+        </details>
+      </section>
+
+      <!-- Output -->
+      <section class="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h2 class="text-lg font-semibold mb-3">Answer</h2>
+        <div id="usageInfo" class="hidden mb-3 text-sm"></div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden">
+          <div class="flex items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-purple"></div>
+          </div>
+          <p class="text-center text-gray-600 mt-2">Processing your question...</p>
+        </div>
+
+        <!-- Token Usage Info (moved above response) -->
+        <div id="tokenInfo" class="mb-4 hidden">
+          <div class="metrics-container">
+            <div class="grid grid-cols-3 gap-2">
+              <div class="metric-item">
+                <div class="metric-icon">
+                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="metric-label">Input</div>
+                  <div class="metric-value" id="inputTokens">-</div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-icon">
+                  <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4v-4z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="metric-label">Output</div>
+                  <div class="metric-value" id="outputTokens">-</div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-icon">
+                  <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="metric-label">Total</div>
+                  <div class="metric-value" id="totalTokens">-</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="answerText" class="p-4 rounded-lg bg-gray-50 border border-gray-200 leading-7 text-gray-900 min-h-[200px]">
+          <span class="text-gray-500">Your answer will appear here...</span>
+        </div>
+      </section>
+    </div>
+
+    
+  </main>
+
+  <footer class="bg-gray-50 border-t border-gray-200 mt-16">
+    <div class="container mx-auto px-6 py-12 max-w-7xl">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Example Use Cases</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">Document Q&amp;A</h3>
+          <p class="text-gray-600 text-sm">Answer specific questions about documents, articles, or reports based on their content.</p>
+          <button id="loadDocQA" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">Study Assistant</h3>
+          <p class="text-gray-600 text-sm">Help students understand complex topics by answering questions about study materials.</p>
+          <button id="loadStudy" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">Context Analysis</h3>
+          <p class="text-gray-600 text-sm">Extract specific information or insights from any given text context quickly and accurately.</p>
+          <button id="loadContext" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m3 14H6a3 3 0 01-3-3V8a3 3 0 013-3h9a3 3 0 013 3v4"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">Customer Support Triage</h3>
+          <p class="text-gray-600 text-sm">Identify intent and extract key details from support chats to speed up resolution.</p>
+          <button id="loadSupportTriage" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m0 0l3-3m-3 3l3 3M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">Compliance Checking</h3>
+          <p class="text-gray-600 text-sm">Check text against policy or regulatory requirements and surface issues.</p>
+          <button id="loadCompliance" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">Data Extraction</h3>
+          <p class="text-gray-600 text-sm">Pull names, dates, IDs, and key facts from unstructured text.</p>
+          <button id="loadExtraction" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M4 11h16M4 19h16"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">Meeting Minutes Q&amp;A</h3>
+          <p class="text-gray-600 text-sm">Ask targeted questions on meeting transcripts and decisions.</p>
+          <button id="loadMeetings" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h12M4 14h8M4 18h6"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">FAQ Builder</h3>
+          <p class="text-gray-600 text-sm">Generate or validate FAQs from a corpus and answer user queries.</p>
+          <button id="loadFAQ" class="mt-3 text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200">Load example</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const samplePayload = {
+      payload: {
+        text: "The Large Hadron Collider (LHC) is the world's largest and most powerful particle accelerator. It first started up on 10 September 2008, and remains the latest addition to CERN's accelerator complex. The LHC consists of a 27-kilometre ring of superconducting magnets with a number of accelerating structures to boost the energy of the particles along the way. Inside the accelerator, two high-energy particle beams travel at close to the speed of light before they are made to collide. The beams travel in opposite directions in separate beam pipes – two tubes kept at ultrahigh vacuum. They are guided around the accelerator ring by a strong magnetic field maintained by superconducting electromagnets. The electromagnets are built from coils of special electric cable that operates in a superconducting state, efficiently conducting electricity without resistance or loss of energy. This requires chilling the magnets to ‑271.3°C – a temperature colder than outer space. For this reason, much of the accelerator is connected to a distribution system of liquid helium, which cools the magnets, as well as to other supply services. The LHC has discovered the Higgs boson, a fundamental particle that gives mass to other particles, which was confirmed in 2012. This discovery completed the Standard Model of particle physics and earned François Englert and Peter Higgs the Nobel Prize in Physics in 2013.",
+        question: "What temperature do the LHC magnets need to be cooled to and why?"
+      },
+      config: {
+        provider: "ollama",
+        model: "gemma2:9b"
+      }
+    };
+
+    const inputText = document.getElementById('inputText');
+    const questionText = document.getElementById('questionText');
+    const providerEl = document.getElementById('provider');
+    const modelEl = document.getElementById('model');
+    const tokenEl = document.getElementById('token');
+    const runBtn = document.getElementById('runBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    
+    const answerText = document.getElementById('answerText');
+    const usageInfo = document.getElementById('usageInfo');
+    const jsonPreview = document.getElementById('jsonPreview');
+    const tokenInfo = document.getElementById('tokenInfo');
+    const inputTokensEl = document.getElementById('inputTokens');
+    const outputTokensEl = document.getElementById('outputTokens');
+    const totalTokensEl = document.getElementById('totalTokens');
+    const chipSupport = document.getElementById('chipSupport');
+    const chipLHC = document.getElementById('chipLHC');
+    const chipDocQA = document.getElementById('chipDocQA');
+    const chipStudy = document.getElementById('chipStudy');
+    const chipContext = document.getElementById('chipContext');
+    const chipTriage = document.getElementById('chipTriage');
+    const chipCompliance = document.getElementById('chipCompliance');
+    const chipExtract = document.getElementById('chipExtract');
+    const chipMeetings = document.getElementById('chipMeetings');
+    const chipFAQ = document.getElementById('chipFAQ');
+    // Footer example buttons
+    const btnDocQA = document.getElementById('loadDocQA');
+    const btnStudy = document.getElementById('loadStudy');
+    const btnContext = document.getElementById('loadContext');
+    const btnSupportTriage = document.getElementById('loadSupportTriage');
+    const btnCompliance = document.getElementById('loadCompliance');
+    const btnExtraction = document.getElementById('loadExtraction');
+    const btnMeetings = document.getElementById('loadMeetings');
+    const btnFAQ = document.getElementById('loadFAQ');
+
+    let abortController = null;
+
+    // Dynamic model options fetched from backend (askText capability)
+    let modelOptions = null;
+
+    // Fetch model options from backend (aligned with Project Planner: source=config&view=capability)
+    async function fetchModelOptions() {
+      try {
+        const headers = {};
+        const tokenVal = (tokenEl && tokenEl.value) ? tokenEl.value.trim() : '';
+        if (tokenVal) headers['Authorization'] = 'Bearer ' + tokenVal;
+
+        const response = await fetch('/api/v1/services/models?source=config&view=capability', { headers });
+        if (!response.ok) throw new Error('Failed to load models: ' + response.status);
+        const data = await response.json();
+        const askTextMap = data && data.byCapability && data.byCapability.askText ? data.byCapability.askText : {};
+
+        // Normalize to existing structure: [{ provider, models: string[] }, ...]
+        modelOptions = Object.keys(askTextMap).map(provider => ({ provider, models: askTextMap[provider] || [] }));
+      } catch (error) {
+        console.error('Failed to fetch model options, using fallback:', error.message || error);
+        // Fallback to default options
+        modelOptions = [
+          { provider: 'ollama', models: ['gemma3:4b', 'llama3.2:3b'] },
+          { provider: 'openai', models: ['gpt-4o-mini', 'gpt-3.5-turbo'] },
+          { provider: 'anthropic', models: ['claude-3-haiku-20240307'] },
+          { provider: 'openrouter', models: ['openai/gpt-4o-mini'] },
+          { provider: 'lmstudio', models: ['llama-3.2-3b-instruct'] }
+        ];
+      } finally {
+        // Ensure provider is valid for askText capability
+        const providers = Array.isArray(modelOptions) ? modelOptions.map(p => p.provider) : [];
+        if (providers.length && !providers.includes(providerEl.value)) {
+          providerEl.value = providers[0];
+        }
+        updateModelDropdown();
+      }
+    }
+
+    function updateModelDropdown() {
+      const selectedProvider = providerEl.value;
+      const providerModels = Array.isArray(modelOptions) ? modelOptions.find(p => p.provider === selectedProvider) : null;
+      
+      modelEl.innerHTML = '';
+      if (providerModels && Array.isArray(providerModels.models)) {
+        providerModels.models.forEach(model => {
+          const option = document.createElement('option');
+          option.value = model;
+          option.textContent = model;
+          modelEl.appendChild(option);
+        });
+
+        // Default to the first model returned from the API for the selected provider
+        if (providerModels.models.length) {
+          modelEl.value = providerModels.models[0];
+        }
+      }
+      updateJsonPreview();
+    }
+
+    function updateJsonPreview() {
+      const payload = {
+        payload: {
+          text: inputText.value,
+          question: questionText.value
+        },
+        config: {
+          provider: providerEl.value,
+          model: modelEl.value,
+          stream: document.getElementById('streamingEnabled').checked
+        }
+      };
+      
+      jsonPreview.textContent = JSON.stringify(payload, null, 2);
+    }
+
+    async function askQuestion() {
+      const text = inputText.value.trim();
+      const question = questionText.value.trim();
+      let model = modelEl.value;
+      const isStreaming = document.getElementById('streamingEnabled').checked;
+      
+      // Handle API key and model selection
+      if (providerEl.value === 'ollama' || providerEl.value === 'lmstudio') {
+        if (providerEl.value === 'ollama' && model === 'custom') {
+          model = document.getElementById('localModel').value || 'llama3.2:3b';
+        }
+      }
+      
+      if (!text || !question) {
+        alert('Please provide both text and a question');
+        return;
+      }
+
+      runBtn.classList.add('hidden');
+      cancelBtn.classList.remove('hidden');
+      document.getElementById('loadingState').classList.remove('hidden');
+      answerText.classList.add('hidden');
+      answerText.innerHTML = '';
+      tokenInfo.classList.add('hidden');
+      
+      abortController = new AbortController();
+
+      try {
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        
+        if (tokenEl.value) {
+          headers['Authorization'] = `Bearer ${tokenEl.value}`;
+        }
+
+        const response = await fetch('/api/v1/ask-text', {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            payload: {
+              text: text,
+              question: question
+            },
+            config: {
+              provider: providerEl.value,
+              model: model,
+              stream: isStreaming
+            }
+          }),
+          signal: abortController.signal
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to get answer');
+        }
+
+        // Check if response is streaming
+        const contentType = response.headers.get('content-type');
+        if (isStreaming && contentType && contentType.includes('text/event-stream')) {
+          // Hide loading state and show answer area for streaming
+          document.getElementById('loadingState').classList.add('hidden');
+          answerText.classList.remove('hidden');
+          answerText.innerHTML = '';
+          
+          // Handle SSE streaming
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          let fullAnswer = '';
+          
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+            
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(line.slice(6));
+                  
+                  if (data.error) {
+                    throw new Error(data.error);
+                  }
+                  
+                  if (data.done) {
+                    // Final message with usage stats
+                    if (data.usage) {
+                      tokenInfo.classList.remove('hidden');
+                      inputTokensEl.textContent = data.usage.input_tokens || '-';
+                      outputTokensEl.textContent = data.usage.output_tokens || '-';
+                      totalTokensEl.textContent = data.usage.total_tokens || '-';
+                    }
+                    
+                    // Display provider and model info
+                    if (data.provider && data.model) {
+                      usageInfo.innerHTML = `
+                        <div class="flex items-center gap-2 text-gray-600">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>Provider: <strong>${data.provider}</strong></span>
+                          <span>•</span>
+                          <span>Model: <strong>${data.model}</strong></span>
+                        </div>
+                      `;
+                      usageInfo.classList.remove('hidden');
+                    }
+                  } else if (data.chunk) {
+                    // Append chunk to the answer
+                    fullAnswer += data.chunk;
+                    answerText.innerHTML = renderMarkdownSimple(fullAnswer);
+                  }
+                } catch (e) {
+                  console.error('Error parsing SSE data:', e);
+                }
+              }
+            }
+          }
+        } else {
+          // Non-streaming response
+          const data = await response.json();
+          
+          // Display the answer with Markdown support (or placeholder if empty)
+          const ans = (data.answer || '').trim();
+          if (ans) {
+            answerText.innerHTML = renderMarkdownSimple(ans);
+          } else {
+            answerText.innerHTML = '<span class="text-gray-500">Your answer will appear here...</span>';
+          }
+          
+          // Display token usage
+          if (data.usage) {
+            tokenInfo.classList.remove('hidden');
+            inputTokensEl.textContent = data.usage.input_tokens || '-';
+            outputTokensEl.textContent = data.usage.output_tokens || '-';
+            totalTokensEl.textContent = data.usage.total_tokens || '-';
+          }
+          
+          // Display usage info
+          if (data.provider && data.model) {
+            usageInfo.innerHTML = `
+              <div class="flex items-center gap-2 text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Provider: <strong>${data.provider}</strong></span>
+                <span>•</span>
+                <span>Model: <strong>${data.model}</strong></span>
+              </div>
+            `;
+            usageInfo.classList.remove('hidden');
+          }
+        }
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          answerText.innerHTML = '<span class="text-yellow-600">Request cancelled</span>';
+        } else {
+          answerText.innerHTML = `<span class="text-red-600">Error: ${error.message}</span>`;
+        }
+      } finally {
+        runBtn.classList.remove('hidden');
+        cancelBtn.classList.add('hidden');
+        document.getElementById('loadingState').classList.add('hidden');
+        answerText.classList.remove('hidden');
+        // If nothing was rendered, show placeholder
+        if (!answerText.innerHTML || !answerText.innerHTML.trim()) {
+          answerText.innerHTML = '<span class="text-gray-500">Your answer will appear here...</span>';
+        }
+        abortController = null;
+      }
+    }
+
+    function cancelRequest() {
+      if (abortController) {
+        abortController.abort();
+      }
+    }
+
+    
+
+    // Basic Markdown renderer (safe: escapes HTML first)
+    function renderMarkdownSimple(md) {
+      if (!md) return '';
+      let s = escapeHtml(String(md));
+
+      // Tables: detect header + separator + rows
+      s = s.replace(/(^|\n)(\|.*\|)\n(\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?)\n([\s\S]*?)(\n{2,}|$)/g, (m, pfx, header, sep, _g, body, tail) => {
+        const split = line => line.trim().replace(/^\|/, '').replace(/\|$/, '').split(/\s*\|\s*/);
+        const headers = split(header);
+        const aligns = split(sep).map(c => {
+          const t = c.trim();
+          const left = t.startsWith(':');
+          const right = t.endsWith(':');
+          if (left && right) return 'center';
+          if (right) return 'right';
+          if (left) return 'left';
+          return 'left';
+        });
+        const rows = [];
+        body.split('\n').forEach(line => {
+          if (line.trim().startsWith('|')) rows.push(split(line));
+        });
+        let html = '<table class="md-table"><thead><tr>' + headers.map((h, i) => `<th style="text-align:${aligns[i] || 'left'}">${h}</th>`).join('') + '</tr></thead>';
+        if (rows.length) {
+          html += '<tbody>' + rows.map(r => '<tr>' + r.map((c, i) => `<td style="text-align:${aligns[i] || 'left'}">${c}</td>`).join('') + '</tr>').join('') + '</tbody>';
+        }
+        html += '</table>';
+        return (pfx || '\n') + html + (tail || '\n');
+      });
+
+      // Code blocks: ```lang\ncode\n```
+      s = s.replace(/```([\s\S]*?)```/g, (m, p1) => {
+        const code = p1.replace(/^\w+\n/, '');
+        return `<pre class="bg-gray-900 text-gray-100 rounded-lg p-3 overflow-auto"><code>${code}</code></pre>`;
+      });
+
+      // Headings
+      s = s
+        .replace(/^# (.+)$/gm, '<h2 class="text-2xl font-bold text-gray-900 mt-4 mb-2">$1</h2>')
+        .replace(/^## (.+)$/gm, '<h3 class="text-xl font-semibold text-gray-800 mt-3 mb-2">$1</h3>')
+        .replace(/^### (.+)$/gm, '<h4 class="text-lg font-medium text-gray-700 mt-2 mb-2">$1</h4>');
+
+      // Bold and italics
+      s = s.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>');
+      s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+      // Inline code
+      s = s.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-gray-800">$1</code>');
+
+      // Lists to <li>
+      s = s
+        .replace(/^\* (.+)$/gm, '<li class="ml-4 mb-1">$1</li>')
+        .replace(/^- (.+)$/gm, '<li class="ml-4 mb-1">$1</li>')
+        .replace(/^\d+\. (.+)$/gm, '<li class="ml-4 mb-1">$1</li>');
+      // Wrap list groups with <ul>
+      s = s
+        .replace(/^<li/gm, '<ul class="list-disc list-inside mb-3">\n<li')
+        .replace(/<\/li>\n(?!<li)/g, '</li></ul>');
+
+      // Paragraphs: keep pre, ul, headings intact; wrap others
+      const blocks = s.split(/\n{2,}/);
+      s = blocks.map(block => {
+        const b = block.trim();
+        if (!b) return '';
+        if (b.startsWith('<pre') || b.startsWith('<ul') || b.startsWith('<h2') || b.startsWith('<h3') || b.startsWith('<h4')) {
+          return b;
+        }
+        return '<p class="mb-3">' + b.replace(/\n/g, '<br />') + '</p>';
+      }).join('\n');
+
+      return s;
+    }
+
+    // Additional Support Chat Sample
+    const sampleSupportPayload = {
+      payload: {
+        text: `Customer John Doe: Hello, I need help with my recent order. I received the wrong item.
+Agent Jane Smith: Hi! I'm sorry to hear that. Could you please provide your order number so I can look into this for you?
+Customer John Doe: Sure, the order number is 123456789. I ordered a wireless mouse, but I received a wired one instead.
+Agent Jane Smith: Thank you for the information. Let me check your order details. Please hold on a moment.
+Customer John Doe: Okay, take your time.
+Agent Jane Smith: Thanks for waiting. I see that the order was for a wired mouse. It appears there was an inventory mistake. I apologize for the inconvenience.
+Customer John Doe: That's frustrating. Can you send me the correct item?
+Agent Jane Smith: Absolutely. I will initiate the process to send the wireless mouse to you immediately. You will receive it within 3-5 business days. Would you like a return label for the wired mouse?
+Customer John Doe: Yes, that would be great. Thank you.
+Agent Jane Smith: You're welcome! I will email you the return shipping label shortly. Is there anything else I can assist you with today?
+Customer John Doe: No, that's all. Thanks for your help.
+Agent Jane Smith: My pleasure! Have a great day!`,
+        question: "Who was the customer"
+      },
+      config: {
+        provider: "ollama",
+        model: "gemma2:9b"
+      }
+    };
+
+    function loadSupportSample(shouldFocus = true) {
+      inputText.value = sampleSupportPayload.payload.text;
+      questionText.value = sampleSupportPayload.payload.question;
+
+      // Choose provider: prefer sample's provider if available, else first available
+      const providers = Array.isArray(modelOptions) ? modelOptions.map(p => p.provider) : [];
+      if (providers.includes(sampleSupportPayload.config.provider)) {
+        providerEl.value = sampleSupportPayload.config.provider;
+      } else if (providers.length) {
+        providerEl.value = providers[0];
+      }
+
+      updateModelDropdown();
+      // After dropdown is populated, select the first model from API
+      setTimeout(() => {
+        if (modelEl.options.length) {
+          modelEl.value = modelEl.options[0].value;
+        }
+        updateJsonPreview();
+      }, 0);
+      if (shouldFocus) inputText.focus();
+    }
+
+    // Generic loader for examples
+    function loadExample(text, question) {
+      inputText.value = text;
+      questionText.value = question;
+      // Keep current provider; if none valid, switch to first available
+      const providers = Array.isArray(modelOptions) ? modelOptions.map(p => p.provider) : [];
+      if (!providers.includes(providerEl.value) && providers.length) {
+        providerEl.value = providers[0];
+      }
+      updateModelDropdown();
+      setTimeout(() => {
+        if (modelEl.options.length) modelEl.value = modelEl.options[0].value;
+        updateJsonPreview();
+      }, 0);
+      inputText.focus();
+    }
+
+    // Event listeners
+    providerEl.addEventListener('change', () => {
+      updateModelDropdown();
+      updateJsonPreview();
+    });
+    
+    modelEl.addEventListener('change', updateJsonPreview);
+    inputText.addEventListener('input', updateJsonPreview);
+    questionText.addEventListener('input', updateJsonPreview);
+    document.getElementById('streamingEnabled').addEventListener('change', updateJsonPreview);
+    
+    
+    runBtn.addEventListener('click', askQuestion);
+    cancelBtn.addEventListener('click', cancelRequest);
+    if (chipSupport) chipSupport.addEventListener('click', () => loadSupportSample(true));
+    if (chipLHC) {
+      chipLHC.addEventListener('click', function () {
+        inputText.value = samplePayload.payload.text;
+        questionText.value = samplePayload.payload.question;
+        providerEl.value = samplePayload.config.provider;
+        updateModelDropdown();
+        setTimeout(() => {
+          modelEl.value = samplePayload.config.model;
+          updateJsonPreview();
+        }, 100);
+        inputText.focus();
+      });
+    }
+    if (chipDocQA) chipDocQA.addEventListener('click', () => loadExample(`Title: The Rise of Renewable Energy\n\nRenewable energy sources such as solar, wind, and hydro are increasingly becoming a larger share of global electricity generation. In 2024, several countries reported record-breaking adoption rates, driven by decreasing technology costs and supportive policies. Analysts project continued growth as storage technologies improve and grid modernization continues.`, 'What are the main drivers of renewable energy adoption?'));
+    if (chipStudy) chipStudy.addEventListener('click', () => loadExample(`Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods from carbon dioxide and water. Photosynthesis in plants generally involves the green pigment chlorophyll and generates oxygen as a byproduct. The overall chemical reaction can be summarized as: 6 CO2 + 6 H2O + light → C6H12O6 + 6 O2.`, 'What is the role of chlorophyll in photosynthesis?'));
+    if (chipContext) chipContext.addEventListener('click', () => loadExample(`Quarterly Report Excerpt:\n\nOur Q2 revenue increased by 12% year-over-year, primarily due to strong performance in the enterprise segment. Churn decreased from 3.2% to 2.6%, and average deal size grew by 15%. Marketing spend was reallocated to product-led growth initiatives, resulting in a 9% improvement in conversion rate.`, 'What were the primary factors contributing to revenue growth?'));
+    if (chipTriage) chipTriage.addEventListener('click', () => loadExample(sampleSupportPayload.payload.text, 'What is the customer requesting?'));
+    if (chipCompliance) chipCompliance.addEventListener('click', () => loadExample(`Policy Excerpt:\n\nAll customer data must be encrypted at rest using AES-256 and in transit using TLS 1.2 or higher. Access to production databases is restricted to authorized personnel with MFA enabled. Logs containing personal data must be retained for no longer than 30 days unless otherwise required by law.`, 'List any non-compliance risks mentioned in the text.'));
+    if (chipExtract) chipExtract.addEventListener('click', () => loadExample(`Invoice #INV-2048\nDate: 2025-02-15\nBill To: Horizon Labs, 77 Market Street, SF, CA\nItems:\n - Data Pipeline Setup: $3,200\n - Monthly Support (Jan): $800\nTotal: $4,000\nNotes: Payment due within 15 days.`, 'Extract the invoice number, date, client, line items, and total.'));
+    if (chipMeetings) chipMeetings.addEventListener('click', () => loadExample(`Meeting Notes (Product Sync)\n\nDecisions:\n- Launch beta on March 10\n- Prioritize OAuth integration\nAction Items:\n- Sara: finalize onboarding screens\n- Tim: set up staging environment\n- Leo: prepare beta feedback form`, 'When is the beta launch date and who is responsible for staging?'));
+    if (chipFAQ) chipFAQ.addEventListener('click', () => loadExample(`Knowledge Base Excerpt:\n\nOur app supports offline mode, automatic backups, and real-time collaboration. The Pro plan includes custom templates and priority support. Typical sync issues are resolved by signing out and back in or clearing the cache.`, 'Provide a concise answer to: Does the app support offline mode?'));
+    // Footer examples wiring
+    if (btnDocQA) btnDocQA.addEventListener('click', () => loadExample(`Title: The Rise of Renewable Energy\n\nRenewable energy sources such as solar, wind, and hydro are increasingly becoming a larger share of global electricity generation. In 2024, several countries reported record-breaking adoption rates, driven by decreasing technology costs and supportive policies. Analysts project continued growth as storage technologies improve and grid modernization continues.`, 'What are the main drivers of renewable energy adoption?'));
+    if (btnStudy) btnStudy.addEventListener('click', () => loadExample(`Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods from carbon dioxide and water. Photosynthesis in plants generally involves the green pigment chlorophyll and generates oxygen as a byproduct. The overall chemical reaction can be summarized as: 6 CO2 + 6 H2O + light → C6H12O6 + 6 O2.`, 'What is the role of chlorophyll in photosynthesis?'));
+    if (btnContext) btnContext.addEventListener('click', () => loadExample(`Quarterly Report Excerpt:\n\nOur Q2 revenue increased by 12% year-over-year, primarily due to strong performance in the enterprise segment. Churn decreased from 3.2% to 2.6%, and average deal size grew by 15%. Marketing spend was reallocated to product-led growth initiatives, resulting in a 9% improvement in conversion rate.`, 'What were the primary factors contributing to revenue growth?'));
+    if (btnSupportTriage) btnSupportTriage.addEventListener('click', () => loadExample(sampleSupportPayload.payload.text, 'What is the customer requesting?'));
+    if (btnCompliance) btnCompliance.addEventListener('click', () => loadExample(`Policy Excerpt:\n\nAll customer data must be encrypted at rest using AES-256 and in transit using TLS 1.2 or higher. Access to production databases is restricted to authorized personnel with MFA enabled. Logs containing personal data must be retained for no longer than 30 days unless otherwise required by law.`, 'List any non-compliance risks mentioned in the text.'));
+    if (btnExtraction) btnExtraction.addEventListener('click', () => loadExample(`Invoice #INV-2048\nDate: 2025-02-15\nBill To: Horizon Labs, 77 Market Street, SF, CA\nItems:\n - Data Pipeline Setup: $3,200\n - Monthly Support (Jan): $800\nTotal: $4,000\nNotes: Payment due within 15 days.`, 'Extract the invoice number, date, client, line items, and total.'));
+    if (btnMeetings) btnMeetings.addEventListener('click', () => loadExample(`Meeting Notes (Product Sync)\n\nDecisions:\n- Launch beta on March 10\n- Prioritize OAuth integration\nAction Items:\n- Sara: finalize onboarding screens\n- Tim: set up staging environment\n- Leo: prepare beta feedback form`, 'When is the beta launch date and who is responsible for staging?'));
+    if (btnFAQ) btnFAQ.addEventListener('click', () => loadExample(`Knowledge Base Excerpt:\n\nOur app supports offline mode, automatic backups, and real-time collaboration. The Pro plan includes custom templates and priority support. Typical sync issues are resolved by signing out and back in or clearing the cache.`, 'Provide a concise answer to: Does the app support offline mode?'));
+    
+
+    // Initialize: fetch models then load Support Chat sample by default
+    fetchModelOptions().finally(() => {
+      loadSupportSample(false);
+    });
+
+    // Re-fetch models if token changes (prod setups may require it)
+    if (tokenEl) {
+      tokenEl.addEventListener('change', () => fetchModelOptions());
+    }
+  </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { z } from "zod";
 import { openai } from '@ai-sdk/openai';
-import { generateObject, generateText } from "ai";
+import { generateObject, generateText, streamText } from "ai";
 
 const OPENAI_MODEL = 'gpt-4.1-nano'
 
@@ -45,6 +45,23 @@ export async function generateChatTextResponse(
   const modelToUse = openai.responses(model || OPENAI_MODEL);
 
   const result = await generateText({
+    model: modelToUse,
+    prompt: prompt
+  });
+
+  return result;
+}
+
+export async function generateChatTextStreamResponse(
+  prompt: string,
+  model?: string,
+): Promise<any> {  
+
+  console.log('streaming model', model);
+  
+  const modelToUse = openai.responses(model || OPENAI_MODEL);
+
+  const result = await streamText({
     model: modelToUse,
     prompt: prompt
   });

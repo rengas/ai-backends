@@ -1,5 +1,5 @@
 import { openrouter } from '@openrouter/ai-sdk-provider';
-import { generateObject, generateText } from 'ai';
+import { generateObject, generateText, streamText } from 'ai';
 import { z } from 'zod';
 import { openrouterConfig } from '../config/services';
 
@@ -40,14 +40,12 @@ export async function generateChatStructuredResponse<T extends z.ZodType>(
  */
 export async function generateChatTextResponse(
   prompt: string,
-  model: string = openrouterConfig.model,
-  temperature: number = 0
+  model: string = openrouterConfig.model
 ): Promise<any> {
   try {
     const result = await generateText({
       model: openrouter(model),
       prompt,
-      temperature,
     });
 
     return {
@@ -62,6 +60,25 @@ export async function generateChatTextResponse(
     };
   } catch (error) {
     throw new Error(`OpenRouter text response error: ${error}`);
+  }
+}
+
+/**
+ * Generate a streaming text response using OpenRouter
+ */
+export async function generateChatTextStreamResponse(
+  prompt: string,
+  model: string = openrouterConfig.model
+): Promise<any> {
+  try {
+    const result = await streamText({
+      model: openrouter(model),
+      prompt,
+    });
+
+    return result;
+  } catch (error) {
+    throw new Error(`OpenRouter streaming response error: ${error}`);
   }
 }
 

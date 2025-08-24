@@ -1,13 +1,13 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Context } from 'hono'
 import { streamSSE } from 'hono/streaming'
-import { askTextPrompt } from '../../utils/prompts'
+import { plannerPrompt } from '../../utils/prompts'
 import { handleError } from '../../utils/errorHandler'
 import { 
-  askTextRequestSchema, 
-  askTextResponseSchema, 
-  createAskTextResponse 
-} from '../../schemas/v1/askText'
+  plannerRequestSchema, 
+  plannerResponseSchema,
+  createPlannerResponse 
+} from '../../schemas/v1/planner'
 import { processTextOutputRequest } from '../../services/ai'
 import { apiVersion } from './versionConfig'
 import { createFinalResponse } from './finalResponse'
@@ -15,18 +15,39 @@ import { createFinalResponse } from './finalResponse'
 const router = new OpenAPIHono()
 
 /**
- * Handler for askText requests
- * Receives text and a question, then uses an LLM to answer the question based on the text
+ * Handler for planner requests
+ * Receives a task and generates a text-based plan to accomplish it
+ * Supports both streaming and non-streaming responses
  */
-async function handleAskTextRequest(c: Context) {
+async function handlePlannerRequest(c: Context) {
   try {
+    const startTime = Date.now()
     const { payload, config } = await c.req.json()
     const provider = config.provider
     const model = config.model
     const isStreaming = config.stream || false
     
-    // Create prompt combining text and question
-    const prompt = askTextPrompt(payload.text, payload.question)
+    // Extract parameters from payload
+    const {
+      task,
+      context,
+      maxSteps,
+      detailLevel,
+      includeTimeEstimates,
+      includeRisks,
+      domain
+    } = payload
+    
+    // Create prompt for plan generation
+    const prompt = plannerPrompt(
+      task,
+      context,
+      maxSteps,
+      detailLevel,
+      includeTimeEstimates,
+      includeRisks,
+      domain
+    )
     
     // Handle streaming response
     if (isStreaming) {
@@ -39,11 +60,23 @@ async function handleAskTextRequest(c: Context) {
       
       return streamSSE(c, async (stream) => {
         try {
+          // Get the text stream from the result
           const textStream = result.textStream
           
           if (!textStream) {
             throw new Error('Streaming not supported for this provider/model')
           }
+          
+          // Send metadata at the beginning
+          await stream.writeSSE({
+            data: JSON.stringify({
+              metadata: {
+                provider: provider,
+                model: model,
+                version: apiVersion
+              }
+            })
+          })
           
           // Stream chunks to the client
           for await (const chunk of textStream) {
@@ -68,8 +101,11 @@ async function handleAskTextRequest(c: Context) {
                   output_tokens: usage.completionTokens,
                   total_tokens: usage.totalTokens
                 },
-                provider: provider,
-                model: model,
+                metadata: {
+                  provider: provider,
+                  model: model,
+                  processingTime: Date.now() - startTime
+                },
                 version: apiVersion
               })
             })
@@ -88,18 +124,25 @@ async function handleAskTextRequest(c: Context) {
     }
     
     // Handle non-streaming response (existing logic)
-    const result = await processTextOutputRequest(prompt, config)
+    const result = await processTextOutputRequest(
+      prompt,
+      config
+    )
     
-    // Create response with answer and metadata
-    const finalResponse = createAskTextResponse(
+    // Calculate processing time
+    const processingTime = Date.now() - startTime
+    
+    // Create response with plan text and metadata
+    const finalResponse = createPlannerResponse(
       result.text, 
       provider, 
       model, 
       {
-        input_tokens: result.usage.promptTokens,
-        output_tokens: result.usage.completionTokens,
-        total_tokens: result.usage.totalTokens,
-      }
+        input_tokens: result.usage?.promptTokens || 0,
+        output_tokens: result.usage?.completionTokens || 0,
+        total_tokens: result.usage?.totalTokens || 0,
+      },
+      processingTime
     )
     
     // Add API version to response
@@ -107,7 +150,7 @@ async function handleAskTextRequest(c: Context) {
     
     return c.json(finalResponseWithVersion, 200)
   } catch (error) {
-    return handleError(c, error, 'Failed to answer question based on text')
+    return handleError(c, error, 'Failed to generate plan')
   }
 }
 
@@ -121,17 +164,17 @@ router.openapi(
       body: {
         content: {
           'application/json': {
-            schema: askTextRequestSchema
+            schema: plannerRequestSchema
           }
         }
       }
     },
     responses: {
       200: {
-        description: 'Returns an answer to the question based on the provided text.',
+        description: 'Returns a structured plan to accomplish the given task.',
         content: {
           'application/json': {
-            schema: askTextResponseSchema
+            schema: plannerResponseSchema
           }
         }
       },
@@ -166,14 +209,16 @@ router.openapi(
         }
       }
     },
-    summary: 'Answer questions based on provided text',
-    description: 'This endpoint receives a text and a question, then uses an LLM to generate an answer based solely on the provided text context.',
+    summary: 'Generate structured plans for tasks',
+    description: 'This endpoint receives a task description and generates a detailed, structured plan with steps, dependencies, time estimates, and success criteria.',
     tags: ['API']
   }),
-  handleAskTextRequest as any
+  handlePlannerRequest as any
 )
 
 export default {
   handler: router,
-  mountPath: 'ask-text'
+  mountPath: 'project-planner'
 }
+
+

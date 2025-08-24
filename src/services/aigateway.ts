@@ -1,53 +1,43 @@
 import { z } from 'zod'
-import { lmstudioConfig } from '../config/services'
+import { aigatewayConfig } from '../config/services'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { generateText, streamText } from 'ai'
-import { zodToJsonSchema } from 'zod-to-json-schema'
+import { generateText, streamText, generateObject } from 'ai'
 import OpenAI from 'openai'
 
-// Build base URL ensuring single trailing /v1
-const normalizedBase = (lmstudioConfig.baseURL || 'http://localhost:1234').replace(/\/$/, '')
-const LMSTUDIO_BASE_URL = `${normalizedBase}`
-
-const lmstudio = createOpenAICompatible({
-  name: 'lmstudio',
-  baseURL: `${LMSTUDIO_BASE_URL}/v1`,
+const aigateway = createOpenAICompatible({
+  name: 'aigateway',
+  baseURL: `${aigatewayConfig.baseURL}`,
+  apiKey: `${aigatewayConfig.apiKey}`
 })
 
-const client = new OpenAI({
-  baseURL: `${LMSTUDIO_BASE_URL}/v1`,
-  apiKey: process.env.LMSTUDIO_API_KEY || 'lm-studio',
-})
+export async function generateChatStructuredResponse<T extends z.ZodType>(
+  prompt: string,
+  schema: T,
+  model: string = aigatewayConfig.model,
+  temperature: number = 0
+): Promise<any> {
+  try {
+    const result = await generateObject({
+      model: aigateway(model || aigatewayConfig.model),
+      schema,
+      prompt,
+      temperature,
+    });
 
-export async function generateChatStructuredResponse(
-    prompt: string,
-    schema: z.ZodType,
-    model?: string,
-    temperature: number = 0
-  ): Promise<any> {
-    const modelId = model || lmstudioConfig.chatModel
-
-    // Convert Zod schema to JSON Schema for LM Studio's OpenAI-compatible endpoint
-    const jsonSchema = zodToJsonSchema(schema)
-
-    const completion = await client.chat.completions.create({
-      model: modelId,
-      messages: [
-        { role: 'user', content: prompt }
-      ],
-      temperature: typeof temperature === 'number' ? temperature : 0,
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
-          name: 'structured_output',
-          strict: true,
-          schema: jsonSchema,
-        },
-      } as any,
-    })
-
-    return parseLmStudioStructuredResponse(completion, schema, modelId)
+    return {
+      object: result.object,
+      finishReason: result.finishReason,
+      usage: {
+        promptTokens: result.usage?.promptTokens || 0,
+        completionTokens: result.usage?.completionTokens || 0,
+        totalTokens: result.usage?.totalTokens || 0,
+      },
+      warnings: result.warnings,
+    };
+  } catch (error) {
+    throw new Error(`AI Gateway structured response error: ${error}`);
   }
+}
 
 export async function generateChatTextResponse(
   prompt: string,
@@ -55,7 +45,7 @@ export async function generateChatTextResponse(
   temperature: number = 0
 ): Promise<any> {
   
-  const modelToUse = lmstudio(model || lmstudioConfig.chatModel);
+  const modelToUse = aigateway(model || aigatewayConfig.chatModel);
 
   const result = await generateText({
     model: modelToUse,
@@ -73,7 +63,7 @@ export async function generateChatTextStreamResponse(
   temperature: number = 0
 ): Promise<any> {
   
-  const modelToUse = lmstudio(model || lmstudioConfig.chatModel);
+  const modelToUse = aigateway(model || aigatewayConfig.chatModel);
 
   const result = await streamText({
     model: modelToUse,
@@ -87,7 +77,7 @@ export async function generateChatTextStreamResponse(
 
 export async function getAvailableModels(): Promise<string[]> {
   try {
-    const response = await fetch(`${LMSTUDIO_BASE_URL}/v1/models`)
+    const response = await fetch(`${AIGATEWAY_BASE_URL}/v1/models`)
     if (!response.ok) return []
     const data = await response.json()
     if (Array.isArray(data?.data)) {
@@ -99,7 +89,7 @@ export async function getAvailableModels(): Promise<string[]> {
   }
 }
 
-function parseLmStudioStructuredResponse<T>(
+function parseAiGatewayStructuredResponse<T>(
   completion: OpenAI.Chat.Completions.ChatCompletion,
   schema: z.ZodType<T>,
   modelFallback: string
@@ -108,7 +98,7 @@ function parseLmStudioStructuredResponse<T>(
   const contentRaw = choice?.message?.content
 
   if (typeof contentRaw !== 'string') {
-    throw new Error('LM Studio returned non-string content for structured response')
+    throw new Error('AI Gateway returned non-string content for structured response')
   }
 
   let parsedObject: unknown
@@ -136,6 +126,4 @@ function parseLmStudioStructuredResponse<T>(
   }
 }
 
-export { LMSTUDIO_BASE_URL }
-
-
+export { AIGATEWAY_BASE_URL }

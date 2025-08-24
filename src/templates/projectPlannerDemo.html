@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Planner - AI Backends</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-purple': '#B341F9',
+                        'brand-pink': '#E453C0',
+                        'terminal-bg': '#1C2128',
+                        'terminal-text': '#A7B5C4'
+                    },
+                    backgroundImage: {
+                        'gradient-brand': 'linear-gradient(135deg, #B341F9, #E453C0)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="/" class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-xl bg-[#B341F9] flex items-center justify-center">
+                        <span class="text-white font-bold text-xl">AI</span>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">Backends</span>
+                </a>
+                <div class="flex items-center space-x-6">
+                    <a href="/api/ui" target="_blank"
+                        class="text-gray-700 hover:text-brand-purple transition-colors duration-300">API Docs</a>
+                    <a href="/api/demos"
+                        class="text-gray-700 hover:text-brand-purple transition-colors duration-300">All Demos</a>
+                    <a href="/api/models"
+                        class="text-gray-700 hover:text-brand-purple transition-colors duration-300">Models Guide</a>
+                    <a href="https://github.com/donvito/ai-backend"
+                        class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors duration-300">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-10">
+        <!-- Page Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Project Planner</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                Generate structured, actionable plans with steps, estimates, and dependencies.
+            </p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+            <!-- Input Panel -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Input</h2>
+
+                <form id="plannerForm" class="space-y-5">
+                    <!-- Task Input -->
+                    <div>
+                        <label for="task" class="block text-sm font-medium text-gray-700 mb-2">
+                            What do you want to plan? <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="task" name="task" rows="4" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-purple focus:border-transparent resize-none"
+                            placeholder="E.g., Launch a new e-commerce website for selling handmade crafts">Build a mobile app for task management with real-time collaboration features</textarea>
+
+                        <!-- Quick Examples -->
+                        <div class="mt-3">
+                            <div class="text-xs text-gray-500 mb-2">Quick examples:</div>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" onclick="loadExample('startup')"
+                                    class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                                    🚀 Startup
+                                </button>
+                                <button type="button" onclick="loadExample('event')"
+                                    class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                                    🎉 Event
+                                </button>
+                                <button type="button" onclick="loadExample('learning')"
+                                    class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                                    📚 Learning
+                                </button>
+                                <button type="button" onclick="loadExample('wedding')"
+                                    class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                                    💍 Wedding
+                                </button>
+                                <button type="button" onclick="loadExample('website')"
+                                    class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                                    🌐 Website
+                                </button>
+                                <button type="button" onclick="loadExample('app')"
+                                    class="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                                    📱 App
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Context Input -->
+                    <div>
+                        <label for="context" class="block text-sm font-medium text-gray-700 mb-2">
+                            Additional Context
+                        </label>
+                        <textarea id="context" name="context" rows="3"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-purple focus:border-transparent resize-none"
+                            placeholder="Provide any additional context, constraints, or requirements">Team size: 3 developers, Timeline: 3 months, Platform: iOS and Android</textarea>
+                    </div>
+
+
+                    <!-- Advanced Options Row -->
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label for="maxSteps" class="block text-sm font-medium text-gray-700 mb-1">
+                                Max Steps
+                            </label>
+                            <input type="number" id="maxSteps" name="maxSteps" min="3" max="20" value="10"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-purple focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label for="detailLevel" class="block text-sm font-medium text-gray-700 mb-1">
+                                Detail Level
+                            </label>
+                            <select id="detailLevel" name="detailLevel"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-purple focus:border-transparent">
+                                <option value="comprehensive">High</option>
+                                <option value="detailed" selected>Medium</option>
+                                <option value="basic">Basic</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="domain" class="block text-sm font-medium text-gray-700 mb-1">
+                                Domain
+                            </label>
+                            <select id="domain" name="domain"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-purple focus:border-transparent">
+                                <option value="">General</option>
+                                <option value="software" selected>Software</option>
+                                <option value="business">Business</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="education">Education</option>
+                                <option value="personal">Personal</option>
+                                <option value="healthcare">Healthcare</option>
+                                <option value="finance">Finance</option>
+                                <option value="creative">Creative</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Checkboxes -->
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="includeTimeEstimates" name="includeTimeEstimates" checked
+                                class="h-4 w-4 text-brand-purple focus:ring-brand-purple border-gray-300 rounded" />
+                            <label for="includeTimeEstimates" class="ml-2 text-sm text-gray-700">
+                                Include time estimates for each step
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="includeRisks" name="includeRisks" checked
+                                class="h-4 w-4 text-brand-purple focus:ring-brand-purple border-gray-300 rounded" />
+                            <label for="includeRisks" class="ml-2 text-sm text-gray-700">
+                                Include risk assessment and mitigation strategies
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Streaming Option -->
+                    <div class="flex items-center mb-3">
+                        <input type="checkbox" id="streaming" name="streaming" checked
+                            class="h-4 w-4 text-brand-purple focus:ring-brand-purple border-gray-300 rounded" />
+                        <label for="streaming" class="ml-2 text-sm text-gray-700">
+                            Enable streaming (see plan as it's generated)
+                        </label>
+                    </div>
+
+                    <!-- Provider and Model Selection -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="provider" class="block text-sm font-medium text-gray-700 mb-1">
+                                AI Provider
+                            </label>
+                            <select id="provider" name="provider"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-purple focus:border-transparent"
+                                onchange="updateModels()">
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Anthropic</option>
+                                <option value="openrouter">OpenRouter</option>
+                                <option value="ollama">Ollama (Local)</option>
+                                <option value="lmstudio">LM Studio (Local)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="model" class="block text-sm font-medium text-gray-700 mb-1">
+                                Model
+                            </label>
+                            <select id="model" name="model"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-purple focus:border-transparent">
+                                <option value="gpt-4o-mini">GPT-4o Mini</option>
+                                <option value="gpt-4o">GPT-4o</option>
+                                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Optional Bearer Token for server auth -->
+                    <div id="tokenSection" class="mt-2">
+                        <label for="token" class="block text-sm font-medium text-gray-700 mb-2">
+                            Bearer Token (optional)
+                        </label>
+                        <input type="password" id="token" name="token"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-purple focus:border-transparent"
+                            placeholder="Only needed in production deployments" />
+                        <p class="mt-1 text-xs text-gray-500">Used to authenticate with this server when required.</p>
+                    </div>
+
+                    <!-- Local Model Input (hidden by default) -->
+                    <div id="localModelSection" class="hidden">
+                        <label for="localModel" class="block text-sm font-medium text-gray-700 mb-2">
+                            Local Model Name
+                        </label>
+                        <input type="text" id="localModel" name="localModel"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-purple focus:border-transparent"
+                            placeholder="e.g., llama3.2:3b" />
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-3">
+                        <button type="submit" id="submitButton"
+                            class="flex-1 px-6 py-3 bg-gradient-brand text-white rounded-lg font-medium hover:opacity-90 transition-opacity duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Generate Plan
+                        </button>
+                        <button type="button" id="cancelButton"
+                            class="hidden px-6 py-3 border border-red-200 text-red-700 bg-white rounded-lg font-medium hover:bg-red-50 transition-colors duration-200">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Output Panel -->
+            <div id="outputPanel" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Output</h2>
+                    <div class="flex items-center gap-2">
+                        <button id="fullscreenButton" onclick="toggleOutputFullscreen()"
+                            class="hidden items-center px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-200 transition-colors duration-200"
+                            title="Maximize Output">
+                            ⛶ Maximize
+                        </button>
+                        <button id="copyButton" onclick="copyPlan()"
+                        class="hidden items-center px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-200 transition-colors duration-200"
+                        title="Copy Plan to Clipboard">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        Copy
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden">
+                    <div class="flex items-center justify-center py-12">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-purple"></div>
+                    </div>
+                    <p id="loadingMessage" class="text-center text-gray-600 mt-4">Generating your plan...</p>
+                    <p id="streamingHint" class="text-center text-gray-500 text-sm mt-2 hidden">Your plan will appear as it's being generated</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="errorState" class="hidden">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">Error generating plan</h3>
+                                <p id="errorMessage" class="mt-1 text-sm text-red-700"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState">
+                    <div class="text-center py-12">
+                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No plan generated yet</h3>
+                        <p class="text-gray-600">Configure your task and click "Generate Plan" to get started.</p>
+                    </div>
+                </div>
+
+                <!-- Result State -->
+                <div id="resultState" class="hidden">
+                    <!-- Metadata (moved to top) -->
+                    <div id="metadata" class="mb-4">
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <div class="text-xs font-medium text-blue-600 uppercase tracking-wide">Provider</div>
+                                <div id="metaProvider" class="text-sm font-semibold text-gray-900 truncate mt-1"></div>
+                            </div>
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                                <div class="text-xs font-medium text-green-600 uppercase tracking-wide">Model</div>
+                                <div id="metaModel" class="text-sm font-semibold text-gray-900 truncate mt-1"></div>
+                            </div>
+                            <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                                <div class="text-xs font-medium text-orange-600 uppercase tracking-wide">Time</div>
+                                <div id="metaTime" class="text-sm font-semibold text-gray-900 mt-1"></div>
+                            </div>
+                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                                <div class="text-xs font-medium text-purple-600 uppercase tracking-wide">Tokens</div>
+                                <div id="metaTokens" class="text-sm font-semibold text-gray-900 mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Plan Content -->
+                    <div id="planContent"
+                        class="bg-white border border-gray-200 rounded-lg p-6 leading-relaxed text-gray-900">
+                        <!-- Plan will be inserted here -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Examples Section (kept but simplified since quick examples are near input) -->
+        <div class="mt-10 max-w-7xl mx-auto">
+            <div class="bg-white border border-gray-200 rounded-2xl p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">More Examples</h3>
+                <div class="grid md:grid-cols-3 gap-3">
+                    <button onclick="loadExample('startup')"
+                        class="text-left p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
+                        <div class="font-medium text-gray-900 mb-1">Launch a Startup</div>
+                        <div class="text-sm text-gray-600">Plan from idea to MVP</div>
+                    </button>
+                    <button onclick="loadExample('event')"
+                        class="text-left p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
+                        <div class="font-medium text-gray-900 mb-1">Plan an Event</div>
+                        <div class="text-sm text-gray-600">Conference for 200 attendees</div>
+                    </button>
+                    <button onclick="loadExample('learning')"
+                        class="text-left p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
+                        <div class="font-medium text-gray-900 mb-1">Learn a New Skill</div>
+                        <div class="text-sm text-gray-600">ML in 6 months</div>
+                    </button>
+                    <button onclick="loadExample('wedding')"
+                        class="text-left p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
+                        <div class="font-medium text-gray-900 mb-1">Plan a Wedding</div>
+                        <div class="text-sm text-gray-600">150 guests, city venue</div>
+                    </button>
+                    <button onclick="loadExample('website')"
+                        class="text-left p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
+                        <div class="font-medium text-gray-900 mb-1">Make a Website</div>
+                        <div class="text-sm text-gray-600">Marketing site with blog</div>
+                    </button>
+                    <button onclick="loadExample('app')"
+                        class="text-left p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
+                        <div class="font-medium text-gray-900 mb-1">Build an App</div>
+                        <div class="text-sm text-gray-600">Habit tracker mobile app</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8 mt-20">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-400">
+                © 2025 AI Backends. Open source under MIT License.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Dynamic model options fetched from backend (planning capability)
+        let modelOptions = null;
+        // Abort controller for in-flight requests
+        let abortController = null;
+
+        // Fallback model configurations if fetch fails
+        const fallbackModelOptions = {
+            ollama: [
+                { value: 'gemma3:4b', label: 'gemma3:4b (default)' }
+            ],
+            openai: [
+                { value: 'gpt-4o-mini', label: 'gpt-4o-mini' },
+                { value: 'gpt-4.1-nano', label: 'gpt-4.1-nano' },
+                { value: 'gpt-5-nano', label: 'gpt-5-nano' }
+            ],
+            openrouter: [
+                { value: 'openai/gpt-4o-mini', label: 'openai/gpt-4o-mini' }
+            ],
+            lmstudio: [
+                { value: 'gemma-3-270m-it', label: 'gemma-3-270m-it' },
+                { value: 'llama-3.2-3b-instruct', label: 'llama-3.2-3b-instruct' }
+            ]
+        };
+
+        // Example tasks
+        const examples = {
+            startup: {
+                task: "Launch a tech startup that provides AI-powered personal finance management tools",
+                context: "Budget: $50,000 initial investment, Team: 2 co-founders with technical backgrounds, Target: B2C market, young professionals aged 25-40",
+                domain: "business",
+                maxSteps: 12,
+                detailLevel: "comprehensive"
+            },
+            event: {
+                task: "Organize a two-day professional tech conference for 200 attendees",
+                context: "Budget: $75,000, Location: Downtown conference center, Expected attendees: Software developers and IT professionals, Include keynote speakers, workshops, and networking sessions",
+                domain: "business",
+                maxSteps: 15,
+                detailLevel: "comprehensive"
+            },
+            learning: {
+                task: "Learn machine learning from beginner to advanced level in 6 months",
+                context: "Background: Software developer with Python experience, Available time: 2 hours per day, Goal: Be job-ready for ML engineer positions",
+                domain: "education",
+                maxSteps: 10,
+                detailLevel: "detailed"
+            },
+            wedding: {
+                task: "Plan a wedding for 150 guests in a city venue",
+                context: "Budget: $30,000, Date: 9 months from now, Preferences: outdoor ceremony with indoor reception, Catering: buffet, Include photography and live band",
+                domain: "personal",
+                maxSteps: 12,
+                detailLevel: "detailed"
+            },
+            website: {
+                task: "Create a modern marketing website for a small business",
+                context: "Pages: Home, About, Services, Blog, Contact; CMS: headless; SEO: basic optimization; Timeline: 4 weeks; Team: 1 designer, 1 developer",
+                domain: "software",
+                maxSteps: 10,
+                detailLevel: "detailed"
+            },
+            app: {
+                task: "Build a cross-platform mobile app for habit tracking",
+                context: "Platforms: iOS/Android; Team: 2 developers; Features: streaks, reminders, analytics dashboard; Timeline: 8 weeks",
+                domain: "software",
+                maxSteps: 12,
+                detailLevel: "comprehensive"
+            }
+        };
+
+        // Fetch planning models from backend
+        async function fetchPlanningModels() {
+            try {
+                const headers = {};
+                const tokenEl = document.getElementById('token');
+                const tokenVal = tokenEl ? tokenEl.value.trim() : '';
+                if (tokenVal) headers['Authorization'] = 'Bearer ' + tokenVal;
+                const res = await fetch('/api/v1/services/models?source=config&view=capability', { headers });
+                if (!res.ok) throw new Error('Failed to load models: ' + res.status);
+                const data = await res.json();
+                const planning = data && data.byCapability && data.byCapability.planning;
+                if (!planning || typeof planning !== 'object') throw new Error('No planning models found');
+
+                const mapped = {};
+                for (const provider in planning) {
+                    const list = Array.isArray(planning[provider]) ? planning[provider] : [];
+                    mapped[provider] = list.map(name => ({ value: name, text: name }));
+                }
+                return mapped;
+            } catch (e) {
+                console.log('Could not fetch planning models, using fallback:', e.message);
+                return null;
+            }
+        }
+
+        // Initialize models from backend
+        async function initModels() {
+            try {
+                modelOptions = await fetchPlanningModels();
+            } catch (e) {
+                modelOptions = null; // fall back to static options
+            }
+
+            const source = modelOptions || fallbackModelOptions;
+            const providers = Object.keys(source);
+            const providerSelect = document.getElementById('provider');
+
+            // Update provider dropdown
+            providerSelect.innerHTML = '';
+            providers.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p;
+                option.textContent = p;                
+                providerSelect.appendChild(option);
+            });
+
+            if (!providers.includes(providerSelect.value)) {
+                providerSelect.value = providers[0] || '';
+            }
+            updateModels();
+        }
+
+        // Update models dropdown based on provider selection
+        function updateModels() {
+            const provider = document.getElementById('provider').value;
+            const modelSelect = document.getElementById('model');
+            const localModelSection = document.getElementById('localModelSection');
+            const localModelInput = document.getElementById('localModel');
+
+            // Clear current options
+            modelSelect.innerHTML = '';
+
+            // Get models from either dynamic or fallback source
+            const source = modelOptions || fallbackModelOptions;
+            const models = source[provider] || [];
+
+            // Add new options based on provider
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.value;
+                option.textContent = model.text || model.value;
+                modelSelect.appendChild(option);
+            });
+
+            // Show/hide appropriate input fields
+            if (provider === 'ollama' || provider === 'lmstudio') {
+                if ((provider === 'ollama' && modelSelect.value === 'custom') ||
+                    (provider === 'lmstudio' && modelSelect.value === 'custom')) {
+                    localModelSection.classList.remove('hidden');
+                    document.querySelector('#localModelSection label').textContent =
+                        provider === 'lmstudio' ? 'Model Path or Name' : 'Local Model Name';
+                    document.getElementById('localModel').placeholder =
+                        provider === 'lmstudio' ? 'e.g., model.gguf or leave empty for active model' : 'e.g., llama3.2:3b';
+                } else {
+                    localModelSection.classList.add('hidden');
+                }
+            } else {
+                // Non-local providers do not require local model input
+                localModelSection.classList.add('hidden');
+            }
+        }
+
+        // Handle model change for Ollama and LM Studio custom model
+        document.getElementById('model').addEventListener('change', function () {
+            const provider = document.getElementById('provider').value;
+            const localModelSection = document.getElementById('localModelSection');
+
+            if ((provider === 'ollama' && this.value === 'custom') ||
+                (provider === 'lmstudio' && this.value === 'custom')) {
+                localModelSection.classList.remove('hidden');
+                document.querySelector('#localModelSection label').textContent =
+                    provider === 'lmstudio' ? 'Model Path or Name' : 'Local Model Name';
+                document.getElementById('localModel').placeholder =
+                    provider === 'lmstudio' ? 'e.g., model.gguf or leave empty for active model' : 'e.g., llama3.2:3b';
+            } else {
+                localModelSection.classList.add('hidden');
+            }
+        });
+
+        // Load example task
+        function loadExample(exampleKey) {
+            const example = examples[exampleKey];
+            if (example) {
+                document.getElementById('task').value = example.task;
+                document.getElementById('context').value = example.context;
+                document.getElementById('domain').value = example.domain;
+                document.getElementById('maxSteps').value = example.maxSteps;
+                document.getElementById('detailLevel').value = example.detailLevel;
+            }
+        }
+
+        // Parse markdown tables to HTML
+        function renderMarkdownTables(md) {
+            const lines = md.split('\n');
+            const out = [];
+            let i = 0;
+
+            const isSeparator = (line) => /\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line.trim());
+            const splitRow = (line) => line.trim().replace(/^\|/, '').replace(/\|$/, '').split(/\s*\|\s*/).map(s => s.trim());
+            const getAlign = (sepCell) => {
+                const t = sepCell.trim();
+                const left = t.startsWith(':');
+                const right = t.endsWith(':');
+                if (left && right) return 'center';
+                if (right) return 'right';
+                if (left) return 'left';
+                return 'left';
+            };
+
+            while (i < lines.length) {
+                const line = lines[i];
+                const next = lines[i + 1] || '';
+                if (line.trim().startsWith('|') && isSeparator(next)) {
+                    // Table detected
+                    const headers = splitRow(line);
+                    const seps = splitRow(next);
+                    const aligns = seps.map(getAlign);
+                    i += 2;
+                    const rows = [];
+                    while (i < lines.length && lines[i].trim().startsWith('|')) {
+                        rows.push(splitRow(lines[i]));
+                        i++;
+                    }
+                    // Build HTML table
+                    let table = '<table class="md-table">';
+                    table += '<thead><tr>' + headers.map((h, idx) => `<th style="text-align:${aligns[idx] || 'left'}">${h}</th>`).join('') + '</tr></thead>';
+                    if (rows.length) {
+                        table += '<tbody>' + rows.map(r => '<tr>' + r.map((c, idx) => `<td style="text-align:${aligns[idx] || 'left'}">${c}</td>`).join('') + '</tr>').join('') + '</tbody>';
+                    }
+                    table += '</table>';
+                    out.push(table);
+                } else {
+                    out.push(line);
+                    i++;
+                }
+            }
+            return out.join('\n');
+        }
+
+        // Format plan text for display
+        function formatPlanForDisplay(planText) {
+            // First convert markdown tables so they don't get mangled by other replacements
+            let md = renderMarkdownTables(planText);
+
+            // Convert common markdown to HTML
+            let formatted = md
+                .replace(/^# (.+)$/gm, '<h2 class="text-2xl font-bold text-gray-900 mt-6 mb-3">$1</h2>')
+                .replace(/^## (.+)$/gm, '<h3 class="text-xl font-semibold text-gray-800 mt-4 mb-2">$1</h3>')
+                .replace(/^### (.+)$/gm, '<h4 class="text-lg font-medium text-gray-700 mt-3 mb-2">$1</h4>')
+                .replace(/^\* (.+)$/gm, '<li class="ml-4 mb-1">$1</li>')
+                .replace(/^- (.+)$/gm, '<li class="ml-4 mb-1">$1</li>')
+                .replace(/^\d+\. (.+)$/gm, '<li class="ml-4 mb-1">$1</li>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/^<li/gm, '<ul class="list-disc list-inside mb-4">\n<li')
+                .replace(/<\/li>\n(?!<li)/g, '</li></ul>');
+
+            // Paragraph handling: keep tables, lists, and headings intact; wrap plain text blocks
+            const blocks = formatted.split(/\n{2,}/);
+            formatted = blocks.map(block => {
+                const b = block.trim();
+                if (!b) return '';
+                if (b.startsWith('<table') || b.startsWith('<ul') || b.startsWith('<ol') || b.startsWith('<h2') || b.startsWith('<h3') || b.startsWith('<h4')) {
+                    return b;
+                }
+                // Convert single newlines to <br> inside paragraphs
+                return '<p class="mb-4">' + b.replace(/\n/g, '<br />') + '</p>';
+            }).join('\n');
+
+            return formatted;
+        }
+
+        // Copy plan to clipboard
+        let currentPlanText = '';
+
+        function copyPlan() {
+            if (currentPlanText) {
+                navigator.clipboard.writeText(currentPlanText).then(() => {
+                    const button = document.getElementById('copyButton');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Copied!';
+                    button.classList.add('bg-green-100', 'text-green-700');
+
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.classList.remove('bg-green-100', 'text-green-700');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            }
+        }
+        
+        function copyPlanFromFullscreen() {
+            if (currentPlanText) {
+                navigator.clipboard.writeText(currentPlanText).then(() => {
+                    const button = document.getElementById('fullscreenCopyBtn');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Copied Successfully!';
+                    button.classList.remove('from-blue-500', 'to-blue-600', 'hover:from-blue-600', 'hover:to-blue-700');
+                    button.classList.add('from-green-500', 'to-green-600', 'hover:from-green-600', 'hover:to-green-700');
+
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.classList.remove('from-green-500', 'to-green-600', 'hover:from-green-600', 'hover:to-green-700');
+                        button.classList.add('from-blue-500', 'to-blue-600', 'hover:from-blue-600', 'hover:to-blue-700');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('plannerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Get form values
+            const provider = document.getElementById('provider').value;
+            const task = document.getElementById('task').value;
+            const context = document.getElementById('context').value;
+            const domain = document.getElementById('domain').value;
+            const maxSteps = parseInt(document.getElementById('maxSteps').value);
+            const detailLevel = document.getElementById('detailLevel').value;
+            const includeTimeEstimates = document.getElementById('includeTimeEstimates').checked;
+            const includeRisks = document.getElementById('includeRisks').checked;
+            const streaming = document.getElementById('streaming').checked;
+
+            let model = document.getElementById('model').value;
+
+            // Handle API key and model selection
+            if (provider === 'ollama' || provider === 'lmstudio') {
+                if (provider === 'ollama' && model === 'custom') {
+                    model = document.getElementById('localModel').value || 'llama3.2:3b';
+                }
+            }
+
+            // Show loading state
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+            document.getElementById('resultState').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('submitButton').disabled = true;
+            // Enable cancel
+            const cancelBtn = document.getElementById('cancelButton');
+            cancelBtn.classList.remove('hidden');
+            abortController = new AbortController();
+
+            const startTime = performance.now();
+
+            try {
+                // Prepare request body
+                const requestBody = {
+                    payload: {
+                        task,
+                        context: context || undefined,
+                        maxSteps,
+                        detailLevel,
+                        includeTimeEstimates,
+                        includeRisks,
+                        domain: domain || undefined
+                    },
+                    config: {
+                        provider,
+                        model,
+                        stream: streaming
+                    }
+                };
+
+                // Make API request
+                const headers = { 'Content-Type': 'application/json' };
+                const tokenEl = document.getElementById('token');
+                const tokenVal = tokenEl ? tokenEl.value.trim() : '';
+                if (tokenVal) headers['Authorization'] = 'Bearer ' + tokenVal;
+
+                const response = await fetch('/api/v1/project-planner', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(requestBody),
+                    signal: abortController.signal
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    const errorMsg = data.error || data.message || data.detail || 'Failed to generate plan';
+                    console.error('API Error:', data);
+                    throw new Error(errorMsg);
+                }
+
+                // Check if streaming is enabled and supported
+                const contentType = response.headers.get('content-type');
+                if (streaming && contentType && contentType.includes('text/event-stream')) {
+                    // Streaming mode
+                    document.getElementById('loadingState').classList.add('hidden');
+                    document.getElementById('resultState').classList.remove('hidden');
+                    document.getElementById('copyButton').classList.remove('hidden');
+                    document.getElementById('copyButton').classList.add('flex');
+                    document.getElementById('fullscreenButton').classList.remove('hidden');
+                    document.getElementById('fullscreenButton').classList.add('flex');
+
+                    // Clear and prepare for streaming
+                    currentPlanText = '';
+                    document.getElementById('planContent').innerHTML = '';
+                    
+                    let usage = null;
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+
+                        for (const line of lines) {
+                            if (line.trim().startsWith('data:')) {
+                                const data = line.replace(/^data:\s*/, '');
+                                if (data.trim() === '[DONE]' || data.trim() === '') {
+                                    continue;
+                                }
+                                try {
+                                    const parsed = JSON.parse(data);
+                                    if (parsed.chunk) {
+                                        currentPlanText += parsed.chunk;
+                                        document.getElementById('planContent').innerHTML = formatPlanForDisplay(currentPlanText);
+                                    }
+                                    if (parsed.done && parsed.usage) {
+                                        usage = parsed.usage;
+                                    }
+                                    if (parsed.metadata) {
+                                        document.getElementById('metaProvider').textContent = parsed.metadata.provider || '';
+                                        document.getElementById('metaModel').textContent = parsed.metadata.model || '';
+                                    }
+                                    if (parsed.error) {
+                                        throw new Error(parsed.error);
+                                    }
+                                } catch (e) {
+                                    if (e instanceof SyntaxError) {
+                                        console.warn('Failed to parse SSE data:', data);
+                                    } else {
+                                        throw e;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    const endTime = performance.now();
+                    const processingTime = Math.round(endTime - startTime);
+
+                    // Update metadata
+                    document.getElementById('metaTime').textContent = `${processingTime}ms`;
+                    if (usage) {
+                        const totalTokens = usage.total_tokens || (usage.input_tokens + usage.output_tokens) || 0;
+                        document.getElementById('metaTokens').textContent = totalTokens.toString();
+                    }
+                } else {
+                    // Non-streaming mode (fallback or when streaming is disabled)
+                    const data = await response.json();
+
+                    // Store the plan text
+                    currentPlanText = data.plan;
+
+                    // Display the result
+                    document.getElementById('planContent').innerHTML = formatPlanForDisplay(currentPlanText);
+                    document.getElementById('metaProvider').textContent = data.metadata?.provider || '';
+                    document.getElementById('metaModel').textContent = data.metadata?.model || '';
+                    document.getElementById('metaTime').textContent = (data.metadata?.processingTime != null) ? `${data.metadata.processingTime}ms` : '';
+                    document.getElementById('metaTokens').textContent = (data.usage?.total_tokens != null) ? data.usage.total_tokens : '';
+
+                    // Show result state
+                    document.getElementById('loadingState').classList.add('hidden');
+                    document.getElementById('resultState').classList.remove('hidden');
+                    // Show copy and fullscreen buttons
+                    document.getElementById('copyButton').classList.remove('hidden');
+                    document.getElementById('copyButton').classList.add('flex');
+                    document.getElementById('fullscreenButton').classList.remove('hidden');
+                    document.getElementById('fullscreenButton').classList.add('flex');
+                }
+
+            } catch (error) {
+                console.error('Full error:', error);
+                // Display the error message more clearly
+                if (error.name === 'AbortError') {
+                    document.getElementById('errorMessage').textContent = 'Request cancelled by user';
+                } else {
+                    const errorMsg = error.message || error.toString() || 'An unknown error occurred';
+                    document.getElementById('errorMessage').textContent = errorMsg;
+                }
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('errorState').classList.remove('hidden');
+            } finally {
+                document.getElementById('submitButton').disabled = false;
+                const cancelBtn = document.getElementById('cancelButton');
+                cancelBtn.classList.add('hidden');
+                // Clear controller
+                abortController = null;
+            }
+        });
+
+        // Cancel button behavior
+        document.getElementById('cancelButton').addEventListener('click', function () {
+            if (abortController) {
+                abortController.abort();
+                // If streaming, update UI immediately
+                const loadingState = document.getElementById('loadingState');
+                const resultState = document.getElementById('resultState');
+                if (!loadingState.classList.contains('hidden')) {
+                    // Was loading, show appropriate message
+                    document.getElementById('errorMessage').textContent = 'Request cancelled by user';
+                    loadingState.classList.add('hidden');
+                    document.getElementById('errorState').classList.remove('hidden');
+                }
+            }
+        });
+
+        // Re-fetch models if token changes (prod setups may require it)
+        const tokenEl = document.getElementById('token');
+        if (tokenEl) {
+            tokenEl.addEventListener('change', () => initModels());
+        }
+
+        // Initialize models on page load
+        initModels();
+
+        // Fullscreen functionality
+        let isOutputFullscreen = false;
+        let backdrop = null;
+        let originalContent = null;
+        
+        function toggleOutputFullscreen() {
+            const outputPanel = document.getElementById('outputPanel');
+            const fullscreenButton = document.getElementById('fullscreenButton');
+            
+            if (!isOutputFullscreen) {
+                // Enter fullscreen
+                enterFullscreen();
+            } else {
+                // Exit fullscreen
+                exitFullscreen();
+            }
+        }
+        
+        function enterFullscreen() {
+            const outputPanel = document.getElementById('outputPanel');
+            const fullscreenButton = document.getElementById('fullscreenButton');
+            const resultState = document.getElementById('resultState');
+            
+            // Create backdrop
+            backdrop = document.createElement('div');
+            backdrop.className = 'fullscreen-backdrop';
+            document.body.appendChild(backdrop);
+            
+            // Trigger backdrop fade-in
+            setTimeout(() => backdrop.classList.add('active'), 10);
+            
+            // Clone the result content
+            originalContent = resultState.innerHTML;
+            
+            // Add fullscreen class
+            outputPanel.classList.add('fullscreen-output');
+            
+            // Create new structure for fullscreen
+            const fullscreenHTML = `
+                <button onclick="exitFullscreen()" class="close-button" title="Close (ESC)" aria-label="Close fullscreen">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <div class="fullscreen-inner">
+                    <div class="fullscreen-header">
+                        <div class="header-left">
+                            <div class="icon-wrapper">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <h2>Project Plan</h2>
+                        </div>
+                        <div class="fullscreen-controls">
+                            <button id="fullscreenCopyBtn" onclick="copyPlanFromFullscreen()" 
+                                class="action-button copy-button"
+                                title="Copy Plan to Clipboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                            <span>Copy</span>
+                        </button>
+                        </div>
+                    </div>
+                    <div class="fullscreen-body">
+                        ${originalContent}
+                    </div>
+                </div>
+            `;
+            
+            outputPanel.innerHTML = fullscreenHTML;
+
+            // Ensure X button reliably closes fullscreen
+            const closeBtn = outputPanel.querySelector('.close-button');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', window.exitFullscreen);
+            }
+            
+            // Update button in original panel
+            fullscreenButton.innerHTML = '↩ Exit Fullscreen';
+            fullscreenButton.title = 'Exit Fullscreen';
+            isOutputFullscreen = true;
+            
+            // Show keyboard hint
+            showKeyboardHint();
+            
+            // Add escape key listener
+            document.addEventListener('keydown', handleEscapeKey);
+            
+            // Click backdrop to close
+            backdrop.addEventListener('click', exitFullscreen);
+        }
+        
+        window.exitFullscreen = function() {
+            const outputPanel = document.getElementById('outputPanel');
+            const fullscreenButton = document.getElementById('fullscreenButton');
+            const resultState = document.getElementById('resultState');
+            
+            // Remove fullscreen class
+            outputPanel.classList.remove('fullscreen-output');
+            
+            // Restore original structure
+            outputPanel.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Output</h2>
+                    <div class="flex items-center gap-2">
+                        <button id="fullscreenButton" onclick="toggleOutputFullscreen()"
+                            class="flex items-center px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-200 transition-colors duration-200"
+                            title="Maximize Output">
+                            ⛶ Maximize
+                        </button>
+                        <button id="copyButton" onclick="copyPlan()"
+                            class="flex items-center px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-200 transition-colors duration-200"
+                            title="Copy Plan to Clipboard">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                <div id="loadingState" class="hidden">
+                    <div class="flex items-center justify-center py-12">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-purple"></div>
+                    </div>
+                    <p class="text-center text-gray-600 mt-4">Generating your plan...</p>
+                </div>
+                <div id="errorState" class="hidden">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">Error generating plan</h3>
+                                <p id="errorMessage" class="mt-1 text-sm text-red-700"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="emptyState" class="hidden">
+                    <div class="text-center py-12">
+                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No plan generated yet</h3>
+                        <p class="text-gray-600">Configure your task and click "Generate Plan" to get started.</p>
+                    </div>
+                </div>
+                <div id="resultState" class="">
+                    ${originalContent}
+                </div>
+            `;
+            
+            // Show/hide appropriate states
+            if (originalContent) {
+                document.getElementById('resultState').classList.remove('hidden');
+                document.getElementById('emptyState').classList.add('hidden');
+            } else {
+                document.getElementById('resultState').classList.add('hidden');
+                document.getElementById('emptyState').classList.remove('hidden');
+            }
+            
+            isOutputFullscreen = false;
+            
+            // Remove backdrop
+            if (backdrop) {
+                backdrop.classList.remove('active');
+                setTimeout(() => {
+                    backdrop.remove();
+                    backdrop = null;
+                }, 300);
+            }
+            
+            // Remove escape key listener
+            document.removeEventListener('keydown', handleEscapeKey);
+        }
+        
+        function handleEscapeKey(event) {
+            if (event.key === 'Escape' && isOutputFullscreen) {
+                exitFullscreen();
+            }
+        }
+        
+        function showKeyboardHint() {
+            const hint = document.createElement('div');
+            hint.className = 'keyboard-hint';
+            hint.innerHTML = 'Press <kbd style="background: #374151; padding: 2px 6px; border-radius: 4px;">ESC</kbd> to exit fullscreen';
+            document.body.appendChild(hint);
+            
+            setTimeout(() => hint.classList.add('show'), 100);
+            setTimeout(() => {
+                hint.classList.remove('show');
+                setTimeout(() => hint.remove(), 300);
+            }, 3000);
+        }
+    </script>
+    
+    <style>
+        /* Fullscreen overlay backdrop */
+        .fullscreen-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        .fullscreen-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Fullscreen output panel */
+        .fullscreen-output {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 90vw !important;
+            max-width: 1400px !important;
+            height: 90vh !important;
+            max-height: 900px !important;
+            z-index: 9999 !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border-radius: 20px !important;
+            box-shadow: 
+                0 20px 25px -5px rgba(0, 0, 0, 0.15),
+                0 10px 10px -5px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(0, 0, 0, 0.05),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.5) !important;
+            overflow: hidden !important;
+            animation: slideUpFade 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -45%) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+        
+        /* Close button */
+        .fullscreen-output .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 50%;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 100;
+            pointer-events: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .fullscreen-output .close-button:hover {
+            background: rgba(255, 255, 255, 1);
+            color: #ef4444;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Inner container */
+        .fullscreen-output .fullscreen-inner {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+        
+        /* Fullscreen header */
+        .fullscreen-output .fullscreen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem 1.25rem 2rem;
+            background: rgba(249, 250, 251, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+            flex-shrink: 0;
+        }
+        
+        .fullscreen-output .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .fullscreen-output .icon-wrapper {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #B341F9, #E453C0);
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(179, 65, 249, 0.3);
+        }
+        
+        .fullscreen-output .fullscreen-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .fullscreen-output .fullscreen-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .fullscreen-output .action-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .fullscreen-output .copy-button {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+        
+        .fullscreen-output .copy-button:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+        
+        
+        /* Fullscreen body */
+        .fullscreen-output .fullscreen-body {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom scrollbar for fullscreen */
+        .fullscreen-output .fullscreen-body::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        .fullscreen-output .fullscreen-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .fullscreen-output .fullscreen-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, rgba(179, 65, 249, 0.4), rgba(228, 83, 192, 0.4));
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        
+        .fullscreen-output .fullscreen-body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, rgba(179, 65, 249, 0.6), rgba(228, 83, 192, 0.6));
+            background-clip: padding-box;
+        }
+        
+        /* Metadata in fullscreen */
+        .fullscreen-output #metadata {
+            margin-bottom: 1.5rem;
+            position: relative;
+            background: transparent;
+            padding: 0;
+            margin: 0 0 1.5rem 0;
+            z-index: 1;
+        }
+        
+        .fullscreen-output #metadata .grid {
+            gap: 0.75rem;
+        }
+        
+        .fullscreen-output #metadata > .grid > div {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px) saturate(150%);
+            -webkit-backdrop-filter: blur(10px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Plan content in fullscreen */
+        .fullscreen-output #planContent {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px) saturate(150%);
+            -webkit-backdrop-filter: blur(10px) saturate(150%);
+            border: 1px solid rgba(229, 231, 235, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            font-size: 1.05rem;
+            line-height: 1.75;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.05),
+                0 2px 4px -1px rgba(0, 0, 0, 0.03),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+        }
+        
+        .fullscreen-output #planContent h2 {
+            color: #1f2937;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .fullscreen-output #planContent h3 {
+            color: #374151;
+            margin-top: 1.5rem;
+        }
+        
+        .fullscreen-output #planContent ul {
+            margin-left: 1rem;
+        }
+
+        /* Markdown table styling */
+        #planContent table.md-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1rem 0;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: white;
+        }
+
+        #planContent table.md-table thead th {
+            background: #f9fafb;
+            color: #374151;
+            font-weight: 600;
+            padding: 0.75rem 0.875rem;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        #planContent table.md-table td {
+            padding: 0.75rem 0.875rem;
+            border-bottom: 1px solid #f3f4f6;
+            color: #1f2937;
+            vertical-align: top;
+        }
+
+        #planContent table.md-table tbody tr:nth-child(odd) td {
+            background: #fafafa;
+        }
+
+        #planContent table.md-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Make table horizontally scrollable on small screens */
+        #planContent .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        /* Enhanced button styles in fullscreen */
+        .fullscreen-output button {
+            transition: all 0.2s ease;
+        }
+        
+        .fullscreen-output button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Scrollbar styling for fullscreen */
+        .fullscreen-output .fullscreen-content::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .fullscreen-output .fullscreen-content::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 5px;
+        }
+        
+        .fullscreen-output .fullscreen-content::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 5px;
+        }
+        
+        .fullscreen-output .fullscreen-content::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+        
+        /* Hide original panel header in fullscreen */
+        .fullscreen-output > div:first-child {
+            display: none !important;
+        }
+        
+        /* Hide other content when output is fullscreen */
+        body:has(.fullscreen-output) nav,
+        body:has(.fullscreen-output) main > *:not(.grid),
+        body:has(.fullscreen-output) main .grid > *:not(#outputPanel),
+        body:has(.fullscreen-output) footer {
+            display: none !important;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .fullscreen-output {
+                width: calc(100vw - 2rem) !important;
+                height: calc(100vh - 2rem) !important;
+                border-radius: 12px !important;
+            }
+            
+            .fullscreen-output .fullscreen-content {
+                padding: 1rem;
+            }
+            
+            .fullscreen-output #planContent {
+                padding: 1.5rem;
+                font-size: 1rem;
+            }
+        }
+        
+        /* Keyboard shortcut hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(179, 65, 249, 0.95), rgba(228, 83, 192, 0.95));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(179, 65, 249, 0.5);
+        }
+        
+        .keyboard-hint.show {
+            opacity: 1;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(10px);
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
+</body>
+
+</html>
+
+

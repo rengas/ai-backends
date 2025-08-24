@@ -5,6 +5,7 @@ export type ModelCapability =
   | 'summarize'
   | 'keywords'
   | 'sentiment'
+  | 'planning'
   | 'vision'
   | 'emailReply'
   | 'translate'

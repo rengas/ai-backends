@@ -35,6 +35,8 @@ function configureApiSecurity(app: OpenAPIHono, tokenConfig: string) {
                 path === '/api/email-reply-demo' ||
                 path === '/api/translate-demo' ||
                 path === '/api/meeting-notes-demo' ||
+                path === '/api/asktext-demo' ||
+                path === '/api/project-planner-demo' ||
                 path === '/api/models' ||
                 path === '/api/jsoneditor' ||
                 // Public read-only service catalog for demos
@@ -120,8 +122,9 @@ export async function checkLLMProvidersAvailability() {
     const openaiApiKey = process.env.OPENAI_API_KEY;
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
     const openrouterApiKey = process.env.OPENROUTER_API_KEY;
+    const aigatewayApiKey = process.env.AI_GATEWAY_API_KEY;
 
-    if (!openaiApiKey && !anthropicApiKey && !openrouterApiKey) {
+    if (!openaiApiKey && !anthropicApiKey && !openrouterApiKey && !aigatewayApiKey) {
         throw new Error('No API keys found for external LLM providers');
     }
 
@@ -129,6 +132,7 @@ export async function checkLLMProvidersAvailability() {
     if (openaiApiKey) availableProviders.push('OpenAI');
     if (anthropicApiKey) availableProviders.push('Anthropic');
     if (openrouterApiKey) availableProviders.push('OpenRouter');
+    if (aigatewayApiKey) availableProviders.push('AIGateway');
     
     return availableProviders;
 }
@@ -177,7 +181,7 @@ const app = new OpenAPIHono();
 app.use('/*', cors({
     origin: configureCors(),
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+    allowHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Cache-Control', 'Connection', 'Accept', 'Last-Event-ID'],
     exposeHeaders: ['Content-Length', 'X-Request-Id'],
     maxAge: 3600,
     credentials: true,
